@@ -100,3 +100,59 @@ const (
 	H7
 	H8
 )
+
+/*
+A rank represents a horizontal bitmask
+ARank = 0000000000000000000000000000000000000000000000000000000011111111
+BRank = 0000000000000000000000000000000000000000000000001111111100000000
+CRank = 0000000000000000000000000000000000000000111111110000000000000000
+DRank = 0000000000000000000000000000000011111111000000000000000000000000
+ERank = 0000000000000000000000001111111100000000000000000000000000000000
+FRank = 0000000000000000111111110000000000000000000000000000000000000000
+GRank = 0000000011111111000000000000000000000000000000000000000000000000
+HRank = 1111111100000000000000000000000000000000000000000000000000000000
+*/
+const (
+	ARank = A1 | A2 | A3 | A4 | A5 | A6 | A7 | A8
+	BRank = ARank << 8
+	CRank = BRank << 8
+	DRank = CRank << 8
+	ERank = DRank << 8
+	FRank = ERank << 8
+	GRank = FRank << 8
+	HRank = GRank << 8
+)
+
+const (
+	OneFile   = A1 | B1 | C1 | D1 | E1 | F1 | G1 | H1
+	TwoFile   = A2 | B2 | C2 | D2 | E2 | F2 | G2 | H2
+	ThreeFile = A3 | B3 | C3 | D3 | E3 | F3 | G3 | H3
+	FourFile  = A4 | B4 | C4 | D4 | E4 | F4 | G4 | H4
+	FiveFile  = A5 | B5 | C5 | D5 | E5 | F5 | G5 | H5
+	SixFile   = A6 | B6 | C6 | D6 | E6 | F6 | G6 | H6
+	SevenFile = A7 | B7 | C7 | D7 | E7 | F7 | G7 | H7
+	EightFile = A8 | B8 | C8 | D8 | E8 | F8 | G8 | H8
+)
+
+//diagonals
+const ()
+
+//PieceType - pawn, knight, etc.
+type PieceType uint8
+
+const (
+	Pawn PieceType = iota
+	Knight
+	Bishop
+	Rook
+	Queen
+	King
+)
+
+//White if true means the piece or tile is white. False means black.
+type White bool
+
+const (
+	white White = true
+	black White = false
+)
