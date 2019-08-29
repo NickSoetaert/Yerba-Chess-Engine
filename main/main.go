@@ -2,11 +2,10 @@
 package main
 
 import (
-	//"Yerba/board"
-	"Yerba/utils"
-	//"fmt"
+	"Yerba/common"
+	"fmt"
 )
 
 func main() {
-	utils.Test()
+	fmt.Printf("%064b\n", common.H7)
 }
