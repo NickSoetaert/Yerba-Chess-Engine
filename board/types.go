@@ -1,4 +1,4 @@
-package common
+package board
 
 /*
 Board represents one possible board orientation.
@@ -13,7 +13,7 @@ type Board struct {
 type Piece uint64
 
 /*
-Tile is a 64-bit mask for each tile. Popcount of a tile is always 1.
+BinaryBoard is a 64-bit mask for each tile. Popcount of a tile is always 1.
 For example:
 A1 = 0000000000000000000000000000000000000000000000000000000000000001
 H8 = 1000000000000000000000000000000000000000000000000000000000000000
@@ -32,10 +32,10 @@ bit-position is defined as follows:
        A  B  C  D  E  F  G  H
 
 */
-type Tile uint64
+type BinaryBoard uint64
 
 const (
-	A1 Tile = 1 << iota
+	A1 BinaryBoard = 1 << iota
 	A2
 	A3
 	A4
