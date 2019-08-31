@@ -6,8 +6,10 @@ import (
 )
 
 //65 to 90
+
+//todo: iterate over H8-A1, concat rows together then print all at once.
 func PrintBinaryBoard(b board.BinaryBoard) {
-	mask := board.A8 //1000000000000000000000000000000000000000000000000000000000000000
+	mask := board.A8
 	fmt.Println("  ----------------------------------")
 	for i := 8; i >= 1; i-- {
 		fmt.Printf("%d |", i)
@@ -17,11 +19,12 @@ func PrintBinaryBoard(b board.BinaryBoard) {
 			} else {
 				fmt.Print("   |")
 			}
-			//fmt.Printf("%64b\n", mask)
-			mask = mask >> 1
+			if j != 8 {
+				mask = mask << 1
+			}
 			//fmt.Printf("%64b\n", mask)
 		}
-		mask = mask << 8
+		mask = mask >> 15
 		fmt.Println("")
 		fmt.Println("  ----------------------------------")
 	}

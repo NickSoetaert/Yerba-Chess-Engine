@@ -101,37 +101,26 @@ const (
 	H8
 )
 
-/*
-A rank represents a horizontal bitmask
-ARank = 0000000000000000000000000000000000000000000000000000000011111111
-BRank = 0000000000000000000000000000000000000000000000001111111100000000
-CRank = 0000000000000000000000000000000000000000111111110000000000000000
-DRank = 0000000000000000000000000000000011111111000000000000000000000000
-ERank = 0000000000000000000000001111111100000000000000000000000000000000
-FRank = 0000000000000000111111110000000000000000000000000000000000000000
-GRank = 0000000011111111000000000000000000000000000000000000000000000000
-HRank = 1111111100000000000000000000000000000000000000000000000000000000
-*/
 const (
-	ARank = A1 | A2 | A3 | A4 | A5 | A6 | A7 | A8
-	BRank = B1 | B2 | B3 | B4 | B5 | B6 | B7 | B8
-	CRank = C1 | C2 | C3 | C4 | C5 | C6 | C7 | C8
-	DRank = D1 | D2 | D3 | D4 | D5 | D6 | D7 | D8
-	ERank = E1 | E2 | E3 | E4 | E5 | E6 | E7 | E8
-	FRank = F1 | F2 | F3 | F4 | F5 | F6 | F7 | F8
-	GRank = G1 | G2 | G3 | G4 | G5 | G6 | G7 | G8
-	HRank = H1 | H2 | H3 | H4 | H5 | H6 | H7 | H8
+	AFile = A1 | A2 | A3 | A4 | A5 | A6 | A7 | A8
+	BFile = B1 | B2 | B3 | B4 | B5 | B6 | B7 | B8
+	CFile = C1 | C2 | C3 | C4 | C5 | C6 | C7 | C8
+	DFile = D1 | D2 | D3 | D4 | D5 | D6 | D7 | D8
+	EFile = E1 | E2 | E3 | E4 | E5 | E6 | E7 | E8
+	FFile = F1 | F2 | F3 | F4 | F5 | F6 | F7 | F8
+	GFile = G1 | G2 | G3 | G4 | G5 | G6 | G7 | G8
+	HFile = H1 | H2 | H3 | H4 | H5 | H6 | H7 | H8
 )
 
 const (
-	OneFile   = A1 | B1 | C1 | D1 | E1 | F1 | G1 | H1
-	TwoFile   = A2 | B2 | C2 | D2 | E2 | F2 | G2 | H2
-	ThreeFile = A3 | B3 | C3 | D3 | E3 | F3 | G3 | H3
-	FourFile  = A4 | B4 | C4 | D4 | E4 | F4 | G4 | H4
-	FiveFile  = A5 | B5 | C5 | D5 | E5 | F5 | G5 | H5
-	SixFile   = A6 | B6 | C6 | D6 | E6 | F6 | G6 | H6
-	SevenFile = A7 | B7 | C7 | D7 | E7 | F7 | G7 | H7
-	EightFile = A8 | B8 | C8 | D8 | E8 | F8 | G8 | H8
+	FirstRank   = A1 | B1 | C1 | D1 | E1 | F1 | G1 | H1
+	SecondRank  = A2 | B2 | C2 | D2 | E2 | F2 | G2 | H2
+	ThirdRank   = A3 | B3 | C3 | D3 | E3 | F3 | G3 | H3
+	FourthRank  = A4 | B4 | C4 | D4 | E4 | F4 | G4 | H4
+	FifthRank   = A5 | B5 | C5 | D5 | E5 | F5 | G5 | H5
+	SixthRank   = A6 | B6 | C6 | D6 | E6 | F6 | G6 | H6
+	SeventhRank = A7 | B7 | C7 | D7 | E7 | F7 | G7 | H7
+	EighthRank  = A8 | B8 | C8 | D8 | E8 | F8 | G8 | H8
 )
 
 //diagonals
