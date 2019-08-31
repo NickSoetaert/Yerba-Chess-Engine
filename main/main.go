@@ -10,5 +10,5 @@ import (
 func main() {
 	fmt.Printf("%64b\n", board.A8)
 	//fmt.Printf("%64b\n", board.OneFile)
-	utils.PrintBinaryBoard(board.A1)
+	utils.PrintBinaryBoard(board.AFile | board.FifthRank)
 }

@@ -3,18 +3,17 @@ package utils
 import (
 	"Yerba/board"
 	"fmt"
+	"math/bits"
 )
 
-//65 to 90
-
-//todo: iterate over H8-A1, concat rows together then print all at once.
+//PrintBinaryBoard takes a bitboard and prints it in chess-board format
 func PrintBinaryBoard(b board.BinaryBoard) {
 	mask := board.A8
 	fmt.Println("  ----------------------------------")
 	for i := 8; i >= 1; i-- {
 		fmt.Printf("%d |", i)
 		for j := 1; j <= 8; j++ {
-			if b == mask {
+			if bits.OnesCount64(uint64(b&mask)) == 1 {
 				fmt.Print(" X |")
 			} else {
 				fmt.Print("   |")
