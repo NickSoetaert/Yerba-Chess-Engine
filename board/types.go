@@ -6,11 +6,9 @@ The a1 square is bit position 0, b2 = 1,..., g8 = 62, h8 = 63
 To figure out if , AND together with White or Black
 */
 type Board struct {
-	Pawns, Knights, Bishops, Rooks, Queens, Kings, White, Black Piece
+	Pawns, Knights, Bishops, Rooks, Queens, Kings, White, Black BinaryBoard
+	Move                                                        IsWhite
 }
-
-//Piece represents the position for one type of piece
-type Piece uint64
 
 /*
 BinaryBoard is a 64-bit mask for each tile. Popcount of a tile is always 1.
@@ -126,6 +124,11 @@ const (
 //diagonals
 const ()
 
+const (
+	QueenSide = AFile | BFile | CFile | DFile
+	KingSide  = EFile | FFile | GFile | HFile
+)
+
 //PieceType - pawn, knight, etc.
 type PieceType uint8
 
@@ -138,10 +141,30 @@ const (
 	King
 )
 
-//White if true means the piece or tile is white. False means black.
-type White bool
+//PieceRune is an unicode value for ascii piece representation
+type PieceRune rune
+
+//unicode values for pieces
+const (
+	WhiteKing   PieceRune = 9812
+	WhiteQueen  PieceRune = 9813
+	WhiteRook   PieceRune = 9814
+	WhiteBishop PieceRune = 9815
+	WhiteKnight PieceRune = 9816
+	WhitePawn   PieceRune = 9817
+
+	BlackKing   PieceRune = 9818
+	BlackQueen  PieceRune = 9819
+	BlackRook   PieceRune = 9820
+	BlackBishop PieceRune = 9821
+	BlackKnight PieceRune = 9822
+	BlackPawn   PieceRune = 9823
+)
+
+//IsWhite == true means the piece, square or turn is White or White's. Else, it's Black or Black's.
+type IsWhite bool
 
 const (
-	white White = true
-	black White = false
+	White IsWhite = true
+	Black IsWhite = false
 )

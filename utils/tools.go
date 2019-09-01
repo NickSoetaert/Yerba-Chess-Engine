@@ -9,7 +9,7 @@ import (
 //PrintBinaryBoard takes a bitboard and prints it in chess-board format
 func PrintBinaryBoard(b board.BinaryBoard) {
 	mask := board.A8
-	fmt.Println("  ----------------------------------")
+	fmt.Println("  ---------------------------------")
 	for i := 8; i >= 1; i-- {
 		fmt.Printf("%d |", i)
 		for j := 1; j <= 8; j++ {
@@ -21,11 +21,10 @@ func PrintBinaryBoard(b board.BinaryBoard) {
 			if j != 8 {
 				mask = mask << 1
 			}
-			//fmt.Printf("%64b\n", mask)
 		}
 		mask = mask >> 15
 		fmt.Println("")
-		fmt.Println("  ----------------------------------")
+		fmt.Println("  ---------------------------------")
 	}
 	//print numbers at bottom with 3 spaces of padding
 	for i := 'A' - 3; i <= 'H'; i++ {
