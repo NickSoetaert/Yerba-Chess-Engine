@@ -5,7 +5,48 @@ import (
 	"fmt"
 )
 
-//This file should declare the logic of how individual pieces move
+//PieceType - pawn, knight, etc.
+type PieceType uint8
+
+const (
+	Pawn PieceType = iota
+	Knight
+	Bishop
+	Rook
+	Queen
+	King
+)
+
+//PieceRune is an unicode value for ascii piece representation
+type PieceRune rune
+
+//unicode values for pieces
+const (
+	WhiteKing   PieceRune = 9812
+	WhiteQueen  PieceRune = 9813
+	WhiteRook   PieceRune = 9814
+	WhiteBishop PieceRune = 9815
+	WhiteKnight PieceRune = 9816
+	WhitePawn   PieceRune = 9817
+
+	BlackKing   PieceRune = 9818
+	BlackQueen  PieceRune = 9819
+	BlackRook   PieceRune = 9820
+	BlackBishop PieceRune = 9821
+	BlackKnight PieceRune = 9822
+	BlackPawn   PieceRune = 9823
+
+	EmptySquare PieceRune = 32
+)
+
+//IsWhite == true means the piece, square or turn is White or White's. Else, it's Black or Black's.
+type IsWhite bool
+
+//Defines if a piece, tile or turn is white or black
+const (
+	White IsWhite = true
+	Black IsWhite = false
+)
 
 //SetUpBoard inits a board in the default state
 func SetUpBoard() Board {
@@ -24,11 +65,12 @@ func SetUpBoard() Board {
 	return board
 }
 
+//PrintBoard prints out an ascii representation of the given board
 func PrintBoard(board Board) {
 	boardString := [8][8]PieceRune{}
 
 	for i := 0; i < 64; i++ {
-		boardString[i/8][i%8] = 32 //32 is a space in ascii
+		boardString[i/8][i%8] = EmptySquare
 	}
 
 	for i := uint(0); i < 64; i++ {
@@ -72,9 +114,17 @@ func PrintBoard(board Board) {
 		}
 	}
 	for i := 0; i < 8; i++ {
+		fmt.Println("---------------------------------")
 		for j := 0; j < 8; j++ {
+
+			fmt.Printf("| ")
 			fmt.Printf("%c", boardString[i][j])
+			fmt.Printf(" ")
+			if j == 7 {
+				fmt.Printf("|")
+			}
 		}
 		fmt.Println("")
 	}
+	fmt.Println("---------------------------------")
 }

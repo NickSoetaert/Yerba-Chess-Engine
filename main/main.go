@@ -17,4 +17,6 @@ func main() {
 
 	board.PrintBoard(myBoard)
 
+	//utils.PrintBinaryBoard(0x0001FFFAABFAD1A2)
+
 }
