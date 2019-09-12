@@ -6,6 +6,36 @@ import (
 	"math/bits"
 )
 
+/*
+GetBoardKey takes a board state for a single piece, and returns
+the long representation. For debug upropses only.
+*/
+func GetBoardKey() uint64 {
+	board := [8][8]string{
+		{" ", " ", " ", " ", " ", " ", " ", " "}, //8
+		{" ", " ", " ", " ", " ", " ", " ", " "}, //7
+		{" ", " ", " ", " ", " ", " ", " ", " "}, //6
+		{" ", " ", " ", " ", " ", " ", " ", " "}, //5
+		{" ", " ", " ", " ", " ", " ", " ", " "}, //4
+		{" ", "x", " ", " ", " ", " ", " ", " "}, //3
+		{" ", " ", "x", " ", " ", " ", " ", " "}, //2
+		{" ", " ", " ", " ", " ", " ", " ", " "}, //1
+		//A    B    C    D    E    F    G    H
+	}
+	//board[0][0] = "y"
+
+	var result uint64
+	//var str string
+
+	for i := uint8(0); i < 64; i++ {
+		if board[7-(i/8)][i%8] != " " {
+			result += 1 << i
+		}
+	}
+
+	return result
+}
+
 //PrintBinaryBoard takes a bitboard and prints it in chess-board format
 func PrintBinaryBoard(b board.BinaryBoard) {
 	mask := board.A8

@@ -21,9 +21,12 @@ func main() {
 
 	x := board.BinaryBoard(utils.GetBoardKey())
 
-	kboard := board.Board{0, x, 0, 0, 0, 0, x, 0, true}
-	board.PrintBoard(kboard)
+	utils.PrintBinaryBoard(x)
 
-	utils.Test()
+	fmt.Println(x == (board.C2 | board.B3))
+
+	//kboard := board.Board{0, x, 0, 0, 0, 0, x, 0, true}
+
+	//board.PrintBoard(kboard)
 
 }
