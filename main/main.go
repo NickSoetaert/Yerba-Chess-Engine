@@ -3,7 +3,7 @@ package main
 
 import (
 	"Yerba/board"
-	//"Yerba/utils"
+	"Yerba/utils"
 	"fmt"
 )
 
@@ -17,6 +17,13 @@ func main() {
 
 	board.PrintBoard(myBoard)
 
-	//utils.PrintBinaryBoard(0x0001FFFAABFAD1A2)
+	fmt.Println(utils.GetBoardKey())
+
+	x := board.BinaryBoard(utils.GetBoardKey())
+
+	kboard := board.Board{0, x, 0, 0, 0, 0, x, 0, true}
+	board.PrintBoard(kboard)
+
+	utils.Test()
 
 }
