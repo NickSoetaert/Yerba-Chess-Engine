@@ -62,8 +62,6 @@ func SetUpBoard() Board {
 		Black:   SeventhRank | EighthRank,
 		Move:    White,
 	}
-
-	//board := Board{0, 0, 0, 0, D8, 0, D8, 0, White}
 	return board
 }
 

@@ -10,30 +10,28 @@ import (
 GetBoardKey takes a board state for a single piece, and returns
 the long representation. For debug upropses only.
 */
-func GetBoardKey() uint64 {
-	board := [8][8]string{
+func GetBoardKey() board.BinaryBoard {
+	b := [8][8]string{
 		{" ", " ", " ", " ", " ", " ", " ", " "}, //8
 		{" ", " ", " ", " ", " ", " ", " ", " "}, //7
 		{" ", " ", " ", " ", " ", " ", " ", " "}, //6
-		{" ", " ", " ", " ", " ", " ", " ", " "}, //5
-		{" ", " ", " ", " ", " ", " ", " ", " "}, //4
-		{" ", "x", " ", " ", " ", " ", " ", " "}, //3
-		{" ", " ", "x", " ", " ", " ", " ", " "}, //2
-		{" ", " ", " ", " ", " ", " ", " ", " "}, //1
+		{" ", " ", " ", " ", " ", "x", " ", " "}, //5
+		{" ", " ", " ", " ", "x", " ", " ", " "}, //4
+		{" ", " ", " ", " ", " ", " ", " ", " "}, //3
+		{" ", " ", " ", " ", "x", " ", " ", " "}, //2
+		{" ", " ", " ", " ", " ", "x", " ", " "}, //1
 		//A    B    C    D    E    F    G    H
 	}
-	//board[0][0] = "y"
 
-	var result uint64
-	//var str string
+	var result board.BinaryBoard
 
 	for i := uint8(0); i < 64; i++ {
-		if board[7-(i/8)][i%8] != " " {
+		if b[7-(i/8)][i%8] != " " {
 			result += 1 << i
 		}
 	}
 
-	return result
+	return result << 1
 }
 
 //PrintBinaryBoard takes a bitboard and prints it in chess-board format
