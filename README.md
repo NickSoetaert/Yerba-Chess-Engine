@@ -1,2 +1,2 @@
 # Yerba-Chess-Engine
-UCI chess engine written from the ground up in Go
+An in-progress UCI chess engine written in Go
