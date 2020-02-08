@@ -20,4 +20,6 @@ func main() {
 	PrintBoard(x)
 	//z := board.DownFill(board.A4)
 	//board.PrintBinaryBoard()
+
+	PrintBinaryBoard(RookAttacks(D4))
 }

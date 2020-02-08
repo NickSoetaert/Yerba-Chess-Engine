@@ -47,6 +47,18 @@ const (
 	Black IsWhite = false
 )
 
+//Sets a single rook on the given square
+func RookDebugBoard(squares BinaryBoard) Board {
+
+	board := Board{
+		Rooks:   squares,
+		White:   squares,
+		Move:    White,
+	}
+	return board
+}
+
+
 //SetUpBoard inits a board in the default state
 func SetUpBoard() Board {
 
