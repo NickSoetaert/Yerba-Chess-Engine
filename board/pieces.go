@@ -98,11 +98,9 @@ func PrintBoard(board Board) {
 		if (board.Rooks&board.Black>>i)&1 == 1 {
 			boardString[7-(i/8)][i%8] = BlackRook
 		}
-
 		if (board.Queens&board.White>>i)&1 == 1 {
 			boardString[7-(i/8)][i%8] = WhiteQueen
 		}
-
 		if (board.Queens&board.Black>>i)&1 == 1 {
 			boardString[7-(i/8)][i%8] = BlackQueen
 		}
@@ -117,7 +115,7 @@ func PrintBoard(board Board) {
 		fmt.Println("---------------------------------")
 		for j := 0; j < 8; j++ {
 
-			fmt.Printf("| ")
+			fmt.Printf("|  ")
 			fmt.Printf("%c", boardString[i][j])
 			fmt.Printf(" ")
 			if j == 7 {

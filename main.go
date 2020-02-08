@@ -3,7 +3,6 @@ package main
 
 import (
 	"Yerba/board"
-	"Yerba/utils"
 	"fmt"
 )
 
@@ -15,8 +14,11 @@ func main() {
 
 	x := board.SetUpBoard()
 
-	k := x.Knights & x.Black
+	//k := x.Knights & x.Black
 
-	utils.PrintBinaryBoard(board.KnightAttacks(k))
+	//utils.PrintBinaryBoard(board.RookMult[0])
 
+	board.PrintBoard(x)
+	//z := board.DownFill(board.A4)
+	//board.PrintBinaryBoard()
 }

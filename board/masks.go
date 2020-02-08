@@ -129,6 +129,7 @@ const (
 	KingSide  = EFile | FFile | GFile | HFile
 )
 
+// Mult: magic bitboard stuff
 var rookMult = [64]BinaryBoard{
 	//A       		 	 B       			 C       			 D					E		 			F					 G					H
 	0x0080001020400080, 0x0040001000200040, 0x0080081000200080, 0x0080040800100080, 0x0080020400080080, 0x0080010200040080, 0x0080008001000200, 0x0080002040800100, //1
@@ -141,6 +142,8 @@ var rookMult = [64]BinaryBoard{
 	0x00FFFCDDFCED714A, 0x007FFCDDFCED714A, 0x003FFFCDFFD88096, 0x0000040810002101, 0x0001000204080011, 0x0001000204000801, 0x0001000082000401, 0x0001FFFAABFAD1A2, //8
 }
 
+// Mask: Squares the piece can go to, AND has to check if it can capture an enemy on to stop its movement.
+// Does not check A or H files, or ranks 1 and 8
 var rookMask = [64]BinaryBoard{
 	//A       		 	 B       			 C       			 D					E		 			F					 G					H
 	0x000101010101017E, 0x000202020202027C, 0x000404040404047A, 0x0008080808080876, 0x001010101010106E, 0x002020202020205E, 0x004040404040403E, 0x008080808080807E, //1
