@@ -1,4 +1,4 @@
-package board
+package main
 
 import (
 	"math/bits"
@@ -28,15 +28,15 @@ func RookAttacks(rooks BinaryBoard) BinaryBoard {
 	for i := 0; i < count; i++ {
 		singleRookPosition := uint8(bits.TrailingZeros64(uint64(rooks)))
 		possibleAttacks |= rookMult[singleRookPosition] //get current squares that rook can attack
-		rooks ^= 1 << singleRookPosition                 //now clear that rook for the next loop iteration
+		rooks ^= 1 << singleRookPosition                //now clear that rook for the next loop iteration
 	}
 
 	return possibleAttacks
 }
 
 func DownFill(file BinaryBoard) BinaryBoard {
-	file |= (file >> 8)
-	file |= (file >> 16)
-	file |= (file >> 32)
+	file |= file >> 8
+	file |= file >> 16
+	file |= file >> 32
 	return file
 }

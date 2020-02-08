@@ -1,4 +1,4 @@
-package board
+package main
 
 /*
 Board represents one possible board orientation.

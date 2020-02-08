@@ -1,7 +1,6 @@
-package board
+package main
 
 import (
-	//"Yerba/utils"
 	"fmt"
 )
 

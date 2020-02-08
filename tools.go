@@ -1,7 +1,6 @@
-package utils
+package main
 
 import (
-	"Yerba/board"
 	"fmt"
 	"math/bits"
 )
@@ -10,7 +9,7 @@ import (
 GetBoardKey takes a board state for a single piece, and returns
 the long representation. For debug upropses only.
 */
-func GetBoardKey() board.BinaryBoard {
+func GetBoardKey() BinaryBoard {
 	b := [8][8]string{
 		{" ", " ", " ", " ", " ", " ", " ", " "}, //8
 		{" ", " ", " ", " ", " ", " ", " ", " "}, //7
@@ -23,7 +22,7 @@ func GetBoardKey() board.BinaryBoard {
 		//A    B    C    D    E    F    G    H
 	}
 
-	var result board.BinaryBoard
+	var result BinaryBoard
 
 	for i := uint8(0); i < 64; i++ {
 		if b[7-(i/8)][i%8] != " " {
@@ -35,8 +34,8 @@ func GetBoardKey() board.BinaryBoard {
 }
 
 //PrintBinaryBoard takes a bitboard and prints it in chess-board format
-func PrintBinaryBoard(b board.BinaryBoard) {
-	mask := board.A8
+func PrintBinaryBoard(b BinaryBoard) {
+	mask := A8
 	fmt.Println("  ---------------------------------")
 	for i := 8; i >= 1; i-- {
 		fmt.Printf("%d |", i)
