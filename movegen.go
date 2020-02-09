@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"math/bits"
 )
 
@@ -94,7 +93,6 @@ func slowCalcRookMoves (square int, blockers uint64) uint64 {
 	//uint64 representation of origin square shifted up one rank
 	up := uint64(1) << uint8(square) << 8
 	for {	//calculate moves sliding upwards
-	fmt.Println("up")
 		if bits.TrailingZeros64(up) >= 64 {
 			break	//we're off the top of the board - do not add up to moves
 		}
@@ -111,7 +109,6 @@ func slowCalcRookMoves (square int, blockers uint64) uint64 {
 
 	down := uint64(1) << uint8(square) >> 8
 	for {
-		fmt.Println("down")
 		if bits.TrailingZeros64(down) >= 64 {
 			break
 		}
@@ -124,7 +121,6 @@ func slowCalcRookMoves (square int, blockers uint64) uint64 {
 
 	left := uint64(1) << uint8(square) >> 1
 	for {
-		fmt.Println("left")
 		if (left << 1) & AFile != 0 {
 			break
 		}
@@ -135,10 +131,12 @@ func slowCalcRookMoves (square int, blockers uint64) uint64 {
 		left >>= 1  //move left another rank
 	}
 
-	right := uint64(1) << uint8(square) >> 1
+	right := uint64(1) << uint8(square) << 1
 	for {
-		fmt.Println("right")
 		if (right >> 1) & HFile != 0 {
+			break
+		}
+		if right == 0 {
 			break
 		}
 		moves |= right
@@ -147,8 +145,6 @@ func slowCalcRookMoves (square int, blockers uint64) uint64 {
 		}
 		right <<= 1  //move left another rank
 	}
-	fmt.Println("AAAAAAA")
-	PrintBinaryBoard(moves)
 	return moves
 }
 
