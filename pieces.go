@@ -48,7 +48,7 @@ const (
 )
 
 //Sets a single rook on the given square
-func RookDebugBoard(squares BinaryBoard) Board {
+func RookDebugBoard(squares uint64) Board {
 
 	board := Board{
 		Rooks:   squares,
