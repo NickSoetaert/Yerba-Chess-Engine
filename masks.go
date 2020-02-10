@@ -129,8 +129,8 @@ const (
 )
 
 const (
-	emptyBoard = uint64(0)
-	wholeBoard = ^uint64(0)
+	EmptyBoard = uint64(0)
+	WholeBoard = ^uint64(0)
 )
 
 // Each index represents every square that you can possibly be stopped by a blocker at, from the given index.

@@ -21,9 +21,12 @@ func main() {
 	//z := board.DownFill(board.A4)
 	//board.PrintBinaryBoard()
 
-	//PrintBinaryBoard(72340172838076926)
-	a := slowCalcRookMoves(63, FourthRank|EFile|AFile)
-	PrintBinaryBoard(a)
+	//40==A6
+	for i:=0; i <64; i++ {
+		fmt.Println(i)
+		PrintBinaryBoard(slowCalcRookMoves(i, EmptyBoard))
+		fmt.Println("\n\n")
+	}
 
 
 }
