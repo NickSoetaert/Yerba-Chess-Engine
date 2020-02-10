@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math/bits"
 )
 
@@ -19,7 +20,7 @@ func KnightAttacks(knights uint64) uint64 {
 	return possibleAttacks
 }
 
-func RookAttacks(rooks, blockers uint64) uint64 {
+func OldRookAttacks(rooks, blockers uint64) uint64 {
 
 	var possibleAttacks uint64
 
@@ -34,29 +35,15 @@ func RookAttacks(rooks, blockers uint64) uint64 {
 	return possibleAttacks
 }
 
-func singleRookAttack(square uint8, blockers uint64) uint64 {
 
-	//Gets a binary board of pieces that intercept with possible rook path
-	blockers &= rookBlockerMask[square]
 
-	return blockers
-}
-
-func DownFill(file uint64) uint64 {
-	file |= file >> 8
-	file |= file >> 16
-	file |= file >> 32
-	return file
-}
-
-//The database of all legal moves given any square and blocker hash
-var rookDB [][]uint64
-var bishopDB [][]uint64
 
 //Pre-compute all possible attacks
-func Init() {
-	rookDB = make([][]uint64, 64)
-	bishopDB = make([][]uint64, 64)
+//TODO: use pointers
+func Init() ([][]uint64, [][]uint64){
+	//TODO: can I make these [][]uint16 because no mask has a popcount past 12?
+	rookDB := make([][]uint64, 64)
+	bishopDB := make([][]uint64, 64)
 
 	//Initialize the move databases to their proper size.
 	//The first dimension of the DB is always 64, because there are 64 squares on a chess board.
@@ -67,38 +54,76 @@ func Init() {
 		bishopDB[i] = make([]uint64, 1<<uint64(bits.OnesCount64(bishopBlockerMask[i])))
 	}
 
-	for square := range rookDB {
-		for blockerPermutation := range rookDB[square] {
+	//Populate rook DB
+	for square, blocker := range rookBlockerMask {	//for all 64 squares
 
-			rookDB[square][blockerPermutation] = 2
+
+		for i:=0; i < 1 << uint64(bits.OnesCount64(rookBlockerMask[square])); i++ {	//for a given "all 1s" blocker, generate evey possible permutation
+
+			hash := blocker * rookMagic[square] 	//using the unique squares that block the rook, calculate a hash
+			//fmt.Printf("%b\n",hash)
+
+			hash >>= 64 - uint8(bits.OnesCount64(rookBlockerMask[square])) //throw away the junk
+			rookDB[square][hash] = slowCalcRookMoves(square, blocker)	//Get the legal moves at that index
+			//fmt.Println(square)
+			//fmt.Printf("%b\n",hash)
+			//os.Exit(0)
+			if blocker == 0 {
+				break
+			}
+			blocker &= blocker-1 	//clear the least significant bit
+
 		}
 	}
+
+	//Populate bishop DB
+	for square, blocker := range bishopBlockerMask {
+		for blocker != 0 {
+			hash := blocker * bishopMagic[square]
+			hash >>= 64 - uint8(bits.OnesCount64(bishopBlockerMask[square]))
+			bishopDB[square][hash] = slowCalcBishopMoves(square, blocker)
+			blocker &= blocker-1
+		}
+	}
+	return rookDB, bishopDB
 }
 
-func bishopAttacks(occ uint64, square uint8) uint64 {
-	occ &= bishopBlockerMask[square]                                //get all squares that block the bishop
-	occ *= bishopMagic[square]                                      //using those unique squares, calculate the hash
-	occ >>= 64 - uint8(bits.OnesCount64(bishopBlockerMask[square])) //throw away the junk.
-	return bishopDB[square][occ]                                    //Index
+//given an "all ones" blocker mask, this function will generate every possible blocker bitboard.
+//parentMask represents the a mask with bits that have been visited so far cleared
+//current mask is the mask for which we will calculate the
+func getPermutations(square uint8, parentMask, currentMask uint64, isRook bool) []uint64 {
+
+
+
+	return nil
 }
+
+
+func GetRookAttacks(db [][]uint64, square int, allPieces uint64) uint64 {
+	blockers := rookBlockerMask[square] & allPieces
+	fmt.Printf("%v%v\n","Blockers: ", blockers)
+	hash := blockers * rookMagic[square]
+	fmt.Printf("%v%v\n","Old hash: ", hash)
+	fmt.Println(bits.OnesCount64(rookBlockerMask[square]))
+	hash >>= 64 - uint8(bits.OnesCount64(rookBlockerMask[square]))
+	fmt.Printf("%v%v\n","Checking hash: ", hash)
+	fmt.Println("")
+	return db[square][hash]
+}
+
 
 //Calculate the single bitboard of all legal rook moves given a single position.
 //This function is only ever called once for each index of rookDB[][]
 func slowCalcRookMoves(square int, blockers uint64) uint64 {
-
 	var moves uint64
 
 	//uint64 representation of origin square shifted up one rank
 	up := uint64(1) << uint8(square) << 8
-	for up != 0{ //calculate moves sliding upwards
-		if up & AFile != 0 {
-			break //we're off the top of the board - do not add up to moves
+	for up != 0{
+		if up & FirstRank != 0 {
+			break
 		}
-		//If we're not off the board yet, so we can legally attack up.
-		//This goes before the blockers check, because we can attack occupied squares.
 		moves |= up
-
-		//Check if our current square is occupied by a blocker. If it is, break.
 		if blockers&up != 0 {
 			break
 		}
@@ -114,7 +139,7 @@ func slowCalcRookMoves(square int, blockers uint64) uint64 {
 		if blockers&down != 0 {
 			break
 		}
-		down >>= 8 //move up another rank
+		down >>= 8
 	}
 
 	left := uint64(1) << uint8(square) >> 1
@@ -138,7 +163,7 @@ func slowCalcRookMoves(square int, blockers uint64) uint64 {
 		if blockers&right != 0 {
 			break
 		}
-		right <<= 1 //move left another rank
+		right <<= 1
 	}
 	return moves
 }
@@ -165,7 +190,6 @@ func slowCalcBishopMoves(square int, blockers uint64) uint64 {
 		if upLeft & (HFile|FirstRank) != 0 {
 			break
 		}
-
 		moves |= upLeft
 		if blockers&upLeft != 0 {
 			break
@@ -196,6 +220,5 @@ func slowCalcBishopMoves(square int, blockers uint64) uint64 {
 		}
 		downLeft >>= 9
 	}
-
 	return moves
 }
