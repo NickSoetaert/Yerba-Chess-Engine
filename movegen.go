@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"math/bits"
 )
 
@@ -56,69 +55,74 @@ func Init() ([][]uint64, [][]uint64){
 
 	//Populate rook DB
 	for square, blocker := range rookBlockerMask {	//for all 64 squares
-
-
-		for i:=0; i < 1 << uint64(bits.OnesCount64(rookBlockerMask[square])); i++ {	//for a given "all 1s" blocker, generate evey possible permutation
-
-			hash := blocker * rookMagic[square] 	//using the unique squares that block the rook, calculate a hash
-			//fmt.Printf("%b\n",hash)
-
-			hash >>= 64 - uint8(bits.OnesCount64(rookBlockerMask[square])) //throw away the junk
-			rookDB[square][hash] = slowCalcRookMoves(square, blocker)	//Get the legal moves at that index
-			//fmt.Println(square)
-			//fmt.Printf("%b\n",hash)
-			//os.Exit(0)
-			if blocker == 0 {
-				break
-			}
-			blocker &= blocker-1 	//clear the least significant bit
-
-		}
+		getPermutations(uint8(square), U8PopCount(blocker), blocker, true, rookDB)
 	}
 
 	//Populate bishop DB
 	for square, blocker := range bishopBlockerMask {
-		for blocker != 0 {
-			hash := blocker * bishopMagic[square]
-			hash >>= 64 - uint8(bits.OnesCount64(bishopBlockerMask[square]))
-			bishopDB[square][hash] = slowCalcBishopMoves(square, blocker)
-			blocker &= blocker-1
-		}
+		getPermutations(uint8(square), U8PopCount(blocker), blocker,false, bishopDB)
 	}
 	return rookDB, bishopDB
 }
 
-//given an "all ones" blocker mask, this function will generate every possible blocker bitboard.
-//parentMask represents the a mask with bits that have been visited so far cleared
-//current mask is the mask for which we will calculate the
-func getPermutations(square uint8, parentMask, currentMask uint64, isRook bool) []uint64 {
+//Takes a mask of 1s and 0s, representing possible board occupations.
+//
+var count = 0
+var idxs = make(map[uint64]int)
+func getPermutations(square, blockersLeft uint8, mask uint64, isRook bool, db [][]uint64) {
+	//if we've run through the entire mask
+	if blockersLeft == 0 {
+		if isRook {
+			index := (mask * rookMagic[square]) >> (64 - UPopCount(rookBlockerMask[square])) //throw away the junk
+			idxs[mask]++
+			count++
+			db[square][index] = slowCalcRookMoves(square, mask)
 
+		} else {
+			index := (mask * bishopMagic[square]) >>  (64 - UPopCount(bishopBlockerMask[square])) //throw away the junk
+			db[square][index] = slowCalcBishopMoves(square, mask)
 
+		}
+		return
+	}
 
-	return nil
+	blockersLeft--
+
+	getPermutations(square, blockersLeft, mask, isRook, db)
+
+	//Calculate a mask where 1 is set to 0 at our current bit
+	var currentBit uint64
+	if isRook {
+		currentBit = rookBlockerMask[square]
+	} else {
+		currentBit = bishopBlockerMask[square]
+	}
+	//clear ones that we've seen
+	for i := 0; i < int(blockersLeft); i++ {
+		currentBit &= currentBit-1
+	}
+	mask ^= 1<<bits.TrailingZeros64(currentBit) //clears the least significant bit
+
+	getPermutations(square, blockersLeft, mask, isRook, db)
+
 }
 
 
-func GetRookAttacks(db [][]uint64, square int, allPieces uint64) uint64 {
+func GetRookAttacks(db [][]uint64, square uint8, allPieces uint64) uint64 {
 	blockers := rookBlockerMask[square] & allPieces
-	fmt.Printf("%v%v\n","Blockers: ", blockers)
 	hash := blockers * rookMagic[square]
-	fmt.Printf("%v%v\n","Old hash: ", hash)
-	fmt.Println(bits.OnesCount64(rookBlockerMask[square]))
-	hash >>= 64 - uint8(bits.OnesCount64(rookBlockerMask[square]))
-	fmt.Printf("%v%v\n","Checking hash: ", hash)
-	fmt.Println("")
+	hash >>= 64 - uint8(UPopCount(rookBlockerMask[square]))
 	return db[square][hash]
 }
 
 
 //Calculate the single bitboard of all legal rook moves given a single position.
 //This function is only ever called once for each index of rookDB[][]
-func slowCalcRookMoves(square int, blockers uint64) uint64 {
+func slowCalcRookMoves(square uint8, blockers uint64) uint64 {
 	var moves uint64
 
 	//uint64 representation of origin square shifted up one rank
-	up := uint64(1) << uint8(square) << 8
+	up := uint64(1) << square << 8
 	for up != 0{
 		if up & FirstRank != 0 {
 			break
@@ -130,7 +134,7 @@ func slowCalcRookMoves(square int, blockers uint64) uint64 {
 		up <<= 8 //move up another rank
 	}
 
-	down := uint64(1) << uint8(square) >> 8
+	down := uint64(1) << square >> 8
 	for down != 0 {
 		if down & EighthRank != 0 {
 			break
@@ -142,7 +146,7 @@ func slowCalcRookMoves(square int, blockers uint64) uint64 {
 		down >>= 8
 	}
 
-	left := uint64(1) << uint8(square) >> 1
+	left := uint64(1) << square >> 1
 	for left != 0 {
 		if left & HFile != 0 {
 			break
@@ -154,7 +158,7 @@ func slowCalcRookMoves(square int, blockers uint64) uint64 {
 		left >>= 1 //move left another rank
 	}
 
-	right := uint64(1) << uint8(square) << 1
+	right := uint64(1) << square << 1
 	for right != 0{
 		if right & AFile != 0 {
 			break
@@ -170,10 +174,10 @@ func slowCalcRookMoves(square int, blockers uint64) uint64 {
 
 //Calculate the single bitboard of all legal bishop moves given a single position.
 //This function is only ever called once for each index of rookDB[][]
-func slowCalcBishopMoves(square int, blockers uint64) uint64 {
+func slowCalcBishopMoves(square uint8, blockers uint64) uint64 {
 	var moves uint64
 
-	upRight := uint64(1) << uint8(square) << 9
+	upRight := uint64(1) << square << 9
 	for upRight != 0 { //as long as we haven't wrapped around the board
 		if upRight & (AFile|FirstRank) != 0{
 			break
@@ -185,7 +189,7 @@ func slowCalcBishopMoves(square int, blockers uint64) uint64 {
 		upRight <<= 9 //up one rank and to the right one file
 	}
 
-	upLeft := uint64(1) << uint8(square) << 7
+	upLeft := uint64(1) << square << 7
 	for upLeft != 0 {
 		if upLeft & (HFile|FirstRank) != 0 {
 			break
@@ -197,7 +201,7 @@ func slowCalcBishopMoves(square int, blockers uint64) uint64 {
 		upLeft <<= 7 //up one rank and to the left one file
 	}
 
-	downRight := uint64(1) << uint8(square) >> 7
+	downRight := uint64(1) << square >> 7
 	for downRight != 0 {
 		if downRight & (AFile | EighthRank)!=0 {
 			break
@@ -209,7 +213,7 @@ func slowCalcBishopMoves(square int, blockers uint64) uint64 {
 		downRight >>= 7
 	}
 
-	downLeft := uint64(1) << uint8(square) >> 9
+	downLeft := uint64(1) << square >> 9
 	for downLeft !=0 {
 		if downLeft & (HFile | EighthRank)!=0{
 			break

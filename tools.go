@@ -65,3 +65,11 @@ func PrintBinaryBoard(b uint64) {
 	}
 	fmt.Println("")
 }
+
+func UPopCount(b uint64) uint {
+	return uint(bits.OnesCount64(b))
+}
+
+func U8PopCount(b uint64) uint8 {
+	return uint8(bits.OnesCount64(b))
+}
