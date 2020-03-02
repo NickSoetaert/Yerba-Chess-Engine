@@ -19,27 +19,8 @@ func KnightAttacks(knights uint64) uint64 {
 	return possibleAttacks
 }
 
-func OldRookAttacks(rooks, blockers uint64) uint64 {
-
-	var possibleAttacks uint64
-
-	count := bits.OnesCount64(rooks)
-	//count must be used, else loop range will decrement with each pass.
-	for i := 0; i < count; i++ {
-		singleRookPosition := uint8(bits.TrailingZeros64(rooks)) //get the position of the "last" rook
-		possibleAttacks |= rookBlockerMask[singleRookPosition]   //get current squares that rook can attack
-		rooks ^= 1 << singleRookPosition                         //clear that rook for the next loop iteration
-	}
-
-	return possibleAttacks
-}
-
-
-
-
-//Pre-compute all possible attacks
-//TODO: use pointers
-func Init() ([][]uint64, [][]uint64){
+//Pre-compute all possible rook and bishop attacks
+func InitSlidingPieces() ([][]uint64, [][]uint64){
 	//TODO: can I make these [][]uint16 because no mask has a popcount past 12?
 	rookDB := make([][]uint64, 64)
 	bishopDB := make([][]uint64, 64)
@@ -55,63 +36,59 @@ func Init() ([][]uint64, [][]uint64){
 
 	//Populate rook DB
 	for square, blocker := range rookBlockerMask {	//for all 64 squares
-		getPermutations(uint8(square), U8PopCount(blocker), blocker, true, rookDB)
+		calculateDbSquare(uint8(square), U8PopCount(blocker), blocker, true, rookDB)
 	}
 
 	//Populate bishop DB
 	for square, blocker := range bishopBlockerMask {
-		getPermutations(uint8(square), U8PopCount(blocker), blocker,false, bishopDB)
+		calculateDbSquare(uint8(square), U8PopCount(blocker), blocker,false, bishopDB)
 	}
 	return rookDB, bishopDB
 }
 
-//Takes a mask of 1s and 0s, representing possible board occupations.
-//
-var count = 0
-var idxs = make(map[uint64]int)
-func getPermutations(square, blockersLeft uint8, mask uint64, isRook bool, db [][]uint64) {
+//Given a single blocker mask, this function will populate the legal move database for the given piece at that square.
+func calculateDbSquare(square, blockersLeft uint8, mask uint64, isRook bool, db [][]uint64) {
 	//if we've run through the entire mask
 	if blockersLeft == 0 {
 		if isRook {
 			index := (mask * rookMagic[square]) >> (64 - UPopCount(rookBlockerMask[square])) //throw away the junk
-			idxs[mask]++
-			count++
 			db[square][index] = slowCalcRookMoves(square, mask)
-
 		} else {
 			index := (mask * bishopMagic[square]) >>  (64 - UPopCount(bishopBlockerMask[square])) //throw away the junk
 			db[square][index] = slowCalcBishopMoves(square, mask)
-
 		}
 		return
 	}
-
 	blockersLeft--
+	calculateDbSquare(square, blockersLeft, mask, isRook, db)
 
-	getPermutations(square, blockersLeft, mask, isRook, db)
-
-	//Calculate a mask where 1 is set to 0 at our current bit
+	//Calculate a mask where all 1s are set to 0 up to our current bit
 	var currentBit uint64
 	if isRook {
 		currentBit = rookBlockerMask[square]
 	} else {
 		currentBit = bishopBlockerMask[square]
 	}
-	//clear ones that we've seen
 	for i := 0; i < int(blockersLeft); i++ {
 		currentBit &= currentBit-1
 	}
 	mask ^= 1<<bits.TrailingZeros64(currentBit) //clears the least significant bit
 
-	getPermutations(square, blockersLeft, mask, isRook, db)
-
+	calculateDbSquare(square, blockersLeft, mask, isRook, db)
 }
 
 
-func GetRookAttacks(db [][]uint64, square uint8, allPieces uint64) uint64 {
+func getUnfilteredRookAttacks(db [][]uint64, square uint8, allPieces uint64) uint64 {
 	blockers := rookBlockerMask[square] & allPieces
 	hash := blockers * rookMagic[square]
 	hash >>= 64 - uint8(UPopCount(rookBlockerMask[square]))
+	return db[square][hash]
+}
+
+func getUnfilteredBishopAttacks(db [][]uint64, square uint8, allPieces uint64) uint64 {
+	blockers := bishopBlockerMask[square] & allPieces
+	hash := blockers * bishopMagic[square]
+	hash >>= 64 - uint8(UPopCount(bishopBlockerMask[square]))
 	return db[square][hash]
 }
 

@@ -1,16 +1,6 @@
 package main
 
 /*
-Board represents one possible board orientation.
-The a1 square is bit position 0, b2 = 1,..., g8 = 62, h8 = 63
-To figure out if , AND together with White or Black
-*/
-type Board struct {
-	Pawns, Knights, Bishops, Rooks, Queens, Kings, White, Black uint64
-	Move                                                        IsWhite
-}
-
-/*
 bit-position is defined as follows, by order of magnitude:
 
     8: 56 57 58 59 60 61 62 63
