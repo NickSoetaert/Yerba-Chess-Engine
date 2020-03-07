@@ -1,6 +1,7 @@
-package main
+package utils
 
 import (
+	"Yerba/moveGen"
 	"fmt"
 	"math/bits"
 )
@@ -35,7 +36,7 @@ func GetBoardKey() uint64 {
 
 //PrintBinaryBoard takes a bitboard and prints it in chess-board format
 func PrintBinaryBoard(b uint64) {
-	mask := A8
+	mask := moveGen.A8
 	fmt.Println("  ---------------------------------")
 	for i := 8; i >= 1; i-- {
 		fmt.Printf("%d |", i)

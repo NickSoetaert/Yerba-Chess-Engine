@@ -1,26 +1,13 @@
-package main
+package moveGen
 
 import (
+	"Yerba/utils"
 	"math/bits"
 )
 
-//KnightAttacks returns a BB of all squares that knights of a given color can attack, regardless of other pieces on the board.
-func KnightAttacks(knights uint64) uint64 {
-
-	var possibleAttacks uint64
-	//Get number of squares that the knight can attack
-	count := bits.OnesCount64(knights)
-	//count must be used, else loop range will decrement with each pass.
-	for i := 0; i < count; i++ {
-		singleKnightPosition := uint8(bits.TrailingZeros64(knights))
-		possibleAttacks |= knightAttacks[singleKnightPosition] //get current square that knight can attack
-		knights ^= 1 << singleKnightPosition                   //now clear that knight for the next loop iteration
-	}
-	return possibleAttacks
-}
 
 //Pre-compute all possible rook and bishop attacks
-func InitSlidingPieces() ([][]uint64, [][]uint64){
+func InitSlidingPieces() ([][]uint64, [][]uint64) {
 	//TODO: can I make these [][]uint16 because no mask has a popcount past 12?
 	rookDB := make([][]uint64, 64)
 	bishopDB := make([][]uint64, 64)
@@ -35,32 +22,34 @@ func InitSlidingPieces() ([][]uint64, [][]uint64){
 	}
 
 	//Populate rook DB
-	for square, blocker := range rookBlockerMask {	//for all 64 squares
-		calculateDbSquare(uint8(square), U8PopCount(blocker), blocker, true, rookDB)
+	for square, blocker := range rookBlockerMask { //for all 64 squares
+		initSlidingPiecesHelper(uint8(square), utils.U8PopCount(blocker), blocker, true, rookDB)
 	}
 
 	//Populate bishop DB
 	for square, blocker := range bishopBlockerMask {
-		calculateDbSquare(uint8(square), U8PopCount(blocker), blocker,false, bishopDB)
+		initSlidingPiecesHelper(uint8(square), utils.U8PopCount(blocker), blocker, false, bishopDB)
 	}
 	return rookDB, bishopDB
 }
 
 //Given a single blocker mask, this function will populate the legal move database for the given piece at that square.
-func calculateDbSquare(square, blockersLeft uint8, mask uint64, isRook bool, db [][]uint64) {
+func initSlidingPiecesHelper(square, blockersLeft uint8, mask uint64, isRook bool, db [][]uint64) {
 	//if we've run through the entire mask
 	if blockersLeft == 0 {
 		if isRook {
-			index := (mask * rookMagic[square]) >> (64 - UPopCount(rookBlockerMask[square])) //throw away the junk
+			//Generate 'magic' unique hash of this position to index with - e.g. rookMovesArray[square][magicHash]
+			index := (mask * rookMagic[square]) >> (64 - utils.UPopCount(rookBlockerMask[square])) //throw away the junk
 			db[square][index] = slowCalcRookMoves(square, mask)
 		} else {
-			index := (mask * bishopMagic[square]) >>  (64 - UPopCount(bishopBlockerMask[square])) //throw away the junk
+			index := (mask * bishopMagic[square]) >> (64 - utils.UPopCount(bishopBlockerMask[square])) //throw away the junk
 			db[square][index] = slowCalcBishopMoves(square, mask)
 		}
 		return
 	}
 	blockersLeft--
-	calculateDbSquare(square, blockersLeft, mask, isRook, db)
+	//calculate all possible boards in which this square is a 1
+	initSlidingPiecesHelper(square, blockersLeft, mask, isRook, db)
 
 	//Calculate a mask where all 1s are set to 0 up to our current bit
 	var currentBit uint64
@@ -70,28 +59,27 @@ func calculateDbSquare(square, blockersLeft uint8, mask uint64, isRook bool, db 
 		currentBit = bishopBlockerMask[square]
 	}
 	for i := 0; i < int(blockersLeft); i++ {
-		currentBit &= currentBit-1
+		currentBit &= currentBit - 1
 	}
-	mask ^= 1<<bits.TrailingZeros64(currentBit) //clears the least significant bit
+	mask ^= 1 << bits.TrailingZeros64(currentBit) //clears the least significant bit
 
-	calculateDbSquare(square, blockersLeft, mask, isRook, db)
+	//calculate all possible boards in which this square is a 0
+	initSlidingPiecesHelper(square, blockersLeft, mask, isRook, db)
 }
-
 
 func getUnfilteredRookAttacks(db [][]uint64, square uint8, allPieces uint64) uint64 {
 	blockers := rookBlockerMask[square] & allPieces
 	hash := blockers * rookMagic[square]
-	hash >>= 64 - uint8(UPopCount(rookBlockerMask[square]))
+	hash >>= 64 - uint8(utils.UPopCount(rookBlockerMask[square]))
 	return db[square][hash]
 }
 
 func getUnfilteredBishopAttacks(db [][]uint64, square uint8, allPieces uint64) uint64 {
 	blockers := bishopBlockerMask[square] & allPieces
 	hash := blockers * bishopMagic[square]
-	hash >>= 64 - uint8(UPopCount(bishopBlockerMask[square]))
+	hash >>= 64 - uint8(utils.UPopCount(bishopBlockerMask[square]))
 	return db[square][hash]
 }
-
 
 //Calculate the single bitboard of all legal rook moves given a single position.
 //This function is only ever called once for each index of rookDB[][]
@@ -100,8 +88,8 @@ func slowCalcRookMoves(square uint8, blockers uint64) uint64 {
 
 	//uint64 representation of origin square shifted up one rank
 	up := uint64(1) << square << 8
-	for up != 0{
-		if up & FirstRank != 0 {
+	for up != 0 {
+		if up&FirstRank != 0 {
 			break
 		}
 		moves |= up
@@ -113,7 +101,7 @@ func slowCalcRookMoves(square uint8, blockers uint64) uint64 {
 
 	down := uint64(1) << square >> 8
 	for down != 0 {
-		if down & EighthRank != 0 {
+		if down&EighthRank != 0 {
 			break
 		}
 		moves |= down
@@ -125,7 +113,7 @@ func slowCalcRookMoves(square uint8, blockers uint64) uint64 {
 
 	left := uint64(1) << square >> 1
 	for left != 0 {
-		if left & HFile != 0 {
+		if left&HFile != 0 {
 			break
 		}
 		moves |= left
@@ -136,8 +124,8 @@ func slowCalcRookMoves(square uint8, blockers uint64) uint64 {
 	}
 
 	right := uint64(1) << square << 1
-	for right != 0{
-		if right & AFile != 0 {
+	for right != 0 {
+		if right&AFile != 0 {
 			break
 		}
 		moves |= right
@@ -156,11 +144,11 @@ func slowCalcBishopMoves(square uint8, blockers uint64) uint64 {
 
 	upRight := uint64(1) << square << 9
 	for upRight != 0 { //as long as we haven't wrapped around the board
-		if upRight & (AFile|FirstRank) != 0{
+		if upRight&(AFile|FirstRank) != 0 {
 			break
 		}
 		moves |= upRight
-		if blockers & upRight != 0 {
+		if blockers&upRight != 0 {
 			break
 		}
 		upRight <<= 9 //up one rank and to the right one file
@@ -168,7 +156,7 @@ func slowCalcBishopMoves(square uint8, blockers uint64) uint64 {
 
 	upLeft := uint64(1) << square << 7
 	for upLeft != 0 {
-		if upLeft & (HFile|FirstRank) != 0 {
+		if upLeft&(HFile|FirstRank) != 0 {
 			break
 		}
 		moves |= upLeft
@@ -180,7 +168,7 @@ func slowCalcBishopMoves(square uint8, blockers uint64) uint64 {
 
 	downRight := uint64(1) << square >> 7
 	for downRight != 0 {
-		if downRight & (AFile | EighthRank)!=0 {
+		if downRight&(AFile|EighthRank) != 0 {
 			break
 		}
 		moves |= downRight
@@ -191,8 +179,8 @@ func slowCalcBishopMoves(square uint8, blockers uint64) uint64 {
 	}
 
 	downLeft := uint64(1) << square >> 9
-	for downLeft !=0 {
-		if downLeft & (HFile | EighthRank)!=0{
+	for downLeft != 0 {
+		if downLeft&(HFile|EighthRank) != 0 {
 			break
 		}
 		moves |= downLeft
