@@ -53,7 +53,7 @@ func RookDebugBoard(squares uint64) Board {
 	board := Board{
 		Rooks:       squares,
 		White:       squares,
-		IsWhiteMove: White,
+		IsWhiteMove: true,
 	}
 	return board
 }
