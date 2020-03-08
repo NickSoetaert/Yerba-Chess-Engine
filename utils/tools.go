@@ -1,15 +1,13 @@
 package utils
 
 import (
-	"Yerba/moveGen"
-	"fmt"
 	"math/bits"
 )
 
-/*
-GetBoardKey takes a board state for a single piece, and returns
-the long representation. For debug upropses only.
-*/
+
+//GetBoardKey takes a board state for a single piece, and returns
+//the long representation. For debug purposes only.
+
 func GetBoardKey() uint64 {
 	b := [8][8]string{
 		{" ", " ", " ", " ", " ", " ", " ", " "}, //8
@@ -34,38 +32,7 @@ func GetBoardKey() uint64 {
 	return result << 1
 }
 
-//PrintBinaryBoard takes a bitboard and prints it in chess-board format
-func PrintBinaryBoard(b uint64) {
-	mask := moveGen.A8
-	fmt.Println("  ---------------------------------")
-	for i := 8; i >= 1; i-- {
-		fmt.Printf("%d |", i)
-		for j := 1; j <= 8; j++ {
-			if bits.OnesCount64(uint64(b&mask)) == 1 {
-				fmt.Print(" X |")
-			} else {
-				fmt.Print("   |")
-			}
-			if j != 8 {
-				mask = mask << 1
-			}
-		}
-		mask = mask >> 15
-		fmt.Println("")
-		fmt.Println("  ---------------------------------")
-	}
-	//print numbers at bottom with 3 spaces of padding
-	for i := 'A' - 3; i <= 'H'; i++ {
-		if i >= 'A' {
-			fmt.Printf(" %c |", i)
-		} else if i == 'A'-1 {
-			fmt.Print("|")
-		} else {
-			fmt.Print(" ")
-		}
-	}
-	fmt.Println("")
-}
+
 
 func UPopCount(b uint64) uint {
 	return uint(bits.OnesCount64(b))

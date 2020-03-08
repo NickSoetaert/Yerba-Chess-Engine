@@ -1,6 +1,7 @@
-package main
+package graphics
 
 import (
+	"Yerba/moveGen"
 	"fmt"
 )
 
@@ -46,11 +47,10 @@ const (
 	White IsWhite = true
 	Black IsWhite = false
 )
-
 //Sets a single rook on the given square
-func RookDebugBoard(squares uint64) Board {
+func RookDebugBoard(squares uint64) moveGen.Board {
 
-	board := Board{
+	board := moveGen.Board{
 		Rooks:       squares,
 		White:       squares,
 		IsWhiteMove: true,
@@ -59,7 +59,7 @@ func RookDebugBoard(squares uint64) Board {
 }
 
 //PrintBoard prints out an ascii representation of the given board
-func (b Board) PrintBoard() {
+func PrintBoard(b moveGen.Board) {
 	boardString := [8][8]PieceRune{}
 
 	for i := 0; i < 64; i++ {

@@ -2,6 +2,8 @@
 package main
 
 import (
+	"Yerba/graphics"
+	"Yerba/moveGen"
 	"fmt"
 )
 
@@ -10,7 +12,12 @@ func main() {
 
 	//40==A6
 
-	board := SetUpBoard()
-	board.PrintBoard()
+	board := moveGen.SetUpBoard()
+	graphics.PrintBinaryBoard(moveGen.GetPawnMoves(board.Pawns, board.White, board.Black, true))
 
 }
+
+
+
+
+

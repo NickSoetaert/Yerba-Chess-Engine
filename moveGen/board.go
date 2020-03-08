@@ -1,6 +1,4 @@
-package main
-
-import "Yerba/moveGen"
+package moveGen
 
 /*
 Board represents one possible board orientation.
@@ -15,16 +13,16 @@ type Board struct {
 
 //SetUpBoard inits a board in the default state
 func SetUpBoard() Board {
-	r, b := moveGen.InitSlidingPieces()
+	r, b := InitSlidingPieces()
 	board := Board{
-		Pawns:       moveGen.SecondRank | moveGen.SeventhRank,
-		Knights:     moveGen.B1 | moveGen.G1 | moveGen.B8 | moveGen.G8,
-		Bishops:     moveGen.C1 | moveGen.F1 | moveGen.C8 | moveGen.F8,
-		Rooks:       moveGen.A1 | moveGen.H1 | moveGen.A8 | moveGen.H8,
-		Queens:      moveGen.D1 | moveGen.D8,
-		Kings:       moveGen.E1 | moveGen.E8,
-		White:       moveGen.FirstRank | moveGen.SecondRank,
-		Black:       moveGen.SeventhRank | moveGen.EighthRank,
+		Pawns:       SecondRank | SeventhRank,
+		Knights:     B1 | G1 | B8 | G8,
+		Bishops:     C1 | F1 | C8 | F8,
+		Rooks:       A1 | H1 | A8 | H8,
+		Queens:      D1 | D8,
+		Kings:       E1 | E8,
+		White:       FirstRank | SecondRank,
+		Black:       SeventhRank | EighthRank,
 		RookDB:      r,
 		BishopDB:    b,
 		IsWhiteMove: true,

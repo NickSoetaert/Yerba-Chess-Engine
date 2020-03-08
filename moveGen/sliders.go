@@ -17,17 +17,17 @@ func InitSlidingPieces() ([][]uint64, [][]uint64) {
 	//The second dimension of the DB has the same number of bits as the number of possible blockers from that square.
 	//This is so that you can store a move for every possible combination of blockers for a given square.
 	for i := 0; i < 64; i++ {
-		rookDB[i] = make([]uint64, 1<<uint64(bits.OnesCount64(rookBlockerMask[i])))
-		bishopDB[i] = make([]uint64, 1<<uint64(bits.OnesCount64(bishopBlockerMask[i])))
+		rookDB[i] = make([]uint64, 1<<uint64(bits.OnesCount64(RookBlockerMask[i])))
+		bishopDB[i] = make([]uint64, 1<<uint64(bits.OnesCount64(BishopBlockerMask[i])))
 	}
 
 	//Populate rook DB
-	for square, blocker := range rookBlockerMask { //for all 64 squares
+	for square, blocker := range RookBlockerMask { //for all 64 squares
 		initSlidingPiecesHelper(uint8(square), utils.U8PopCount(blocker), blocker, true, rookDB)
 	}
 
 	//Populate bishop DB
-	for square, blocker := range bishopBlockerMask {
+	for square, blocker := range BishopBlockerMask {
 		initSlidingPiecesHelper(uint8(square), utils.U8PopCount(blocker), blocker, false, bishopDB)
 	}
 	return rookDB, bishopDB
@@ -39,10 +39,10 @@ func initSlidingPiecesHelper(square, blockersLeft uint8, mask uint64, isRook boo
 	if blockersLeft == 0 {
 		if isRook {
 			//Generate 'magic' unique hash of this position to index with - e.g. rookMovesArray[square][magicHash]
-			index := (mask * rookMagic[square]) >> (64 - utils.UPopCount(rookBlockerMask[square])) //throw away the junk
+			index := (mask * rookMagic[square]) >> (64 - utils.UPopCount(RookBlockerMask[square])) //throw away the junk
 			db[square][index] = slowCalcRookMoves(square, mask)
 		} else {
-			index := (mask * bishopMagic[square]) >> (64 - utils.UPopCount(bishopBlockerMask[square])) //throw away the junk
+			index := (mask * bishopMagic[square]) >> (64 - utils.UPopCount(BishopBlockerMask[square])) //throw away the junk
 			db[square][index] = slowCalcBishopMoves(square, mask)
 		}
 		return
@@ -51,12 +51,11 @@ func initSlidingPiecesHelper(square, blockersLeft uint8, mask uint64, isRook boo
 	//calculate all possible boards in which this square is a 1
 	initSlidingPiecesHelper(square, blockersLeft, mask, isRook, db)
 
-	//Calculate a mask where all 1s are set to 0 up to our current bit
 	var currentBit uint64
 	if isRook {
-		currentBit = rookBlockerMask[square]
+		currentBit = RookBlockerMask[square]
 	} else {
-		currentBit = bishopBlockerMask[square]
+		currentBit = BishopBlockerMask[square]
 	}
 	for i := 0; i < int(blockersLeft); i++ {
 		currentBit &= currentBit - 1
@@ -67,17 +66,17 @@ func initSlidingPiecesHelper(square, blockersLeft uint8, mask uint64, isRook boo
 	initSlidingPiecesHelper(square, blockersLeft, mask, isRook, db)
 }
 
-func getUnfilteredRookAttacks(db [][]uint64, square uint8, allPieces uint64) uint64 {
-	blockers := rookBlockerMask[square] & allPieces
+func GetUnfilteredRookAttacks(db [][]uint64, square uint8, allPieces uint64) uint64 {
+	blockers := RookBlockerMask[square] & allPieces
 	hash := blockers * rookMagic[square]
-	hash >>= 64 - uint8(utils.UPopCount(rookBlockerMask[square]))
+	hash >>= 64 - uint8(utils.UPopCount(RookBlockerMask[square]))
 	return db[square][hash]
 }
 
-func getUnfilteredBishopAttacks(db [][]uint64, square uint8, allPieces uint64) uint64 {
-	blockers := bishopBlockerMask[square] & allPieces
+func GetUnfilteredBishopAttacks(db [][]uint64, square uint8, allPieces uint64) uint64 {
+	blockers := BishopBlockerMask[square] & allPieces
 	hash := blockers * bishopMagic[square]
-	hash >>= 64 - uint8(utils.UPopCount(bishopBlockerMask[square]))
+	hash >>= 64 - uint8(utils.UPopCount(BishopBlockerMask[square]))
 	return db[square][hash]
 }
 
