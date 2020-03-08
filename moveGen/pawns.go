@@ -1,17 +1,47 @@
 package moveGen
 
-func GetPawnMoves(pawns, friends, enemies uint64, isWhiteToMove bool) uint64 {
-	return unfilteredPawnNonAttacks(pawns&friends, isWhiteToMove)
+import (
+	"CounterGo/common"
+	"Yerba/utils"
+)
+
+func GetPawnMoves(pawns, whitePieces, blackPieces uint64, isWhiteToMove bool) []uint64 {
+	if isWhiteToMove {
+		pawns &= whitePieces
+	} else {
+		pawns &= blackPieces
+	}
+	moves := make([]uint64, common.PopCount(pawns))
+
+	for i:=0; pawns != 0; i++ {
+		pawn := utils.IsolateLsb(pawns)
+		moves[i] = pawnCapturingMoves(pawn, whitePieces, blackPieces, isWhiteToMove) |
+				pawnNonAttacks(pawn, whitePieces, blackPieces, isWhiteToMove)
+
+		pawns &= pawns-1
+	}
+	return moves
 }
 
 //TODO: shifting them all together doesn't really work - I need to know which pawns can go where.
-func unfilteredPawnNonAttacks(pawns uint64, isWhiteToMove bool) (moves uint64) {
+func pawnNonAttacks(pawn, whitePieces, blackPieces uint64, isWhiteToMove bool) (moves uint64) {
 	if isWhiteToMove {
-		moves = pawns << 8
-		moves |= (pawns << 16) & FourthRank //You can only move 2 squares if you end up on the 4th rank for white.
+		moves = pawn << 8
+		moves |= (pawn << 16) & FourthRank
 	} else {
-		moves = pawns >> 8
-		moves |= (pawns >> 16) & FifthRank
+		moves = pawn >> 8
+		moves |= (pawn >> 16) & FifthRank
 	}
-	return moves
+	return moves & ^(whitePieces | blackPieces)
+}
+
+func pawnCapturingMoves(pawn, whitePieces, blackPieces uint64, isWhiteToMove bool) (moves uint64) {
+	if isWhiteToMove {
+	  moves = ((pawn << 7) & ^HFile) & blackPieces
+	  moves |= ((pawn << 9) & ^AFile) & blackPieces
+	} else {
+		moves = ((pawn >> 7) & ^AFile) & whitePieces
+		moves |= ((pawn >> 9) & ^HFile) & whitePieces
+	}
+	return
 }

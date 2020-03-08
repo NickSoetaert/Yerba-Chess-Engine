@@ -8,7 +8,7 @@ import (
 
 //PrintBinaryBoard takes a bitboard and prints it in chess-board format
 func PrintBinaryBoard(b uint64) {
-	mask := moveGen.A8
+	mask := moveGen.A8 //top left corner
 	fmt.Println("  ---------------------------------")
 	for i := 8; i >= 1; i-- {
 		fmt.Printf("%d |", i)
