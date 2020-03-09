@@ -7,7 +7,6 @@ import (
 
 //Pre-compute all possible rook and bishop attacks
 func InitSlidingPieces() ([][]uint64, [][]uint64) {
-	//TODO: can I make these [][]uint16 because no mask has a popcount past 12?
 	rookDB := make([][]uint64, 64)
 	bishopDB := make([][]uint64, 64)
 
