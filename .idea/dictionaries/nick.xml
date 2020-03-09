@@ -3,7 +3,9 @@
     <words>
       <w>bitboard</w>
       <w>bitboards</w>
+      <w>kingside</w>
       <w>passant</w>
+      <w>queenside</w>
     </words>
   </dictionary>
 </component>
