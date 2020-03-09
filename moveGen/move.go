@@ -1,6 +1,6 @@
 package moveGen
 
-//Type Move specifications:
+//type Move structure:
 //Origin square bits:	   	0-5
 //Destination square bits: 	6-11
 //Special move bits:		12-14
@@ -30,7 +30,15 @@ package moveGen
 
 type Move uint16
 
-//Given a starting board and a move, return the resulting board.
-func ApplyMove() {
+type undoMove func()
 
+
+//TODO
+//Given a starting board and a move, return the resulting board.
+//Returns a function that undoes the previously applied move.
+func (b *Board) ApplyMove(m Move) undoMove {
+
+	return func(){
+		b.White = 0
+	}
 }

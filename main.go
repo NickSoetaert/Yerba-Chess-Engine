@@ -2,6 +2,7 @@
 package main
 
 import (
+	"Yerba/graphics"
 	"Yerba/moveGen"
 	"fmt"
 )
@@ -11,12 +12,17 @@ func main() {
 
 	//40==A6
 
-	board := moveGen.SetUpBoard()
+	b := moveGen.SetUpBoard()
 
-	//for _, i := range moveGen.GetPawnMoves(board.Pawns, board.White, board.Black, true) {
-	//	graphics.PrintBinaryBoard(i)
-	//}
+	for _, move := range moveGen.GetPawnMoves(b.Pawns, b.White, b.Black, true) {
+		graphics.PrintBinaryBoard(move)
+	}
 
-	fmt.Println(board.Evaluate())
+	fmt.Println(b.Evaluate())
+
+	undo := b.ApplyMove(0)
+	graphics.PrintBinaryBoard(b.White)
+	undo()
+	graphics.PrintBinaryBoard(b.White)
 
 }
