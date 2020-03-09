@@ -4,7 +4,6 @@ import (
 	"math/bits"
 )
 
-
 //GetBoardKey takes a board state for a single piece, and returns
 //the long representation. For debug purposes only.
 

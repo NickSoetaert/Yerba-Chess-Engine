@@ -14,4 +14,3 @@ func UnfilteredKnightAttacks(knights uint64) uint64 {
 	}
 	return possibleAttacks
 }
-

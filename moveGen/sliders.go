@@ -5,7 +5,6 @@ import (
 	"math/bits"
 )
 
-
 //Pre-compute all possible rook and bishop attacks
 func InitSlidingPieces() ([][]uint64, [][]uint64) {
 	//TODO: can I make these [][]uint16 because no mask has a popcount past 12?

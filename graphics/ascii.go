@@ -47,6 +47,7 @@ const (
 	White IsWhite = true
 	Black IsWhite = false
 )
+
 //Sets a single rook on the given square
 func RookDebugBoard(squares uint64) moveGen.Board {
 
