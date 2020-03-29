@@ -2,44 +2,170 @@ package moveGen
 
 import (
 	"Yerba/utils"
+	"fmt"
 )
 
-func GetPawnMoves(pawns, whitePieces, blackPieces uint64, isWhiteToMove bool) (moves []uint64) {
+func GetPawnMoves(pawns, whitePieces, blackPieces uint64, isWhiteToMove bool, enPassantFile uint8) (moves []Move) {
 	if isWhiteToMove {
 		pawns &= whitePieces
 	} else {
 		pawns &= blackPieces
 	}
 
-	for i := 0; pawns != 0; i++ {
-		pawn := utils.IsolateLsb(pawns)
-		moves = append(moves, pawnNormalCapturingMoves(pawn, whitePieces, blackPieces, isWhiteToMove)|
-			pawnNonAttacks(pawn, whitePieces, blackPieces, isWhiteToMove))
+	moves = append(moves, pawnNormalCaptures(pawns, whitePieces, blackPieces, isWhiteToMove)...)
+	moves = append(moves, pawnSinglePushMoves(pawns, whitePieces, blackPieces, isWhiteToMove)...)
+	moves = append(moves, pawnDoublePushMoves(pawns, whitePieces, blackPieces, isWhiteToMove)...)
+	moves = append(moves, pawnEnPassantCaptures(pawns, whitePieces, blackPieces, isWhiteToMove, enPassantFile)...)
 
-		pawns &= pawns - 1
+	return moves
+}
+
+
+func pawnSinglePushMoves(pawns, whitePieces, blackPieces uint64, isWhiteToMove bool) (moves []Move) {
+	var openSquares uint64
+	baseMove := Move(0)
+	baseMove.setMoveType(normalPawnPush)
+	if isWhiteToMove {
+		openSquares = pawns<< 8 ^ EighthRank
+	} else {
+		openSquares = pawns>> 8 ^ FirstRank
+	}
+	openSquares = openSquares & ^(whitePieces | blackPieces)
+
+	//Convert all available squares to a Move
+	for openSquares != 0 {
+		dest := utils.IsolateLsb(openSquares)
+		newMove := baseMove
+		newMove.setDest(dest)
+		if isWhiteToMove{
+			newMove.setOrigin(dest>>8)
+			fmt.Printf("%016b\n",newMove)
+		} else {
+			newMove.setOrigin(dest<<8)
+		}
+		moves = append(moves, newMove)
+		openSquares &= openSquares-1
 	}
 	return moves
 }
-//TODO for all move generators - return an array of Moves instead of a bitboard (or array of BBs)
-//
-func pawnNonAttacks(pawn, whitePieces, blackPieces uint64, isWhiteToMove bool) (moves uint64) {
+
+func pawnDoublePushMoves(pawns, whitePieces, blackPieces uint64, isWhiteToMove bool) (moves []Move) {
+	var openSquares uint64
+	baseMove := Move(0)
+	baseMove.setMoveType(pawnDoublePush)
 	if isWhiteToMove {
-		moves = pawn << 8
-		moves |= (pawn << 16) & FourthRank
+		openSquares |= ((pawns << 16) & FourthRank) ^ (((whitePieces|blackPieces) & ThirdRank) << 8)
 	} else {
-		moves = pawn >> 8
-		moves |= (pawn >> 16) & FifthRank
+		openSquares |= ((pawns >> 16) & FifthRank)  ^ (((whitePieces|blackPieces) & SixthRank) >> 8)
 	}
-	return moves & ^(whitePieces | blackPieces)
+	openSquares = openSquares & ^(whitePieces | blackPieces)
+
+	//Convert all available squares to a Move
+	for openSquares != 0 {
+		dest := utils.IsolateLsb(openSquares)
+		newMove := baseMove
+		newMove.setDest(dest)
+		if isWhiteToMove{
+			newMove.setOrigin(dest>>8)
+		} else {
+			newMove.setOrigin(dest<<8)
+		}
+		moves = append(moves, newMove)
+		openSquares &= openSquares-1
+	}
+
+	return moves
 }
 
-func pawnNormalCapturingMoves(pawn, whitePieces, blackPieces uint64, isWhiteToMove bool) (moves uint64) {
+func pawnNormalCaptures(pawns, whitePieces, blackPieces uint64, isWhiteToMove bool) (moves []Move) {
+	var openSquares uint64
+	baseMove := Move(0)
+	baseMove.setMoveType(normalPawnCapture)
 	if isWhiteToMove {
-		moves = ((pawn << 7) & ^HFile) & blackPieces
-		moves |= ((pawn << 9) & ^AFile) & blackPieces
+		openSquares = ((pawns << 7) & ^HFile) & blackPieces
 	} else {
-		moves = ((pawn >> 7) & ^AFile) & whitePieces
-		moves |= ((pawn >> 9) & ^HFile) & whitePieces
+		openSquares = ((pawns >> 7) & ^AFile) & whitePieces
 	}
-	return
+
+	//Convert all available squares to a Move
+	for openSquares != 0 {
+		dest := utils.IsolateLsb(openSquares)
+		newMove := baseMove
+		newMove.setDest(dest)
+		if isWhiteToMove{
+			newMove.setOrigin(dest>>7)
+		} else {
+			newMove.setOrigin(dest<<7)
+		}
+		moves = append(moves, newMove)
+		openSquares &= openSquares-1
+	}
+
+	if isWhiteToMove {
+		openSquares |= ((pawns << 9) & ^AFile) & blackPieces
+	} else {
+		openSquares |= ((pawns >> 9) & ^HFile) & whitePieces
+	}
+	//Convert all available squares to a Move
+	for openSquares != 0 {
+		dest := utils.IsolateLsb(openSquares)
+		newMove := baseMove
+		newMove.setDest(dest)
+		if isWhiteToMove{
+			newMove.setOrigin(dest>>9)
+		} else {
+			newMove.setOrigin(dest<<9)
+		}
+		moves = append(moves, newMove)
+		openSquares &= openSquares-1
+	}
+
+	return moves
+}
+
+func pawnEnPassantCaptures(pawns, whitePieces, blackPieces uint64, isWhiteToMove bool, enPassantFile uint8) (moves []Move) {
+	if enPassantFile == 0 {
+		return nil
+	}
+	baseMove := Move(0)
+	baseMove.setMoveType(enPassantCapture)
+	var openSquares uint64
+
+	if isWhiteToMove {
+		openSquares |= ((pawns << 7) & ^HFile) & (uint64(enPassantFile) << 16)
+	} else {
+		openSquares |= ((pawns >> 7) & ^AFile) & (uint64(enPassantFile) << 40)
+	}
+	for openSquares != 0 {
+		dest := utils.IsolateLsb(openSquares)
+		newMove := baseMove
+		newMove.setDest(dest)
+		if isWhiteToMove{
+			newMove.setOrigin(dest>>7)
+		} else {
+			newMove.setOrigin(dest<<7)
+		}
+		moves = append(moves, newMove)
+		openSquares &= openSquares-1
+	}
+
+	if isWhiteToMove {
+		openSquares |= ((pawns << 9) & ^HFile) & (uint64(enPassantFile) << 16)
+	} else {
+		openSquares |= ((pawns >> 9) & ^AFile) & (uint64(enPassantFile) << 40)
+	}
+	for openSquares != 0 {
+		dest := utils.IsolateLsb(openSquares)
+		newMove := baseMove
+		newMove.setDest(dest)
+		if isWhiteToMove{
+			newMove.setOrigin(dest>>9)
+		} else {
+			newMove.setOrigin(dest<<9)
+		}
+		moves = append(moves, newMove)
+		openSquares &= openSquares-1
+	}
+
+	return moves
 }

@@ -14,15 +14,22 @@ func main() {
 
 	b := moveGen.SetUpBoard()
 
-	for _, move := range moveGen.GetPawnMoves(b.Pawns, b.White, b.Black, true) {
-		graphics.PrintBinaryBoard(move)
+	pawnMoves := moveGen.GetPawnMoves(b.Pawns, b.White, b.Black, b.IsWhiteMove, 0)
+	for _, move := range pawnMoves {
+		b.ApplyMove(move)
+		graphics.PrintBoard(b)
+		break
 	}
 
-	fmt.Println(b.Evaluate())
-
-	undo := b.ApplyMove(0)
-	graphics.PrintBinaryBoard(b.White)
-	undo()
-	graphics.PrintBinaryBoard(b.White)
+	//for _, move := range moveGen.GetPawnMoves(b.Pawns, b.White, b.Black, false, b.EnPassantFile) {
+	//	graphics.PrintBinaryBoard(move)
+	//}
+	//
+	//fmt.Println(b.Evaluate())
+	//
+	//undo := b.ApplyMove(0)
+	//graphics.PrintBinaryBoard(b.White)
+	//undo()
+	//graphics.PrintBinaryBoard(b.White)
 
 }
