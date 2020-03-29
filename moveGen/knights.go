@@ -1,16 +1,14 @@
 package moveGen
 
 import (
-	"fmt"
 	"math/bits"
 )
 
-//UnfilteredKnightAttacks returns a BB of all squares that knights of a given color can attack, regardless of other pieces on the board.
-func GetKnightMoves(knights, ownPieces uint64) (moves []Move) {
+func getKnightMoves(knights, ownPieces uint64, ch chan []Move) {
+	var moves []Move
 	knights = knights & ownPieces //filter out enemy knights
 	baseMove := Move(0)
 	baseMove.setMoveType(knightMove)
-	fmt.Printf("\n\n%064b\n", knights)
 	for bits.OnesCount64(knights) != 0 { //While there are still knights left
 		originSquareMove := baseMove
 		currentSquare := uint8(bits.TrailingZeros64(knights))     //square number that we're looking at
@@ -26,5 +24,5 @@ func GetKnightMoves(knights, ownPieces uint64) (moves []Move) {
 		}
 		knights ^= uint64(1 << currentSquare) //now clear that knight for the next loop iteration
 	}
-	return moves
+	ch <- moves
 }

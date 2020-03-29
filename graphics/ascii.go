@@ -22,42 +22,22 @@ type PieceRune rune
 
 //unicode values for pieces
 const (
-	WhiteKing   PieceRune = 9812
-	WhiteQueen  PieceRune = 9813
-	WhiteRook   PieceRune = 9814
-	WhiteBishop PieceRune = 9815
-	WhiteKnight PieceRune = 9816
-	WhitePawn   PieceRune = 9817
+	BlackKing   PieceRune = 9812
+	BlackQueen  PieceRune = 9813
+	BlackRook   PieceRune = 9814
+	BlackBishop PieceRune = 9815
+	BlackKnight PieceRune = 9816
+	BlackPawn   PieceRune = 9817
 
-	BlackKing   PieceRune = 9818
-	BlackQueen  PieceRune = 9819
-	BlackRook   PieceRune = 9820
-	BlackBishop PieceRune = 9821
-	BlackKnight PieceRune = 9822
-	BlackPawn   PieceRune = 9823
+	WhiteKing   PieceRune = 9818
+	WhiteQueen  PieceRune = 9819
+	WhiteRook   PieceRune = 9820
+	WhiteBishop PieceRune = 9821
+	WhiteKnight PieceRune = 9822
+	WhitePawn   PieceRune = 9823
 
 	EmptySquare PieceRune = 32
 )
-
-//IsWhite == true means the piece, square or turn is White or White's. Else, it's Black or Black's.
-type IsWhite bool
-
-//Defines if a piece, tile or turn is white or black
-const (
-	White IsWhite = true
-	Black IsWhite = false
-)
-
-//Sets a single rook on the given square
-func RookDebugBoard(squares uint64) moveGen.Board {
-
-	board := moveGen.Board{
-		Rooks:       squares,
-		White:       squares,
-		IsWhiteMove: true,
-	}
-	return board
-}
 
 //PrintBoard prints out an ascii representation of the given board
 func PrintBoard(b moveGen.Board) {

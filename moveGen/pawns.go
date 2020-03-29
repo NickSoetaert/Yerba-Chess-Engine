@@ -4,7 +4,8 @@ import (
 	"Yerba/utils"
 )
 //TODO: promotions
-func GetPawnMoves(pawns, whitePieces, blackPieces uint64, isWhiteToMove bool, enPassantFile uint8) (moves []Move) {
+func getPawnMoves(pawns, whitePieces, blackPieces uint64, isWhiteToMove bool, enPassantFile uint8, c chan []Move) {
+	var moves []Move
 	if isWhiteToMove {
 		pawns &= whitePieces
 	} else {
@@ -16,7 +17,7 @@ func GetPawnMoves(pawns, whitePieces, blackPieces uint64, isWhiteToMove bool, en
 	moves = append(moves, pawnDoublePushMoves(pawns, whitePieces, blackPieces, isWhiteToMove)...)
 	moves = append(moves, pawnEnPassantCaptures(pawns, whitePieces, blackPieces, isWhiteToMove, enPassantFile)...)
 
-	return moves
+	c <- moves
 }
 
 func pawnSinglePushMoves(pawns, whitePieces, blackPieces uint64, isWhiteToMove bool) (moves []Move) {
