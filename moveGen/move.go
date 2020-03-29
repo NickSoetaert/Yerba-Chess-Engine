@@ -4,8 +4,7 @@ import (
 	"math/bits"
 )
 
-
-//type Move structure:
+//type Move:
 //Origin square bits:	   	0-5
 //Destination square bits: 	6-11
 //Special move bits:		12-15
@@ -40,7 +39,7 @@ type UndoMove func()
 //Returns a function that undoes the previously applied move.
 //ApplyMove does NOT check for legality; that is the responsibility of MoveGen.
 func (b *Board) ApplyMove(m Move) UndoMove {
-	oldBoard := *b
+	oldBoard := *b //TODO: Optimize
 
 	//Note - adding/removing pieces from the White/Black bitboards is taken care of in a single case after the switch.
 	switch m.getMoveType() {

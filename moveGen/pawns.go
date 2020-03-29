@@ -2,7 +2,6 @@ package moveGen
 
 import (
 	"Yerba/utils"
-	"fmt"
 )
 
 func GetPawnMoves(pawns, whitePieces, blackPieces uint64, isWhiteToMove bool, enPassantFile uint8) (moves []Move) {
@@ -25,9 +24,9 @@ func pawnSinglePushMoves(pawns, whitePieces, blackPieces uint64, isWhiteToMove b
 	baseMove := Move(0)
 	baseMove.setMoveType(normalPawnPush)
 	if isWhiteToMove {
-		openSquares = pawns<< 8 ^ EighthRank
+		openSquares = (pawns << 8) ^ EighthRank
 	} else {
-		openSquares = pawns>> 8 ^ FirstRank
+		openSquares = (pawns >> 8) ^ FirstRank
 	}
 	openSquares = openSquares & ^(whitePieces | blackPieces)
 
@@ -37,9 +36,7 @@ func pawnSinglePushMoves(pawns, whitePieces, blackPieces uint64, isWhiteToMove b
 		newMove := baseMove
 		newMove.setDest(dest)
 		if isWhiteToMove{
-			fmt.Printf("Before: %016b\n",newMove)
 			newMove.setOrigin(dest>>8)
-			fmt.Printf("After:  %016b\n",newMove)
 		} else {
 			newMove.setOrigin(dest<<8)
 		}
@@ -54,9 +51,10 @@ func pawnDoublePushMoves(pawns, whitePieces, blackPieces uint64, isWhiteToMove b
 	baseMove := Move(0)
 	baseMove.setMoveType(pawnDoublePush)
 	if isWhiteToMove {
+		//Get moves that move forward 2 ranks and end up on proper rank, and don't jump over anything
 		openSquares |= ((pawns << 16) & FourthRank) ^ (((whitePieces|blackPieces) & ThirdRank) << 8)
 	} else {
-		openSquares |= ((pawns >> 16) & FifthRank)  ^ (((whitePieces|blackPieces) & SixthRank) >> 8)
+		openSquares |= ((pawns >> 16) & FifthRank ) ^ (((whitePieces|blackPieces) & SixthRank) >> 8)
 	}
 	openSquares = openSquares & ^(whitePieces | blackPieces)
 
@@ -73,7 +71,6 @@ func pawnDoublePushMoves(pawns, whitePieces, blackPieces uint64, isWhiteToMove b
 		moves = append(moves, newMove)
 		openSquares &= openSquares-1
 	}
-
 	return moves
 }
 

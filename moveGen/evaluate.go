@@ -2,9 +2,9 @@ package moveGen
 
 import "math/bits"
 
-func (b *Board) Evaluate() float32 {
+func (b *Board) Evaluate() float64 {
 
-	return float32(b.getMaterialImbalance())
+	return float64(b.getMaterialImbalance())
 }
 
 func (b *Board) getMaterialImbalance() (imbalance int) {

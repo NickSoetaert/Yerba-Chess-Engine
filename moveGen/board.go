@@ -49,7 +49,8 @@ func SetUpBoard() Board {
 	return board
 }
 
-func (b Board) GenerateLegalMoves() []Board {
+func (b Board) GenerateLegalMoves() (moves []Move) {
+	moves = append(moves, GetPawnMoves(b.Pawns, b.White, b.Black, b.IsWhiteMove, b.EnPassantFile)...)
 
-	return nil
+	return moves
 }
