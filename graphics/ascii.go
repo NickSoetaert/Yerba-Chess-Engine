@@ -5,43 +5,28 @@ import (
 	"fmt"
 )
 
-//PieceType - pawn, knight, etc.
-type PieceType uint8
-
-const (
-	Pawn PieceType = iota
-	Knight
-	Bishop
-	Rook
-	Queen
-	King
-)
-
-//PieceRune is an unicode value for ascii piece representation
-type PieceRune rune
-
 //unicode values for pieces
 const (
-	BlackKing   PieceRune = 9812
-	BlackQueen  PieceRune = 9813
-	BlackRook   PieceRune = 9814
-	BlackBishop PieceRune = 9815
-	BlackKnight PieceRune = 9816
-	BlackPawn   PieceRune = 9817
+	BlackKing   rune = 9812
+	BlackQueen  rune = 9813
+	BlackRook   rune = 9814
+	BlackBishop rune = 9815
+	BlackKnight rune = 9816
+	BlackPawn   rune = 9817
 
-	WhiteKing   PieceRune = 9818
-	WhiteQueen  PieceRune = 9819
-	WhiteRook   PieceRune = 9820
-	WhiteBishop PieceRune = 9821
-	WhiteKnight PieceRune = 9822
-	WhitePawn   PieceRune = 9823
+	WhiteKing   rune = 9818
+	WhiteQueen  rune = 9819
+	WhiteRook   rune = 9820
+	WhiteBishop rune = 9821
+	WhiteKnight rune = 9822
+	WhitePawn   rune = 9823
 
-	EmptySquare PieceRune = 32
+	EmptySquare rune = 32
 )
 
 //PrintBoard prints out an ascii representation of the given board
 func PrintBoard(b moveGen.Board) {
-	boardString := [8][8]PieceRune{}
+	boardString := [8][8]rune{}
 
 	for i := 0; i < 64; i++ {
 		boardString[i/8][i%8] = EmptySquare

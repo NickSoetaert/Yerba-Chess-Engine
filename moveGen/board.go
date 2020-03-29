@@ -29,16 +29,16 @@ type Board struct {
 func SetUpBoard() Board {
 	r, b := InitSlidingPieces()
 	board := Board{
-		Pawns:                      SecondRank | SeventhRank,
+		//Pawns:                      SecondRank | SeventhRank,
 		Knights: B1 | G1 | B8 | G8,
 		Bishops: C1 | F1 | C8 | F8,
 		Rooks:   A1 | H1 | A8 | H8,
 		Queens:  D1 | D8,
 		Kings:   E1 | E8,
-		//White:   FirstRank,
-		//Black:   EighthRank,
-		White:                      FirstRank | SecondRank,
-		Black:                      SeventhRank | EighthRank,
+		White:   FirstRank,
+		Black:   EighthRank,
+		//White:                      FirstRank | SecondRank,
+		//Black:                      SeventhRank | EighthRank,
 		RookDB:                     r,
 		BishopDB:                   b,
 		IsWhiteMove:                true,

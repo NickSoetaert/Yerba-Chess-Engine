@@ -28,8 +28,12 @@ func (b *Board) Search() (boards []Board) {
 var BlackCount = 0
 var WhiteCount = 0
 func (b *Board) MiniMax(plyLeft int, alpha, beta float64) float64 {
+	eval := b.Evaluate()
 	if plyLeft == 0 {
-		return b.Evaluate()
+		return eval
+	}
+	if math.Abs(eval) > 5000 { //TODO: make real checkmate
+		return eval
 	}
 
 	if b.IsWhiteMove {
@@ -64,5 +68,5 @@ func (b *Board) MiniMax(plyLeft int, alpha, beta float64) float64 {
 			}
 		}
 	}
-	return b.Evaluate()
+	return eval
 }
