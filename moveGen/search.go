@@ -1,7 +1,6 @@
 package moveGen
 
 import (
-	"fmt"
 	"math"
 )
 
@@ -26,16 +25,17 @@ func (b *Board) Search() (boards []Board) {
 
 	return boards
 }
-
+var BlackCount = 0
+var WhiteCount = 0
 func (b *Board) MiniMax(plyLeft int, alpha, beta float64) float64 {
 	if plyLeft == 0 {
 		return b.Evaluate()
 	}
 
 	if b.IsWhiteMove {
+		WhiteCount++
 		plyLeft--
 
-		fmt.Println("White")
 		maxEval := math.Inf(-1)
 		for _, move := range b.GenerateLegalMoves() {
 			undo := b.ApplyMove(move)
@@ -44,13 +44,12 @@ func (b *Board) MiniMax(plyLeft int, alpha, beta float64) float64 {
 			maxEval = math.Max(maxEval, eval)
 			alpha = math.Max(alpha, eval)
 			if beta <= alpha { //we can prune this branch
-				fmt.Println("BREAKING FOR WHITE")
 				break
 			}
 		}
 		return maxEval
 	} else {
-		fmt.Println("Black")
+		BlackCount++
 		plyLeft--
 
 		minEval := math.Inf(1)
@@ -61,8 +60,6 @@ func (b *Board) MiniMax(plyLeft int, alpha, beta float64) float64 {
 			minEval = math.Min(minEval, eval)
 			beta = math.Min(beta, eval)
 			if beta <= alpha { //we can prune this branch
-				fmt.Println("BREAKING FOR BLACK")
-
 				break
 			}
 		}

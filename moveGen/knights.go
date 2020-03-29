@@ -1,16 +1,30 @@
 package moveGen
 
-import "math/bits"
+import (
+	"fmt"
+	"math/bits"
+)
 
 //UnfilteredKnightAttacks returns a BB of all squares that knights of a given color can attack, regardless of other pieces on the board.
-func UnfilteredKnightAttacks(knights uint64) uint64 {
-	var possibleAttacks uint64
-	//Get number of squares that the knight can attack
-	count := bits.OnesCount64(knights)
-	for i := 0; i < count; i++ {
-		currentSquare := uint8(bits.TrailingZeros64(knights))
-		possibleAttacks |= KnightMask[currentSquare] //get current square that knight can attack
-		knights ^= 1 << currentSquare                //now clear that knight for the next loop iteration
+func GetKnightMoves(knights, ownPieces uint64) (moves []Move) {
+	knights = knights & ownPieces //filter out enemy knights
+	baseMove := Move(0)
+	baseMove.setMoveType(knightMove)
+	fmt.Printf("\n\n%064b\n", knights)
+	for bits.OnesCount64(knights) != 0 { //While there are still knights left
+		originSquareMove := baseMove
+		currentSquare := uint8(bits.TrailingZeros64(knights))     //square number that we're looking at
+		originSquareMove.setOriginFromSquare(currentSquare)       //set this move to start at said square
+		possibleAttacks := KnightMask[currentSquare] &^ ownPieces //get all squares the current knight can attack
+
+		for possibleAttacks != 0 { //for every square that we can attack,
+			move := originSquareMove //copy our move with origin and move type
+			attack := uint8(bits.TrailingZeros64(possibleAttacks))
+			move.setDestFromSquare(attack)
+			moves = append(moves, move)
+			possibleAttacks ^= uint64(1 << attack)
+		}
+		knights ^= uint64(1 << currentSquare) //now clear that knight for the next loop iteration
 	}
-	return possibleAttacks
+	return moves
 }

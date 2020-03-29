@@ -222,15 +222,26 @@ func (m Move) getMoveType() moveType {
 }
 
 //Expects a bitboard with a pop count of one, and sets the origin square of given move to that square.
-func (m *Move) setOrigin(origin uint64) {
+func (m *Move) setOriginFromBB(origin uint64) {
 	*m = *m &^ (0b111111 << 10)                    //clear origin bits
 	*m |= Move(bits.TrailingZeros64(origin)) << 10 //set the cleared bits
 }
 
+//Expects a square position
+func (m *Move) setOriginFromSquare(origin uint8) {
+	*m = *m &^ (0b111111 << 10)                    //clear origin bits
+	*m |= Move(origin) << 10 //set the cleared bits
+}
+
 //Expects a bitboard with a pop count of one, and sets the destination square of given move to that square.
-func (m *Move) setDest(dest uint64) {
+func (m *Move) setDestFromBB(dest uint64) {
 	*m = *m &^ (0b111111 << 4)                  //clear origin bits
 	*m |= Move(bits.TrailingZeros64(dest)) << 4 //set the cleared bits
+}
+
+func (m *Move) setDestFromSquare(dest uint8) {
+	*m = *m &^ (0b111111 << 4)                  //clear origin bits
+	*m |= Move(dest) << 4 //set the cleared bits
 }
 
 func (m *Move) setMoveType(mt moveType) {

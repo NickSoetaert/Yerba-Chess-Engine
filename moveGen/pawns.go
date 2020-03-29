@@ -3,7 +3,7 @@ package moveGen
 import (
 	"Yerba/utils"
 )
-
+//TODO: promotions
 func GetPawnMoves(pawns, whitePieces, blackPieces uint64, isWhiteToMove bool, enPassantFile uint8) (moves []Move) {
 	if isWhiteToMove {
 		pawns &= whitePieces
@@ -34,11 +34,11 @@ func pawnSinglePushMoves(pawns, whitePieces, blackPieces uint64, isWhiteToMove b
 	for openSquares != 0 {
 		dest := utils.IsolateLsb(openSquares)
 		newMove := baseMove
-		newMove.setDest(dest)
+		newMove.setDestFromBB(dest)
 		if isWhiteToMove{
-			newMove.setOrigin(dest>>8)
+			newMove.setOriginFromBB(dest>>8)
 		} else {
-			newMove.setOrigin(dest<<8)
+			newMove.setOriginFromBB(dest<<8)
 		}
 		moves = append(moves, newMove)
 		openSquares &= openSquares-1
@@ -62,11 +62,11 @@ func pawnDoublePushMoves(pawns, whitePieces, blackPieces uint64, isWhiteToMove b
 	for openSquares != 0 {
 		dest := utils.IsolateLsb(openSquares)
 		newMove := baseMove
-		newMove.setDest(dest)
+		newMove.setDestFromBB(dest)
 		if isWhiteToMove{
-			newMove.setOrigin(dest>>16)
+			newMove.setOriginFromBB(dest>>16)
 		} else {
-			newMove.setOrigin(dest<<16)
+			newMove.setOriginFromBB(dest<<16)
 		}
 		moves = append(moves, newMove)
 		openSquares &= openSquares-1
@@ -88,11 +88,11 @@ func pawnNormalCaptures(pawns, whitePieces, blackPieces uint64, isWhiteToMove bo
 	for openSquares != 0 {
 		dest := utils.IsolateLsb(openSquares)
 		newMove := baseMove
-		newMove.setDest(dest)
+		newMove.setDestFromBB(dest)
 		if isWhiteToMove{
-			newMove.setOrigin(dest>>7)
+			newMove.setOriginFromBB(dest>>7)
 		} else {
-			newMove.setOrigin(dest<<7)
+			newMove.setOriginFromBB(dest<<7)
 		}
 		moves = append(moves, newMove)
 		openSquares &= openSquares-1
@@ -107,11 +107,11 @@ func pawnNormalCaptures(pawns, whitePieces, blackPieces uint64, isWhiteToMove bo
 	for openSquares != 0 {
 		dest := utils.IsolateLsb(openSquares)
 		newMove := baseMove
-		newMove.setDest(dest)
+		newMove.setDestFromBB(dest)
 		if isWhiteToMove{
-			newMove.setOrigin(dest>>9)
+			newMove.setOriginFromBB(dest>>9)
 		} else {
-			newMove.setOrigin(dest<<9)
+			newMove.setOriginFromBB(dest<<9)
 		}
 		moves = append(moves, newMove)
 		openSquares &= openSquares-1
@@ -136,11 +136,11 @@ func pawnEnPassantCaptures(pawns, whitePieces, blackPieces uint64, isWhiteToMove
 	for openSquares != 0 {
 		dest := utils.IsolateLsb(openSquares)
 		newMove := baseMove
-		newMove.setDest(dest)
+		newMove.setDestFromBB(dest)
 		if isWhiteToMove{
-			newMove.setOrigin(dest>>7)
+			newMove.setOriginFromBB(dest>>7)
 		} else {
-			newMove.setOrigin(dest<<7)
+			newMove.setOriginFromBB(dest<<7)
 		}
 		moves = append(moves, newMove)
 		openSquares &= openSquares-1
@@ -154,11 +154,11 @@ func pawnEnPassantCaptures(pawns, whitePieces, blackPieces uint64, isWhiteToMove
 	for openSquares != 0 {
 		dest := utils.IsolateLsb(openSquares)
 		newMove := baseMove
-		newMove.setDest(dest)
+		newMove.setDestFromBB(dest)
 		if isWhiteToMove{
-			newMove.setOrigin(dest>>9)
+			newMove.setOriginFromBB(dest>>9)
 		} else {
-			newMove.setOrigin(dest<<9)
+			newMove.setOriginFromBB(dest<<9)
 		}
 		moves = append(moves, newMove)
 		openSquares &= openSquares-1

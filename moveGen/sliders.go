@@ -188,3 +188,42 @@ func slowCalcBishopMoves(square uint8, blockers uint64) uint64 {
 	}
 	return moves
 }
+
+//Calculates bishop XOR rook-like moves for a given piece set (rooks, bishops, queens)
+func GetSliderMoves(sliders, whitePieces, blackPieces uint64, isWhiteMove, bishopMove bool, sliderType moveType, db [][]uint64) (moves []Move) {
+	baseMove := Move(0)
+	baseMove.setMoveType(sliderType)
+	if isWhiteMove {
+		sliders &= whitePieces
+	} else {
+		sliders &= blackPieces
+	}
+	for sliders != 0 { //While there are any sliders left to calculate moves for
+		originSquareMove := baseMove
+		currentSquareNum := uint8(bits.TrailingZeros64(sliders))
+		originSquareMove.setOriginFromSquare(currentSquareNum)
+
+		var possibleAttacks uint64
+		if bishopMove {
+			possibleAttacks = GetUnfilteredBishopAttacks(db, currentSquareNum, blackPieces|whitePieces)
+		} else {
+			possibleAttacks = GetUnfilteredRookAttacks(db, currentSquareNum, blackPieces|whitePieces)
+		}
+		if isWhiteMove {
+			possibleAttacks = possibleAttacks &^ whitePieces
+		} else {
+			possibleAttacks = possibleAttacks &^ blackPieces
+		}
+		for possibleAttacks != 0 {
+			move := originSquareMove
+
+			attack := uint8(bits.TrailingZeros64(possibleAttacks))
+			move.setDestFromSquare(attack)
+			moves = append(moves, move)
+			possibleAttacks ^= uint64(1 << attack) //clear the attack we just processed
+		}
+		sliders ^= uint64(1 << currentSquareNum) //clear the slider we just processed.
+	}
+
+	return
+}
