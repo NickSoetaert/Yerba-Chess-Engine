@@ -50,7 +50,7 @@ func (b *Board) ApplyMove(m Move) UndoMove {
 
 	case normalPawnCapture:
 		b.Pawns = b.Pawns &^ m.getOrigin() //clear pawn
-		b.clearTargetSquare(m.getDest())
+		b.clearTargetSquare(m.getDest())   //clear captured piece
 		b.Pawns |= m.getDest()			   //add pawn
 
 	case pawnDoublePush:
@@ -174,7 +174,7 @@ func (b *Board) ApplyMove(m Move) UndoMove {
 		b.EnPassantFile = 0
 	}
 
-	//Finally, take care of adding/removing pieces from the color bitboards.
+	//Take care of adding/removing pieces from the color bitboards.
 	if b.IsWhiteMove {
 		b.White = b.White &^ m.getOrigin()
 		b.White |= m.getDest()
@@ -183,8 +183,11 @@ func (b *Board) ApplyMove(m Move) UndoMove {
 		b.Black |= m.getDest()
 	}
 
+	//Finally, change who's turn it is
+	b.IsWhiteMove = !b.IsWhiteMove
+
 	return func() {
-		b = &oldBoard
+		*b = oldBoard
 	}
 }
 
@@ -203,10 +206,9 @@ func (b *Board) clearTargetSquare(square uint64) {
 	}
 }
 
-
 //Returns binary-board (64 bit) representation of origin square.
 func (m Move) getOrigin() uint64 {
-	return 1 >> (m >> 10)
+	return 1 << (m >> 10)
 }
 //001000 010000 0000
 //		 100000

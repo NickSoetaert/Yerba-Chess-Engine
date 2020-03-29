@@ -14,11 +14,18 @@ func main() {
 
 	b := moveGen.SetUpBoard()
 
-	pawnMoves := moveGen.GetPawnMoves(b.Pawns, b.White, b.Black, b.IsWhiteMove, 0)
+	pawnMoves := moveGen.GetPawnMoves(b.Pawns, b.White, b.Black, b.IsWhiteMove, b.EnPassantFile)
 	for _, move := range pawnMoves {
-		b.ApplyMove(move)
+		undo := b.ApplyMove(move)
 		graphics.PrintBoard(b)
-		break
+		deeper := moveGen.GetPawnMoves(b.Pawns,  b.White, b.Black, b.IsWhiteMove, b.EnPassantFile)
+		for _, blackMove := range deeper {
+			blackUndo := b.ApplyMove(blackMove)
+			graphics.PrintBoard(b)
+			blackUndo()
+		}
+		fmt.Println("")
+		undo()
 	}
 
 	//for _, move := range moveGen.GetPawnMoves(b.Pawns, b.White, b.Black, false, b.EnPassantFile) {

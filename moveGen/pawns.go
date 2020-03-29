@@ -20,7 +20,6 @@ func GetPawnMoves(pawns, whitePieces, blackPieces uint64, isWhiteToMove bool, en
 	return moves
 }
 
-
 func pawnSinglePushMoves(pawns, whitePieces, blackPieces uint64, isWhiteToMove bool) (moves []Move) {
 	var openSquares uint64
 	baseMove := Move(0)
@@ -38,8 +37,9 @@ func pawnSinglePushMoves(pawns, whitePieces, blackPieces uint64, isWhiteToMove b
 		newMove := baseMove
 		newMove.setDest(dest)
 		if isWhiteToMove{
+			fmt.Printf("Before: %016b\n",newMove)
 			newMove.setOrigin(dest>>8)
-			fmt.Printf("%016b\n",newMove)
+			fmt.Printf("After:  %016b\n",newMove)
 		} else {
 			newMove.setOrigin(dest<<8)
 		}
@@ -66,9 +66,9 @@ func pawnDoublePushMoves(pawns, whitePieces, blackPieces uint64, isWhiteToMove b
 		newMove := baseMove
 		newMove.setDest(dest)
 		if isWhiteToMove{
-			newMove.setOrigin(dest>>8)
+			newMove.setOrigin(dest>>16)
 		} else {
-			newMove.setOrigin(dest<<8)
+			newMove.setOrigin(dest<<16)
 		}
 		moves = append(moves, newMove)
 		openSquares &= openSquares-1
