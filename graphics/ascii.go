@@ -33,40 +33,40 @@ func PrintBoard(b moveGen.Board) {
 	}
 
 	for i := uint(0); i < 64; i++ {
-		if (b.Pawns&b.White>>i)&1 == 1 {
+		if (b.Pawns&b.WhitePieces>>i)&1 == 1 {
 			boardString[7-(i/8)][i%8] = WhitePawn
 		}
-		if (b.Pawns&b.Black>>i)&1 == 1 {
+		if (b.Pawns&b.BlackPieces>>i)&1 == 1 {
 			boardString[7-(i/8)][i%8] = BlackPawn
 		}
-		if (b.Knights&b.White>>i)&1 == 1 {
+		if (b.Knights&b.WhitePieces>>i)&1 == 1 {
 			boardString[7-(i/8)][i%8] = WhiteKnight
 		}
-		if (b.Knights&b.Black>>i)&1 == 1 {
+		if (b.Knights&b.BlackPieces>>i)&1 == 1 {
 			boardString[7-(i/8)][i%8] = BlackKnight
 		}
-		if (b.Bishops&b.White>>i)&1 == 1 {
+		if (b.Bishops&b.WhitePieces>>i)&1 == 1 {
 			boardString[7-(i/8)][i%8] = WhiteBishop
 		}
-		if (b.Bishops&b.Black>>i)&1 == 1 {
+		if (b.Bishops&b.BlackPieces>>i)&1 == 1 {
 			boardString[7-(i/8)][i%8] = BlackBishop
 		}
-		if (b.Rooks&b.White>>i)&1 == 1 {
+		if (b.Rooks&b.WhitePieces>>i)&1 == 1 {
 			boardString[7-(i/8)][i%8] = WhiteRook
 		}
-		if (b.Rooks&b.Black>>i)&1 == 1 {
+		if (b.Rooks&b.BlackPieces>>i)&1 == 1 {
 			boardString[7-(i/8)][i%8] = BlackRook
 		}
-		if (b.Queens&b.White>>i)&1 == 1 {
+		if (b.Queens&b.WhitePieces>>i)&1 == 1 {
 			boardString[7-(i/8)][i%8] = WhiteQueen
 		}
-		if (b.Queens&b.Black>>i)&1 == 1 {
+		if (b.Queens&b.BlackPieces>>i)&1 == 1 {
 			boardString[7-(i/8)][i%8] = BlackQueen
 		}
-		if (b.Kings&b.White>>i)&1 == 1 {
+		if (b.Kings&b.WhitePieces>>i)&1 == 1 {
 			boardString[7-(i/8)][i%8] = WhiteKing
 		}
-		if (b.Kings&b.Black>>i)&1 == 1 {
+		if (b.Kings&b.BlackPieces>>i)&1 == 1 {
 			boardString[7-(i/8)][i%8] = BlackKing
 		}
 	}

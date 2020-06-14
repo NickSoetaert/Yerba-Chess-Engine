@@ -25,31 +25,29 @@ func getNormalKingMoves(kings, ownPieces, attackedSquares uint64, ch chan []Move
 	ch <- moves
 }
 
-func (b *Board) getCastlingMoves(ch chan []Move) {
+func (b *Board) getCastlingMoves(attackedSquares uint64, ch chan []Move) {
 	var moves []Move
 	if b.IsWhiteMove {
 		if b.WhiteKingsideCastleRights {
-			//check if any pieces are on f1 or g1
-			if (b.Black | b.White) & (F1 | G1) == 0 {
-				//Todo: check if e1, f1, or g1 are under attack
+			if (b.BlackPieces|b.WhitePieces)&(F1|G1) == 0 && attackedSquares&(E1|F1|G1) == 0 {
 				moves = append(moves, Move(castleKingside))
 			}
 		}
 		if b.WhiteQueensideCastleRights {
-			//check if any pieces are on d1, c1 or b1
-			if (b.Black | b.White) & (D1 | C1 | B1) == 0 {
-				//Todo: check if e1, d1, or c1 are under attack
+			if (b.BlackPieces|b.WhitePieces)&(D1|C1|B1) == 0 && attackedSquares&(E1|D1|C1) == 0 {
 				moves = append(moves, Move(castleQueenside))
 			}
 		}
 	} else {
 		if b.BlackKingsideCastleRights {
-			//check if e8, f8, or g8 are under attack
-			//check if any pieces are on f8 or g8
+			if (b.BlackPieces|b.WhitePieces)&(F8|G8) == 0 && attackedSquares&(E8|F8|G8) == 0 {
+				moves = append(moves, Move(castleQueenside))
+			}
 		}
 		if b.WhiteQueensideCastleRights {
-			//check if e8, d8, or c8 are under attack
-			//check if any pieces are on d8, c8 or b8
+			if (b.BlackPieces|b.WhitePieces)&(D8|C8|B8) == 0 && attackedSquares&(E8|D8|C8) == 0 {
+				moves = append(moves, Move(castleQueenside))
+			}
 		}
 	}
 	ch <- moves

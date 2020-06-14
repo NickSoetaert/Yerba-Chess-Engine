@@ -4,29 +4,9 @@ import (
 	"math"
 )
 
-var depth = 0
-var bestSoFar = 0.0
+var BlackCount = 0 //used for debug
+var WhiteCount = 0 //used for debug
 
-func (b *Board) Search() (boards []Board) {
-	var undo UndoMove
-	depth++
-	for _, move := range b.GenerateLegalMoves() {
-		undo = b.ApplyMove(move)
-		if b.Evaluate() > bestSoFar {
-			bestSoFar = b.Evaluate()
-		}
-		boards = append(boards, *b)
-		if depth < 2 {
-			boards = append(boards, b.Search()...)
-		}
-		undo()
-	}
-	depth--
-
-	return boards
-}
-var BlackCount = 0
-var WhiteCount = 0
 func (b *Board) MiniMax(plyLeft int, alpha, beta float64) float64 {
 	eval := b.Evaluate()
 	if plyLeft == 0 {
