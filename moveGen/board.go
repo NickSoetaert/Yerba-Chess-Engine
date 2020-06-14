@@ -85,7 +85,7 @@ func (b Board) GenerateLegalMoves() (moves []Move) {
 	kChan := make(chan []Move)
 	castleChan := make(chan []Move)
 
-	go getPawnMoves(b.Pawns, b.WhitePieces, b.BlackPieces, b.IsWhiteMove, b.EnPassantFile, pChan)                  //pawns
+	go b.getPawnMoves(pChan)  //pawns
 	go getSliderMoves(b.Bishops, b.WhitePieces, b.BlackPieces, b.IsWhiteMove, true, bishopMove, b.BishopDB, bChan) //bishops
 	go getSliderMoves(b.Rooks, b.WhitePieces, b.BlackPieces, b.IsWhiteMove, false, rookMove, b.RookDB, rChan)      //rooks
 	go getSliderMoves(b.Queens, b.WhitePieces, b.BlackPieces, b.IsWhiteMove, true, queenMove, b.BishopDB, qbChan)  //queens

@@ -20,6 +20,7 @@ func main() {
 	//	undo()
 	//}
 
+	////TODO: This benchmark differs from master - investigate which is correct.
 	start := time.Now()
 	ply := 6
 	x := b.MiniMax(ply, math.Inf(-1), math.Inf(1))
