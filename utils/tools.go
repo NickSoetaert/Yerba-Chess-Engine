@@ -56,8 +56,22 @@ func IsolateBitsU32(bits, startIndex, endIndex uint32) uint32 {
 //With the idea that newBits will be a subset of oldBits,
 //sets the bits starting at startIndex with newBits
 //Example(using 8 bits instead of 32):
-//SetBits(01010101, 2, 0100) -> 00100101
-func SetBitsU32(oldBits, startIndex, newBits uint32) uint32 {
+//SetBits(01010101, 2, 6, 0100) -> 00100101
+func SetBitsU32(oldBits, startIndex, endIndex, newBits uint32) uint32 {
+	//First, clear the bits in range [startIndex, endIndex]
+	oldBits = ClearBitsU32(oldBits, startIndex, endIndex)
+	//Now, line up the new bits with the cleared bits
+	//We need to ensure that 0s will be left filled if end-start > num bits. (What if you passed 0b001 to set 3 bits?)
+	newBits = newBits << uint32(7-endIndex)
+	return oldBits | newBits
+}
 
+func ClearBitsU32(oldBits, startIndex, endIndex uint32) uint32 {
+	//Get a block of bits n long to clear with
+	block := 1 << (endIndex+1 - startIndex)-1
+	//Shift these bits until they line up with the bits you wish to clear
+	clear := uint32(block << (7-(endIndex)))
+	//use those bits to clear oldBits
+	return oldBits &^ clear
 
 }
