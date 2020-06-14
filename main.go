@@ -21,7 +21,7 @@ func main() {
 	//}
 
 	start := time.Now()
-	ply := 6
+	ply := 4
 	x := b.MiniMax(ply, math.Inf(-1), math.Inf(1))
 	fmt.Println("Ply: ", ply)
 	fmt.Printf("Time elapsed: %v\n", time.Since(start))
