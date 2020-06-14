@@ -3,19 +3,34 @@ package moveGen
 type moveType uint8
 
 const (
-	normalPawnPush moveType = iota
-	normalPawnCapture
+	normalMove moveType = iota
 	pawnDoublePush
 	enPassantCapture
-	knightMove
-	bishopMove
-	rookMove
-	queenMove
-	normalKingMove
+	removesWhiteKingsideCastleRights
+	removesWhiteQueensideCastleRights
+	removesBlackKingsideCastleRights
+	removesBlackQueensideCastleRights
 	castleKingside
 	castleQueenside
-	knightPromotion
-	bishopPromotion
-	rookPromotion
-	queenPromotion
+)
+
+//tile occupancy types
+type tileOccupancy uint8
+
+const (
+	empty tileOccupancy = iota
+
+	whitePawn
+	whiteKnight
+	whiteBishop
+	whiteRook
+	whiteQueen
+	whiteKing
+
+	blackPawn
+	blackKnight
+	blackBishop
+	blackRook
+	blackQueen
+	blackKing
 )

@@ -42,3 +42,22 @@ func U8PopCount(b uint64) uint8 {
 func IsolateLsb(b uint64) uint64 {
 	return 1 << bits.TrailingZeros64(b)
 }
+
+//expects 0 <= startIndex <= endIndex <= 31
+//will return the resulting bits in said range.
+func IsolateBitsU32(bits, startIndex, endIndex uint32) uint32 {
+	//Step one: Set all the bits to the left of startIndex to 0
+	bitsToTheLeft := uint32(1 << (startIndex) - 1) //get all the bits to the left of startIndex
+	bitsToTheLeft = bitsToTheLeft << (32 - startIndex) //this will align bitsToTheLeft with the original move
+	bits = bits &^ bitsToTheLeft // Clear all bits to the left of startIndex
+	return bits >> (31 - endIndex) // Clear bits to the right of endIndex
+}
+
+//With the idea that newBits will be a subset of oldBits,
+//sets the bits starting at startIndex with newBits
+//Example(using 8 bits instead of 32):
+//SetBits(01010101, 2, 0100) -> 00100101
+func SetBitsU32(oldBits, startIndex, newBits uint32) uint32 {
+
+
+}
