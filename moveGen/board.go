@@ -15,7 +15,7 @@ package moveGen
 
 type Board struct {
 	Pawns, Knights, Bishops, Rooks, Queens, Kings uint64
-	White, Black                                  uint64
+	WhitePieces, BlackPieces                      uint64
 	RookDB, BishopDB                              [][]uint64
 	IsWhiteMove                                   bool
 	WhiteKingsideCastleRights                     bool //True if white king/kingside rook haven't been moved/captured
@@ -29,16 +29,14 @@ type Board struct {
 func SetUpBoard() Board {
 	r, b := InitSlidingPieces()
 	board := Board{
-		//Pawns:                      SecondRank | SeventhRank,
-		Knights: B1 | G1 | B8 | G8,
-		Bishops: C1 | F1 | C8 | F8,
-		Rooks:   A1 | H1 | A8 | H8,
-		Queens:  D1 | D8,
-		Kings:   E1 | E8,
-		White:   FirstRank,
-		Black:   EighthRank,
-		//White:                      FirstRank | SecondRank,
-		//Black:                      SeventhRank | EighthRank,
+		Pawns:                      SecondRank | SeventhRank,
+		Knights:                    B1 | G1 | B8 | G8,
+		Bishops:                    C1 | F1 | C8 | F8,
+		Rooks:                      A1 | H1 | A8 | H8,
+		Queens:                     D1 | D8,
+		Kings:                      E1 | E8,
+		WhitePieces:                FirstRank | SecondRank,
+		BlackPieces:                SeventhRank | EighthRank,
 		RookDB:                     r,
 		BishopDB:                   b,
 		IsWhiteMove:                true,
@@ -50,6 +48,31 @@ func SetUpBoard() Board {
 	}
 	return board
 }
+
+//For benchmarking
+func SetUpBoardNoPawns() Board {
+	r, b := InitSlidingPieces()
+	board := Board{
+		Knights:                    B1 | G1 | B8 | G8,
+		Bishops:                    C1 | F1 | C8 | F8,
+		Rooks:                      A1 | H1 | A8 | H8,
+		Queens:                     D1 | D8,
+		Kings:                      E1 | E8,
+		WhitePieces:                FirstRank,
+		BlackPieces:                EighthRank,
+		RookDB:                     r,
+		BishopDB:                   b,
+		IsWhiteMove:                true,
+		WhiteKingsideCastleRights:  true,
+		WhiteQueensideCastleRights: true,
+		BlackKingsideCastleRights:  true,
+		BlackQueensideCastleRights: true,
+		EnPassantFile:              uint8(0),
+	}
+	return board
+}
+
+
 //Todo: account for pinned pieces
 func (b Board) GenerateLegalMoves() (moves []Move) {
 
@@ -62,19 +85,19 @@ func (b Board) GenerateLegalMoves() (moves []Move) {
 	kChan := make(chan []Move)
 	castleChan := make(chan []Move)
 
-	go getPawnMoves(b.Pawns, b.White, b.Black, b.IsWhiteMove, b.EnPassantFile, pChan)                  //pawns
-	go getSliderMoves(b.Bishops, b.White, b.Black, b.IsWhiteMove, true, bishopMove, b.BishopDB, bChan) //bishops
-	go getSliderMoves(b.Rooks, b.White, b.Black, b.IsWhiteMove, false, rookMove, b.RookDB, rChan)      //rooks
-	go getSliderMoves(b.Queens, b.White, b.Black, b.IsWhiteMove, true, queenMove, b.BishopDB, qbChan)  //queens
-	go getSliderMoves(b.Queens, b.White, b.Black, b.IsWhiteMove, false, queenMove, b.RookDB, qrChan)   //queens
-	go b.getCastlingMoves(castleChan)
+	go getPawnMoves(b.Pawns, b.WhitePieces, b.BlackPieces, b.IsWhiteMove, b.EnPassantFile, pChan)                  //pawns
+	go getSliderMoves(b.Bishops, b.WhitePieces, b.BlackPieces, b.IsWhiteMove, true, bishopMove, b.BishopDB, bChan) //bishops
+	go getSliderMoves(b.Rooks, b.WhitePieces, b.BlackPieces, b.IsWhiteMove, false, rookMove, b.RookDB, rChan)      //rooks
+	go getSliderMoves(b.Queens, b.WhitePieces, b.BlackPieces, b.IsWhiteMove, true, queenMove, b.BishopDB, qbChan)  //queens
+	go getSliderMoves(b.Queens, b.WhitePieces, b.BlackPieces, b.IsWhiteMove, false, queenMove, b.RookDB, qrChan)   //queens
+	go b.getCastlingMoves(EmptyBoard, castleChan)                                                                  //Todo: pass attacked squares
 
 	if b.IsWhiteMove {
-		go getKnightMoves(b.Knights, b.White, nChan)
-		go getNormalKingMoves(b.Kings, b.White, 0, kChan) //Todo: pass attacked squares
+		go getKnightMoves(b.Knights, b.WhitePieces, nChan)
+		go getNormalKingMoves(b.Kings, b.WhitePieces, EmptyBoard, kChan) //Todo: pass attacked squares
 	} else {
-		go getKnightMoves(b.Knights, b.Black, nChan)
-		go getNormalKingMoves(b.Kings, b.Black, 0, kChan)
+		go getKnightMoves(b.Knights, b.BlackPieces, nChan)
+		go getNormalKingMoves(b.Kings, b.BlackPieces, EmptyBoard, kChan)
 	}
 
 	moves = append(moves, <-pChan...)

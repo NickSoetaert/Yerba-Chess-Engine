@@ -45,25 +45,25 @@ func (b *Board) ApplyMove(m Move) UndoMove {
 	switch m.getMoveType() {
 	case normalPawnPush:
 		b.Pawns = b.Pawns &^ m.getOrigin() //clear pawn
-		b.Pawns |= m.getDest()			   //add pawn
+		b.Pawns |= m.getDest()             //add pawn
 
 	case normalPawnCapture:
 		b.Pawns = b.Pawns &^ m.getOrigin() //clear pawn
 		b.clearTargetSquare(m.getDest())   //clear captured piece
-		b.Pawns |= m.getDest()			   //add pawn
+		b.Pawns |= m.getDest()             //add pawn
 
 	case pawnDoublePush:
 		b.EnPassantFile = uint8(bits.TrailingZeros64(m.getOrigin()) % 8)
 		b.Pawns = b.Pawns &^ m.getOrigin() //clear pawn
-		b.Pawns |= m.getDest()			   //add pawn
+		b.Pawns |= m.getDest()             //add pawn
 
 	case enPassantCapture:
 		b.Pawns = b.Pawns &^ m.getOrigin() //clear pawn
-		b.Pawns |= m.getDest()			   //add pawn
+		b.Pawns |= m.getDest()             //add pawn
 		if b.IsWhiteMove {
-			b.clearTargetSquare(uint64(b.EnPassantFile)<<16) //remove captured piece
+			b.clearTargetSquare(uint64(b.EnPassantFile) << 16) //remove captured piece
 		} else {
-			b.clearTargetSquare(uint64(b.EnPassantFile)<<40) //TODO: check
+			b.clearTargetSquare(uint64(b.EnPassantFile) << 40) //TODO: check
 		}
 
 	case knightMove:
@@ -131,17 +131,17 @@ func (b *Board) ApplyMove(m Move) UndoMove {
 		if b.IsWhiteMove {
 			b.Kings |= C1
 			b.Rooks = b.Rooks &^ A1
-			b.White = b.White &^ A1
+			b.WhitePieces = b.WhitePieces &^ A1
 			b.Rooks |= D1
-			b.White |= D1
+			b.WhitePieces |= D1
 			b.WhiteKingsideCastleRights = false
 			b.WhiteQueensideCastleRights = false
 		} else {
 			b.Kings |= C8
 			b.Rooks = b.Rooks &^ A8
-			b.Black = b.Black &^ A8
+			b.BlackPieces = b.BlackPieces &^ A8
 			b.Rooks |= D8
-			b.Black |= D8
+			b.BlackPieces |= D8
 			b.BlackKingsideCastleRights = false
 			b.BlackQueensideCastleRights = false
 		}
@@ -175,11 +175,11 @@ func (b *Board) ApplyMove(m Move) UndoMove {
 
 	//Take care of adding/removing pieces from the color bitboards.
 	if b.IsWhiteMove {
-		b.White = b.White &^ m.getOrigin()
-		b.White |= m.getDest()
+		b.WhitePieces = b.WhitePieces &^ m.getOrigin()
+		b.WhitePieces |= m.getDest()
 	} else {
-		b.Black = b.Black &^ m.getOrigin()
-		b.Black |= m.getDest()
+		b.BlackPieces = b.BlackPieces &^ m.getOrigin()
+		b.BlackPieces |= m.getDest()
 	}
 
 	//Finally, change who's turn it is
@@ -199,9 +199,9 @@ func (b *Board) clearTargetSquare(square uint64) {
 	b.Queens = b.Queens &^ square
 
 	if b.IsWhiteMove {
-		b.Black = b.Black &^ square
+		b.BlackPieces = b.BlackPieces &^ square
 	} else {
-		b.White = b.White &^ square
+		b.WhitePieces = b.WhitePieces &^ square
 	}
 }
 
@@ -209,6 +209,7 @@ func (b *Board) clearTargetSquare(square uint64) {
 func (m Move) getOrigin() uint64 {
 	return 1 << (m >> 10)
 }
+
 //001000 010000 0000
 //		 100000
 //1 00000000 00000000
@@ -229,8 +230,8 @@ func (m *Move) setOriginFromBB(origin uint64) {
 
 //Expects a square position
 func (m *Move) setOriginFromSquare(origin uint8) {
-	*m = *m &^ (0b111111 << 10)                    //clear origin bits
-	*m |= Move(origin) << 10 //set the cleared bits
+	*m = *m &^ (0b111111 << 10) //clear origin bits
+	*m |= Move(origin) << 10    //set the cleared bits
 }
 
 //Expects a bitboard with a pop count of one, and sets the destination square of given move to that square.
@@ -240,11 +241,17 @@ func (m *Move) setDestFromBB(dest uint64) {
 }
 
 func (m *Move) setDestFromSquare(dest uint8) {
-	*m = *m &^ (0b111111 << 4)                  //clear origin bits
-	*m |= Move(dest) << 4 //set the cleared bits
+	*m = *m &^ (0b111111 << 4) //clear origin bits
+	*m |= Move(dest) << 4      //set the cleared bits
 }
 
 func (m *Move) setMoveType(mt moveType) {
 	*m = *m &^ 0b111111 //clear origin bits
 	*m |= Move(mt)      //set the cleared bits
+}
+
+func (m *Move) copyMoveSetType (mt moveType) Move {
+	newMove := *m
+	newMove.setMoveType(mt)
+	return newMove
 }
