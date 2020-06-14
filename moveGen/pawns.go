@@ -4,13 +4,9 @@ import (
 	"Yerba/utils"
 )
 
-//TODO: promotions
 
-// TODO
-// TODO DANGER: I stopped half way through a refactor here. Setting b.Pawns &= b.WhitePieces will mess up the board state.
-// TODO Either make pass by value (extra memory), do AND checks for each time you reference the pawns, or refactor to have
-// TODO a larger Board object that has both White and Black pieces for each piece type.
-func (b *Board) getPawnMoves(c chan []Move) {
+// TODO Don't pass by value - optimize
+func (b Board) getPawnMoves(c chan []Move) {
 	var moves []Move
 	if b.IsWhiteMove {
 		b.Pawns &= b.WhitePieces
@@ -26,7 +22,7 @@ func (b *Board) getPawnMoves(c chan []Move) {
 	c <- moves
 }
 
-
+//TODO: promotions
 func (b Board) allPossiblePromotionsHelper(move Move) (allPromotions []Move) {
 	allPromotions = append(allPromotions, move.copyMoveSetType(knightPromotion))
 	
@@ -45,7 +41,7 @@ func (b Board) pawnPromotionsHelper() (moves []Move) {
 	return nil
 }
 
-
+// TODO: instead of filtering 1st/8th rank, just put those moves through pawnPromotionsHelper()
 func (b Board) pawnSinglePushMoves() (moves []Move) {
 	var openSquares uint64
 	baseMove := Move(0)
@@ -74,6 +70,7 @@ func (b Board) pawnSinglePushMoves() (moves []Move) {
 	return moves
 }
 
+// TODO: instead of filtering 1st/8th rank, just put those moves through pawnPromotionsHelper()
 func (b Board) pawnNormalCaptures() (moves []Move) {
 	var openSquares uint64
 	baseMove := Move(0)
