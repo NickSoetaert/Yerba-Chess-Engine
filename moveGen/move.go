@@ -16,6 +16,22 @@ import (
 //Who's move: bit 30. (0 means White made the move, 1 means Black made the move.)
 //bit 31: currently unused
 
+const (
+	originSquareBitsStart = 0
+	originSquareBitsEnd = 5
+	destSquareBitsStart = 6
+	destSquareBitsEnd = 11
+	originSquareOccBitsStart = 12
+	originSquareOccBitsEnd = 15
+	destSquarePreMoveOccBitsStart = 16
+	destSquarePreMoveOccBitsEnd = 20
+	destSquarePostMoveOccBitsStart = 21
+	destSquarePostMoveOccBitsEnd = 25
+	moveTypeBitsStart = 26
+	moveTypeBitsEnd = 29
+	whoseTurnBit = 30
+)
+
 
 //Move type bits
 //0000 - normal move
@@ -29,6 +45,7 @@ import (
 //1000 - castle queenside
 
 type Move uint32
+
 
 type UndoMove func()
 
@@ -202,8 +219,6 @@ func (b *Board) clearTargetSquare(square uint64) {
 	}
 }
 
-
-
 //Returns binary-board (64 bit) representation of origin square.
 //Origin square: bits 0-5
 func (m Move) getOriginSquare() uint64 {
@@ -213,58 +228,57 @@ func (m Move) getOriginSquare() uint64 {
 //Returns binary-board (64 bit) representation of destination square.
 //Destination square: bits 6-11
 func (m Move) getDestSquare() uint64 {
-	return 1 << uint64(utils.IsolateBitsU32(uint32(m), 6, 11))
+	return 1 << uint64(utils.IsolateBitsU32(uint32(m), destSquareBitsStart, destSquareBitsEnd))
 }
 
 //Returns a tileOccupancy representing the piece that occupied the origin square
 //Orig occupancy bits: 12-15
 func (m Move) getOriginOccupancy() tileOccupancy {
-	return tileOccupancy(utils.IsolateBitsU32(uint32(m), 12, 15))
+	return tileOccupancy(utils.IsolateBitsU32(uint32(m), originSquareOccBitsStart, originSquareOccBitsEnd))
 }
 
 //returns the tileOccupancy that was on the destination square before the move was made.
 //bits: 16-20
 func (m Move) getDestOccupancyBeforeMove() tileOccupancy {
-	return tileOccupancy(utils.IsolateBitsU32(uint32(m), 16, 20))
+	return tileOccupancy(utils.IsolateBitsU32(uint32(m), destSquarePreMoveOccBitsStart, destSquarePreMoveOccBitsEnd))
 }
 
 //returns the tileOccupancy that is on the destination square after the move was made.
 //bits: 21-25
 func (m Move) getDestOccupancyAfterMove() tileOccupancy {
-	return tileOccupancy(utils.IsolateBitsU32(uint32(m), 21, 25))
+	return tileOccupancy(utils.IsolateBitsU32(uint32(m), destSquarePostMoveOccBitsStart, destSquarePostMoveOccBitsEnd))
 }
 
 //Returns the moveType bits (bits 26-29)
 func (m Move) getMoveType() moveType {
-	return moveType(utils.IsolateBitsU32(uint32(m), 26, 29))
+	return moveType(utils.IsolateBitsU32(uint32(m), moveTypeBitsStart, moveTypeBitsEnd))
 }
 
 //Expects a bitboard with a pop count of one, and sets the origin square of given move to that square.
+//Origin square coordinate bits: 0-5
 func (m *Move) setOriginFromBB(origin uint64) {
-	*m = *m &^ (0b111111 << 26)                    //clear origin bits
-	*m |= Move(bits.TrailingZeros64(origin)) << 26 //set the cleared bits
+	*m = *m &^ (0b111111 << moveTypeBitsStart)                    //clear origin bits
+	*m |= Move(bits.TrailingZeros64(origin)) << moveTypeBitsStart //set the cleared bits
 }
 
 //Expects a square position - e.g. 7 to represent A8, and will set the origin square to be that square.
 func (m *Move) setOriginFromSquare(origin uint8) {
-	*m = *m &^ (0b111111 << 26) //clear origin bits
-	*m |= Move(origin) << 26    //set the cleared bits
+	*m = *m &^ (0b111111 << moveTypeBitsStart) //clear origin bits
+	*m |= Move(origin) << moveTypeBitsStart    //set the cleared bits
 }
 
 //Expects a bitboard with a pop count of one, and sets the destination square of given move to that square.
 func (m *Move) setDestFromBB(dest uint64) {
-	*m = *m &^ (0b111111 << 20)                  //clear origin bits
-	*m |= Move(bits.TrailingZeros64(dest)) << 20 //set the cleared bits
+	*m = Move(utils.SetBitsU32(uint32(*m), destSquareBitsStart, destSquareBitsEnd, uint32(bits.TrailingZeros64(dest))))
 }
 
 func (m *Move) setDestFromSquare(dest uint8) {
-	*m = *m &^ (0b111111 << 20) //clear origin bits
-	*m |= Move(dest) << 20      //set the cleared bits
+	*m = Move(utils.SetBitsU32(uint32(*m), destSquareBitsStart, destSquareBitsEnd, uint32(dest)))
 }
 
+//Move type bits: 26-29
 func (m *Move) setMoveType(mt moveType) {
-	*m = *m &^ (0b111100 >> 2) //clear bits to be safe
-	*m |= Move(mt >> 2)        //set move type. We shift over 2 because moveType bits are 2 bits from the end.
+	*m = Move(utils.SetBitsU32(uint32(*m), moveTypeBitsStart, moveTypeBitsEnd, uint32(mt)))
 }
 
 func (m *Move) copyMoveSetType (mt moveType) Move {
