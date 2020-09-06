@@ -8,7 +8,7 @@ func getKnightMoves(knights, ownPieces uint64, ch chan []Move) {
 	var moves []Move
 	knights = knights & ownPieces //filter out enemy knights
 	baseMove := Move(0)
-	baseMove.setMoveType(knightMove)
+	baseMove.setMoveType(normalMove)
 	for bits.OnesCount64(knights) != 0 { //While there are still knights left
 		originSquareMove := baseMove
 		currentSquare := uint8(bits.TrailingZeros64(knights))     //square number that we're looking at

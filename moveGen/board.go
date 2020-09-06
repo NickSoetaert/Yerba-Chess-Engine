@@ -16,35 +16,42 @@ package moveGen
 type Board struct {
 	Pawns, Knights, Bishops, Rooks, Queens, Kings uint64
 	WhitePieces, BlackPieces                      uint64
-	RookDB, BishopDB                              [][]uint64
-	IsWhiteMove                                   bool
-	WhiteKingsideCastleRights                     bool //True if white king/kingside rook haven't been moved/captured
-	WhiteQueensideCastleRights                    bool //True if white king/queenside rook haven't been moved/captured
-	BlackKingsideCastleRights                     bool //True if black king/kingside rook haven't been moved/captured
-	BlackQueensideCastleRights                    bool //True if black king/queenside rook haven't been moved/captured
-	EnPassantFile                                 uint8
+	RookDB, BishopDB                              [][]uint64 //All possible (precomputed) moves for rooks and bishops
+	IsWhiteMove                                   bool       //True if it is currently white's move
+
+	WhiteKingHasNeverMoved bool //True if the white king has never moved (including castling)
+	A1RookHasNeverMoved    bool //True if white rook on A1 has never moved, regardless of if captured or not.
+	A8RookHasNeverMoved    bool //True if white rook on A8 has never moved, regardless of if captured or not.
+
+	BlackKingHasNeverMoved bool //True if the black king has never moved (including castling)
+	H1RookHasNeverMoved    bool //True if black rook on H1 has never moved, regardless of if captured or not.
+	H8RookHasNeverMoved    bool //True if black rook on H8 has never moved, regardless of if captured or not.
+
+	EnPassantFile uint8 //File on which an E.P. capture is currently legal, 0 if no E.P. is legal.
 }
 
 //SetUpBoard inits a board in the default state
 func SetUpBoard() Board {
 	r, b := InitSlidingPieces()
 	board := Board{
-		Pawns:                      SecondRank | SeventhRank,
-		Knights:                    B1 | G1 | B8 | G8,
-		Bishops:                    C1 | F1 | C8 | F8,
-		Rooks:                      A1 | H1 | A8 | H8,
-		Queens:                     D1 | D8,
-		Kings:                      E1 | E8,
-		WhitePieces:                FirstRank | SecondRank,
-		BlackPieces:                SeventhRank | EighthRank,
-		RookDB:                     r,
-		BishopDB:                   b,
-		IsWhiteMove:                true,
-		WhiteKingsideCastleRights:  true,
-		WhiteQueensideCastleRights: true,
-		BlackKingsideCastleRights:  true,
-		BlackQueensideCastleRights: true,
-		EnPassantFile:              uint8(0),
+		Pawns:                  SecondRank | SeventhRank,
+		Knights:                B1 | G1 | B8 | G8,
+		Bishops:                C1 | F1 | C8 | F8,
+		Rooks:                  A1 | H1 | A8 | H8,
+		Queens:                 D1 | D8,
+		Kings:                  E1 | E8,
+		WhitePieces:            FirstRank | SecondRank,
+		BlackPieces:            SeventhRank | EighthRank,
+		RookDB:                 r,
+		BishopDB:               b,
+		IsWhiteMove:            true,
+		WhiteKingHasNeverMoved: true,
+		A1RookHasNeverMoved:    true,
+		A8RookHasNeverMoved:    true,
+		BlackKingHasNeverMoved: true,
+		H1RookHasNeverMoved:    true,
+		H8RookHasNeverMoved:    true,
+		EnPassantFile:          uint8(0),
 	}
 	return board
 }
@@ -53,25 +60,26 @@ func SetUpBoard() Board {
 func SetUpBoardNoPawns() Board {
 	r, b := InitSlidingPieces()
 	board := Board{
-		Knights:                    B1 | G1 | B8 | G8,
-		Bishops:                    C1 | F1 | C8 | F8,
-		Rooks:                      A1 | H1 | A8 | H8,
-		Queens:                     D1 | D8,
-		Kings:                      E1 | E8,
-		WhitePieces:                FirstRank,
-		BlackPieces:                EighthRank,
-		RookDB:                     r,
-		BishopDB:                   b,
-		IsWhiteMove:                true,
-		WhiteKingsideCastleRights:  true,
-		WhiteQueensideCastleRights: true,
-		BlackKingsideCastleRights:  true,
-		BlackQueensideCastleRights: true,
-		EnPassantFile:              uint8(0),
+		Knights:                B1 | G1 | B8 | G8,
+		Bishops:                C1 | F1 | C8 | F8,
+		Rooks:                  A1 | H1 | A8 | H8,
+		Queens:                 D1 | D8,
+		Kings:                  E1 | E8,
+		WhitePieces:            FirstRank,
+		BlackPieces:            EighthRank,
+		RookDB:                 r,
+		BishopDB:               b,
+		IsWhiteMove:            true,
+		WhiteKingHasNeverMoved: true,
+		A1RookHasNeverMoved:    true,
+		A8RookHasNeverMoved:    true,
+		BlackKingHasNeverMoved: true,
+		H1RookHasNeverMoved:    true,
+		H8RookHasNeverMoved:    true,
+		EnPassantFile:          uint8(0),
 	}
 	return board
 }
-
 
 //Todo: account for pinned pieces
 func (b Board) GenerateLegalMoves() (moves []Move) {
@@ -85,12 +93,12 @@ func (b Board) GenerateLegalMoves() (moves []Move) {
 	kChan := make(chan []Move)
 	castleChan := make(chan []Move)
 
-	go b.getPawnMoves(pChan)  //pawns
-	go getSliderMoves(b.Bishops, b.WhitePieces, b.BlackPieces, b.IsWhiteMove, true, bishopMove, b.BishopDB, bChan) //bishops
-	go getSliderMoves(b.Rooks, b.WhitePieces, b.BlackPieces, b.IsWhiteMove, false, rookMove, b.RookDB, rChan)      //rooks
-	go getSliderMoves(b.Queens, b.WhitePieces, b.BlackPieces, b.IsWhiteMove, true, queenMove, b.BishopDB, qbChan)  //queens
-	go getSliderMoves(b.Queens, b.WhitePieces, b.BlackPieces, b.IsWhiteMove, false, queenMove, b.RookDB, qrChan)   //queens
-	go b.getCastlingMoves(EmptyBoard, castleChan)                                                                  //Todo: pass attacked squares
+	go b.getPawnMoves(pChan)                                                                           //pawns
+	go getSliderMoves(b.Bishops, b.WhitePieces, b.BlackPieces, b.IsWhiteMove, true, b.BishopDB, bChan) //bishops
+	go getSliderMoves(b.Rooks, b.WhitePieces, b.BlackPieces, b.IsWhiteMove, false, b.RookDB, rChan)    //rooks
+	go getSliderMoves(b.Queens, b.WhitePieces, b.BlackPieces, b.IsWhiteMove, true, b.BishopDB, qbChan) //queens
+	go getSliderMoves(b.Queens, b.WhitePieces, b.BlackPieces, b.IsWhiteMove, false, b.RookDB, qrChan)  //queens
+	go b.getCastlingMoves(EmptyBoard, castleChan)                                                      //Todo: pass attacked squares
 
 	if b.IsWhiteMove {
 		go getKnightMoves(b.Knights, b.WhitePieces, nChan)

@@ -22,37 +22,34 @@ func (b Board) getPawnMoves(c chan []Move) {
 	c <- moves
 }
 
-//TODO: promotions
-func (b Board) allPossiblePromotionsHelper(move Move) (allPromotions []Move) {
-	allPromotions = append(allPromotions, move.copyMoveSetType(knightPromotion))
-	
 
-	return nil
-}
-
-func (b Board) pawnPromotionsHelper() (moves []Move) {
-
-	if b.IsWhiteMove {
-		b.Pawns &= SeventhRank //If it is white to move, the only pawns that can promote are on the 7th rank.
+//Expects a pawn move. If it is eligible for a promotion, will return all possible promotions.
+//Else, returns base move.
+func pawnPromotionsHelper(move Move, isWhiteToMove bool) (allMoves []Move) {
+	if isWhiteToMove {
+		if (move.getDestSquare() & EighthRank) == 0 { //if there are no possible promotions, return base move
+			return []Move{move}
+		}
+		allMoves = append(allMoves, move.copyMoveAndSetDestOccupancy(whiteKnight))
+		allMoves = append(allMoves, move.copyMoveAndSetDestOccupancy(whiteBishop))
+		allMoves = append(allMoves, move.copyMoveAndSetDestOccupancy(whiteRook))
+		allMoves = append(allMoves, move.copyMoveAndSetDestOccupancy(whiteQueen))
 	} else {
-		b.Pawns &= SecondRank
+		if (move.getDestSquare() & FirstRank) == 0 {
+			return []Move{move}
+		}
+		allMoves = append(allMoves, move.copyMoveAndSetDestOccupancy(blackKnight))
+		allMoves = append(allMoves, move.copyMoveAndSetDestOccupancy(blackBishop))
+		allMoves = append(allMoves, move.copyMoveAndSetDestOccupancy(blackRook))
+		allMoves = append(allMoves, move.copyMoveAndSetDestOccupancy(blackQueen))
 	}
-
-	return nil
+	return allMoves
 }
 
-// TODO: instead of filtering 1st/8th rank, just put those moves through pawnPromotionsHelper()
 func (b Board) pawnSinglePushMoves() (moves []Move) {
-	var openSquares uint64
 	baseMove := Move(0)
-	baseMove.setMoveType(normalPawnPush)
-	if b.IsWhiteMove {
-		//ensure we don't push b.Pawns to the 8th rank
-		openSquares = (b.Pawns << 8) ^ EighthRank
-	} else {
-		openSquares = (b.Pawns >> 8) ^ FirstRank
-	}
-	openSquares = openSquares & ^(b.WhitePieces | b.BlackPieces)
+	baseMove.setMoveType(normalMove)
+	openSquares := ^(b.WhitePieces | b.BlackPieces) //Get all squares without a piece on them
 
 	//Convert all available squares to a Move
 	for openSquares != 0 {
@@ -67,18 +64,28 @@ func (b Board) pawnSinglePushMoves() (moves []Move) {
 		moves = append(moves, newMove)
 		openSquares &= openSquares - 1
 	}
-	return moves
+
+	//Todo - optimize by only applying to moves on last rank
+	var promotedMoves []Move
+	for _, move := range moves {
+		for _, promotion := range pawnPromotionsHelper(move, b.IsWhiteMove) {
+			promotedMoves = append(moves, promotion)
+		}
+	}
+	return promotedMoves
 }
 
-// TODO: instead of filtering 1st/8th rank, just put those moves through pawnPromotionsHelper()
 func (b Board) pawnNormalCaptures() (moves []Move) {
 	var openSquares uint64
 	baseMove := Move(0)
-	baseMove.setMoveType(normalPawnCapture)
+	baseMove.setMoveType(normalMove)
+
 	if b.IsWhiteMove {
-		openSquares = ((b.Pawns << 7) & ^HFile) & b.BlackPieces
+		//openSquares = ((b.Pawns << 7) & ^HFile) & b.BlackPieces //old
+		openSquares = ((b.Pawns & b.WhitePieces) << 7) & b.BlackPieces //all squares that white pawns can attack
 	} else {
-		openSquares = ((b.Pawns >> 7) & ^AFile) & b.WhitePieces
+		//openSquares = ((b.Pawns >> 7) & ^AFile) & b.WhitePieces //old
+		openSquares = ((b.Pawns & b.BlackPieces) >> 7) & b.WhitePieces //all squares that black pawns can attack
 	}
 
 	//Convert all available squares to a Move
@@ -114,7 +121,14 @@ func (b Board) pawnNormalCaptures() (moves []Move) {
 		openSquares &= openSquares - 1
 	}
 
-	return moves
+	//Todo - optimize by only applying to moves on last rank
+	var promotedMoves []Move
+	for _, move := range moves {
+		for _, promotion := range pawnPromotionsHelper(move, b.IsWhiteMove) {
+			promotedMoves = append(moves, promotion)
+		}
+	}
+	return promotedMoves
 }
 
 func (b Board) pawnDoublePushMoves() (moves []Move) {

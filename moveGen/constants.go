@@ -6,10 +6,6 @@ const (
 	normalMove moveType = iota
 	pawnDoublePush
 	enPassantCapture
-	removesWhiteKingsideCastleRights
-	removesWhiteQueensideCastleRights
-	removesBlackKingsideCastleRights
-	removesBlackQueensideCastleRights
 	castleKingside
 	castleQueenside
 )

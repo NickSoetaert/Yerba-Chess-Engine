@@ -190,10 +190,10 @@ func slowCalcBishopMoves(square uint8, blockers uint64) uint64 {
 }
 
 //Calculates bishop XOR rook-like moves for a given piece set (rooks, bishops, queens)
-func getSliderMoves(sliders, whitePieces, blackPieces uint64, isWhiteMove, bishopMove bool, sliderType moveType, db [][]uint64, c chan []Move) {
+func getSliderMoves(sliders, whitePieces, blackPieces uint64, isWhiteMove, bishopMove bool, db [][]uint64, c chan []Move) {
 	var moves []Move
 	baseMove := Move(0)
-	baseMove.setMoveType(sliderType)
+	baseMove.setMoveType(normalMove)
 	if isWhiteMove {
 		sliders &= whitePieces
 	} else {
