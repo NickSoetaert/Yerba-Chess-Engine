@@ -44,8 +44,9 @@ func IsolateLsb(b uint64) uint64 {
 	return 1 << bits.TrailingZeros64(b)
 }
 
-//expects 0 <= startIndex <= endIndex <= 31
+//expects 0 <= startIndex <= endIndex <= 31, with 0 representing the least significant bit.
 //will return the resulting bits in said range.
+//setting the start and end at the same index will clear the single bit at that index.
 func IsolateBitsU32(bits, startIndex, endIndex uint32) uint32 {
 	//Step one: Set all the bits to the left of startIndex to 0
 	bitsToTheLeft := uint32(1 << (startIndex) - 1) //get all the bits to the left of startIndex
@@ -57,11 +58,12 @@ func IsolateBitsU32(bits, startIndex, endIndex uint32) uint32 {
 //With the idea that newBits will be a subset of oldBits,
 //sets the bits starting at startIndex with newBits
 //Example(using 8 bits instead of 32):
-//SetBits(01010101, 2, 6, 0100) -> 00100101
+//SetBits(01010101, 2, 6, 0b0100) -> 00100101
 func SetBitsU32(oldBits, startIndex, endIndex, newBits uint32) uint32 {
 	//First, clear the bits in range [startIndex, endIndex]
 	fmt.Printf("~~~old bits: %032b\n",oldBits)
 	oldBits = ClearBitsU32(oldBits, startIndex, endIndex)
+
 	//Now, line up the new bits with the cleared bits
 	//We need to ensure that 0s will be left filled if end-start > num bits. (What if you passed 0b001 to set 3 bits?)
 	newBits = newBits << uint32(7-endIndex)
@@ -70,13 +72,16 @@ func SetBitsU32(oldBits, startIndex, endIndex, newBits uint32) uint32 {
 	return oldBits | newBits
 }
 
-//expects 0 <= startIndex <= endIndex <= 31
+//expects 0 <= startIndex <= endIndex <= 31, with 0 representing the least significant bit.
 //will set the bits in said range to 0
+//setting the start and end at the same index will clear the single bit at that index.
 func ClearBitsU32(oldBits, startIndex, endIndex uint32) uint32 {
 	//Get a block of bits n long to clear with
 	block := 1 << (endIndex+1 - startIndex)-1
+
 	//Shift these bits until they line up with the bits you wish to clear
-	clear := uint32(block << (7-(endIndex)))
+	clear := uint32(block << startIndex)
+
 	//use those bits to clear oldBits
 	return oldBits &^ clear
 

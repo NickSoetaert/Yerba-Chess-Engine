@@ -3,7 +3,6 @@ package main
 
 import (
 	"Yerba/moveGen"
-	"Yerba/utils"
 	"fmt"
 )
 
@@ -15,8 +14,6 @@ func main() {
 	move = (1 << 32) - 1
 	fmt.Printf("%032b\n",move)
 
-	x := utils.ClearBitsU32(uint32(move), 0, 31)
-	fmt.Printf("%032b\n",x)
 	//b := moveGen.SetUpBoard()
 	//fmt.Printf("number of legal moves from start position: %v (should be 20)", len(b.GenerateLegalMoves()))
 	//for i, move := range b.GenerateLegalMoves() {
