@@ -51,9 +51,11 @@ func pawnPromotionsHelper(move Move, isWhiteToMove bool) (allMoves []Move) {
 }
 
 func (b Board) pawnSinglePushMoves() (moves []Move) {
+	var openSquares uint64
 	baseMove := Move(0)
 	baseMove.setMoveType(normalMove)
-	openSquares := ^(b.WhitePieces | b.BlackPieces) //Get all squares without a piece on them
+	openSquares = b.Pawns << 8
+	openSquares ^= b.WhitePieces | b.BlackPieces //Get all squares without a piece on them
 
 	for openSquares != 0 { 	//Convert all available squares to a Move
 
