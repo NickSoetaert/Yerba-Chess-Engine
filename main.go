@@ -29,18 +29,19 @@ func main() {
 	//	fmt.Printf("%032b\n",move)
 	//	fmt.Println(i)
 	//	undo := b.ApplyMove(move)
-	//	graphics.PrintBoard(b)
+	//	PrintBoard(b)
 	//	undo()
 	//}
 
 
 	start := time.Now()
-	ply := 6
+	ply := 2
 	x := b.MiniMax(ply, math.Inf(-1), math.Inf(1))
 	fmt.Println("Ply: ", ply)
 	fmt.Printf("Time elapsed: %v\n", time.Since(start))
 	fmt.Printf("Eval: %v\n", x)
 	fmt.Println(moveGen.BlackCount)
 	fmt.Println(moveGen.WhiteCount)
+	fmt.Printf("en passant captures: %v\n", moveGen.EpCount)
 }
 

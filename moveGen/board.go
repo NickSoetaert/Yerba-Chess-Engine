@@ -1,5 +1,9 @@
 package moveGen
 
+import (
+	"fmt"
+)
+
 //An instance of a Board represents a single possible game state.
 //The a1 square is bit position 0, b2 = 1,..., g8 = 62, h8 = 63
 //EnPassantFile encoding: Square that en passant is currently possible on. To get square, AND with turn.
@@ -133,3 +137,65 @@ func (b Board) GenerateLegalMoves() (moves []Move) {
 //good:
 //getOriginSquare
 //getDestSquare (always 1)
+
+//PrintBoard prints out an ascii representation of the given board
+func PrintBoard(b Board) {
+	boardString := [8][8]rune{}
+
+	for i := 0; i < 64; i++ {
+		boardString[i/8][i%8] = EmptySquare
+	}
+
+	for i := uint(0); i < 64; i++ {
+		if (b.Pawns&b.WhitePieces>>i)&1 == 1 {
+			boardString[7-(i/8)][i%8] = WhitePawn
+		}
+		if (b.Pawns&b.BlackPieces>>i)&1 == 1 {
+			boardString[7-(i/8)][i%8] = BlackPawn
+		}
+		if (b.Knights&b.WhitePieces>>i)&1 == 1 {
+			boardString[7-(i/8)][i%8] = WhiteKnight
+		}
+		if (b.Knights&b.BlackPieces>>i)&1 == 1 {
+			boardString[7-(i/8)][i%8] = BlackKnight
+		}
+		if (b.Bishops&b.WhitePieces>>i)&1 == 1 {
+			boardString[7-(i/8)][i%8] = WhiteBishop
+		}
+		if (b.Bishops&b.BlackPieces>>i)&1 == 1 {
+			boardString[7-(i/8)][i%8] = BlackBishop
+		}
+		if (b.Rooks&b.WhitePieces>>i)&1 == 1 {
+			boardString[7-(i/8)][i%8] = WhiteRook
+		}
+		if (b.Rooks&b.BlackPieces>>i)&1 == 1 {
+			boardString[7-(i/8)][i%8] = BlackRook
+		}
+		if (b.Queens&b.WhitePieces>>i)&1 == 1 {
+			boardString[7-(i/8)][i%8] = WhiteQueen
+		}
+		if (b.Queens&b.BlackPieces>>i)&1 == 1 {
+			boardString[7-(i/8)][i%8] = BlackQueen
+		}
+		if (b.Kings&b.WhitePieces>>i)&1 == 1 {
+			boardString[7-(i/8)][i%8] = WhiteKing
+		}
+		if (b.Kings&b.BlackPieces>>i)&1 == 1 {
+			boardString[7-(i/8)][i%8] = BlackKing
+		}
+	}
+	for i := 0; i < 8; i++ {
+		fmt.Println("-----------------------------------------")
+		for j := 0; j < 8; j++ {
+
+			fmt.Printf("|  ")
+			fmt.Printf("%c", boardString[i][j])
+			fmt.Printf(" ")
+			if j == 7 {
+				fmt.Printf("|")
+			}
+		}
+		fmt.Println("")
+	}
+	fmt.Println("-----------------------------------------")
+}

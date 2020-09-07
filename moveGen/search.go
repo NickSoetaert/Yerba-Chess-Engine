@@ -8,6 +8,7 @@ var BlackCount = 0 //used for debug
 var WhiteCount = 0 //used for debug
 
 func (b *Board) MiniMax(plyLeft int, alpha, beta float64) float64 {
+	PrintBoard(*b)
 	eval := b.Evaluate()
 	if plyLeft == 0 {
 		return eval

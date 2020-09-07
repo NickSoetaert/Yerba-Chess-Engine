@@ -64,3 +64,22 @@ const (
 	blackQueen
 	blackKing
 )
+
+//graphics
+const (
+	BlackKing   rune = 9812
+	BlackQueen  rune = 9813
+	BlackRook   rune = 9814
+	BlackBishop rune = 9815
+	BlackKnight rune = 9816
+	BlackPawn   rune = 9817
+
+	WhiteKing   rune = 9818
+	WhiteQueen  rune = 9819
+	WhiteRook   rune = 9820
+	WhiteBishop rune = 9821
+	WhiteKnight rune = 9822
+	WhitePawn   rune = 9823
+
+	EmptySquare rune = 32
+)

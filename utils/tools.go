@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"math/bits"
 )
 
@@ -84,4 +85,37 @@ func ClearBitsU32(oldBits, startIndex, endIndex uint32) uint32 {
 	//use those bits to clear oldBits
 	return oldBits &^ clear
 
+}
+
+//PrintBinaryBoard takes a bitboard and prints it in chess-board format
+func PrintBinaryBoard(b uint64) {
+	mask := uint64(72057594037927936) //A8 or top left corner
+	fmt.Println("  ---------------------------------")
+	for i := 8; i >= 1; i-- {
+		fmt.Printf("%d |", i)
+		for j := 1; j <= 8; j++ {
+			if bits.OnesCount64(b&mask) == 1 {
+				fmt.Print(" X |")
+			} else {
+				fmt.Print("   |")
+			}
+			if j != 8 {
+				mask = mask << 1
+			}
+		}
+		mask = mask >> 15
+		fmt.Println("")
+		fmt.Println("  ---------------------------------")
+	}
+	//print numbers at bottom with 3 spaces of padding
+	for i := 'A' - 3; i <= 'H'; i++ {
+		if i >= 'A' {
+			fmt.Printf(" %c |", i)
+		} else if i == 'A'-1 {
+			fmt.Print("|")
+		} else {
+			fmt.Print(" ")
+		}
+	}
+	fmt.Println("")
 }

@@ -7,6 +7,7 @@ import (
 )
 
 type UndoMove func()
+var EpCount = 0
 
 //Given a starting board and a move, ApplyMove applies said move to said board,
 //and returns a function that will undo the previously applied move.
@@ -26,6 +27,7 @@ func (b *Board) ApplyMove(m Move) UndoMove {
 		b.putPieceOnTargetSquare(m)
 
 	case enPassantCapture:
+		EpCount++
 		//add and remove pawns for Pawns bitboards
 		b.Pawns |= m.getDestSquare()                                               //add pawn
 		b.Pawns = b.Pawns &^ enPassantFileToSquare(b.EnPassantFile, b.IsWhiteMove) //remove pawn
@@ -39,6 +41,7 @@ func (b *Board) ApplyMove(m Move) UndoMove {
 		}
 
 	case castleKingside:
+		fmt.Println("CASTLE KINGSIDE!")
 		if b.IsWhiteMove {
 			b.Kings |= G1
 			b.Rooks = b.Rooks &^ H1
@@ -52,6 +55,7 @@ func (b *Board) ApplyMove(m Move) UndoMove {
 		}
 
 	case castleQueenside:
+		fmt.Println("CASTLE Q!")
 		if b.IsWhiteMove {
 			b.Kings |= C1
 			b.Rooks = b.Rooks &^ A1
