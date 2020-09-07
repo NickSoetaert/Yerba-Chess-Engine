@@ -6,8 +6,6 @@ import (
 	"math/bits"
 )
 
-
-
 type UndoMove func()
 
 //Given a starting board and a move, ApplyMove applies said move to said board,
@@ -28,14 +26,14 @@ func (b *Board) ApplyMove(m Move) UndoMove {
 
 	case enPassantCapture:
 		//add and remove pawns for Pawns bitboards
-		b.Pawns |= m.getDestSquare()            //add pawn
+		b.Pawns |= m.getDestSquare()                                               //add pawn
 		b.Pawns = b.Pawns &^ enPassantFileToSquare(b.EnPassantFile, b.IsWhiteMove) //remove pawn
 
 		if b.IsWhiteMove { //add and remove pawns for WhitePieces and BlackPieces bitboards
-			b.WhitePieces |= m.getDestSquare() //add pawn
+			b.WhitePieces |= m.getDestSquare()                                                     //add pawn
 			b.BlackPieces = b.BlackPieces &^ enPassantFileToSquare(b.EnPassantFile, b.IsWhiteMove) //remove pawn
 		} else {
-			b.BlackPieces |= m.getDestSquare() //add pawn
+			b.BlackPieces |= m.getDestSquare()                                                     //add pawn
 			b.WhitePieces = b.WhitePieces &^ enPassantFileToSquare(b.EnPassantFile, b.IsWhiteMove) //remove pawn
 		}
 
@@ -109,33 +107,51 @@ func (b *Board) updateCastlingRights(m Move) {
 func enPassantFileToSquare(file uint8, isWhiteToMove bool) uint64 {
 	if isWhiteToMove {
 		switch file {
-		case 1: return A4
-		case 2: return B4
-		case 3: return C4
-		case 4: return D4
-		case 5: return E4
-		case 6: return F4
-		case 7: return G4
-		case 8: return H4
-		default: panic(fmt.Sprintf("impossible e.p. file %v",file))
+		case 1:
+			return A4
+		case 2:
+			return B4
+		case 3:
+			return C4
+		case 4:
+			return D4
+		case 5:
+			return E4
+		case 6:
+			return F4
+		case 7:
+			return G4
+		case 8:
+			return H4
+		default:
+			panic(fmt.Sprintf("impossible e.p. file %v", file))
 		}
 	} else {
 		switch file {
-		case 1: return A5
-		case 2: return B5
-		case 3: return C5
-		case 4: return D5
-		case 5: return E5
-		case 6: return F5
-		case 7: return G5
-		case 8: return H5
-		default: panic(fmt.Sprintf("impossible e.p. file %v",file))
+		case 1:
+			return A5
+		case 2:
+			return B5
+		case 3:
+			return C5
+		case 4:
+			return D5
+		case 5:
+			return E5
+		case 6:
+			return F5
+		case 7:
+			return G5
+		case 8:
+			return H5
+		default:
+			panic(fmt.Sprintf("impossible e.p. file %v", file))
 		}
 	}
 }
 
 // Removes a piece from its start square
-func (b *Board) clearOriginSquare (m Move) {
+func (b *Board) clearOriginSquare(m Move) {
 	if b.IsWhiteMove {
 		b.WhitePieces = b.WhitePieces &^ m.getOriginSquare()
 	} else {
@@ -168,6 +184,8 @@ func (b *Board) clearOriginSquare (m Move) {
 		b.Queens = b.Queens &^ m.getOriginSquare()
 	case blackKing:
 		b.Kings = b.Kings &^ m.getOriginSquare()
+	default:
+		panic(fmt.Sprintf("m.getOriginOccupancy() returned: %v", m.getOriginOccupancy()))
 	}
 }
 
@@ -205,6 +223,8 @@ func (b *Board) clearTargetSquare(m Move) {
 		b.Queens = b.Queens &^ m.getDestSquare()
 	case blackKing:
 		b.Kings = b.Kings &^ m.getDestSquare()
+	default:
+		panic(fmt.Sprintf("m.getDestOccupancyBeforeMove() returned %v - piece %064b", m.getDestOccupancyBeforeMove(), m.getOriginSquare()))
 	}
 }
 
@@ -242,6 +262,8 @@ func (b *Board) putPieceOnTargetSquare(m Move) {
 		b.Queens |= m.getDestSquare()
 	case blackKing:
 		b.Kings |= m.getDestSquare()
+	default:
+		panic(fmt.Sprintf("m.getDestOccupancyAfterMove() returned: %v", m.getDestOccupancyAfterMove()))
 	}
 }
 
@@ -302,7 +324,6 @@ func (m *Move) setDestFromSquare(dest uint8) {
 	*m = Move(utils.SetBitsU32(uint32(*m), destSquareBitsStart, destSquareBitsEnd, uint32(dest)))
 }
 
-
 //Move type bits: 26-29
 func (m *Move) setMoveType(mt moveType) {
 	*m = Move(utils.SetBitsU32(uint32(*m), moveTypeBitsStart, moveTypeBitsEnd, uint32(mt)))
@@ -332,3 +353,5 @@ func (m *Move) copyMoveAndSetDestOccupancy(newPiece tileOccupancy) Move {
 	newMove.setDestOccupancyAfterMove(newPiece)
 	return newMove
 }
+
+

@@ -16,13 +16,9 @@ func (b Board) getPawnMoves(c chan []Move) {
 	}
 
 	moves = append(moves, b.pawnNormalCaptures()...)
-	fmt.Printf("pawn captures: %v\n", len(moves))
 	moves = append(moves, b.pawnSinglePushMoves()...)
-	fmt.Printf("pawn single push: %v\n", len(moves))
 	moves = append(moves, b.pawnDoublePushMoves()...)
-	fmt.Printf("pawn double push: %v\n", len(moves))
 	moves = append(moves, b.enPassantCaptures()...)
-	fmt.Printf("pawn ep: %v\n", len(moves))
 
 	c <- moves
 }
@@ -57,16 +53,18 @@ func (b Board) pawnSinglePushMoves() (moves []Move) {
 
 	if b.IsWhiteMove {
 		openSquares = (b.Pawns & b.WhitePieces) << 8
+		baseMove.setOriginOccupancy(whitePawn)
 	} else {
 		openSquares = (b.Pawns & b.BlackPieces) >> 8
+		baseMove.setOriginOccupancy(blackPawn)
 	}
 
 	openSquares &^= b.WhitePieces | b.BlackPieces //Filter out all squares with pieces on them
 	for openSquares != 0 { 	//Convert all available squares to a Move
-
 		dest := utils.IsolateLsb(openSquares)
 		newMove := baseMove
 		newMove.setDestFromBB(dest)
+
 		if b.IsWhiteMove {
 			newMove.setOriginFromBB(dest >> 8) //record the square we started at
 
@@ -101,8 +99,10 @@ func (b Board) pawnNormalCaptures() (moves []Move) {
 
 	if b.IsWhiteMove {
 		openSquares = ((b.Pawns << 7) & ^HFile) & b.BlackPieces
+		baseMove.setOriginOccupancy(whitePawn)
 	} else {
 		openSquares = ((b.Pawns >> 7) & ^AFile) & b.WhitePieces
+		baseMove.setOriginOccupancy(blackPawn)
 	}
 
 	//Convert all available squares to a Move
@@ -110,6 +110,7 @@ func (b Board) pawnNormalCaptures() (moves []Move) {
 		dest := utils.IsolateLsb(openSquares)
 		newMove := baseMove
 		newMove.setDestFromBB(dest)
+
 		if b.IsWhiteMove {
 			newMove.setOriginFromBB(dest >> 7)
 		} else {
@@ -129,6 +130,7 @@ func (b Board) pawnNormalCaptures() (moves []Move) {
 		dest := utils.IsolateLsb(openSquares)
 		newMove := baseMove
 		newMove.setDestFromBB(dest)
+
 		if b.IsWhiteMove {
 			newMove.setOriginFromBB(dest >> 9)
 
@@ -155,14 +157,7 @@ func (b Board) pawnNormalCaptures() (moves []Move) {
 		openSquares &= openSquares - 1
 	}
 
-	//Todo - optimize by only applying to moves on last rank
-	var promotedMoves []Move
-	for _, move := range moves {
-		for _, promotion := range pawnPromotionsHelper(move, b.IsWhiteMove) {
-			promotedMoves = append(moves, promotion)
-		}
-	}
-	return promotedMoves
+	return moves
 }
 
 func (b Board) pawnDoublePushMoves() (moves []Move) {
@@ -172,8 +167,10 @@ func (b Board) pawnDoublePushMoves() (moves []Move) {
 	if b.IsWhiteMove {
 		//Get moves that move forward 2 ranks and end up on proper rank, and don't jump over anything
 		openSquares |= ((b.Pawns << 16) & FourthRank) ^ (((b.WhitePieces | b.BlackPieces) & ThirdRank) << 8)
+		baseMove.setOriginOccupancy(whitePawn)
 	} else {
 		openSquares |= ((b.Pawns >> 16) & FifthRank) ^ (((b.WhitePieces | b.BlackPieces) & SixthRank) >> 8)
+		baseMove.setOriginOccupancy(blackPawn)
 	}
 	openSquares = openSquares & ^(b.WhitePieces | b.BlackPieces)
 

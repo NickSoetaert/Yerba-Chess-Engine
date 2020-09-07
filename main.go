@@ -2,6 +2,7 @@
 package main
 
 import (
+	"Yerba/graphics"
 	"Yerba/moveGen"
 	"fmt"
 )
@@ -11,12 +12,14 @@ func main() {
 	////40==A6
 	b := moveGen.SetUpBoard()
 	fmt.Printf("number of legal moves from start position: %v (should be 20)", len(b.GenerateLegalMoves()))
-	//for _, move := range b.GenerateLegalMoves() {
-	//	fmt.Printf("%032b\n",move)
-	//	b.ApplyMove(move)
-	//	graphics.PrintBoard(b)
-	//	//undo()
-	//}
+	for _, move := range b.GenerateLegalMoves() {
+		fmt.Printf("%032b\n",move)
+		b.ApplyMove(move)
+		graphics.PrintBoard(b)
+		//undo()
+	}
+
+	//todo: setDestOccupancyBeforeMove
 
 	//start := time.Now()
 	//ply := 6

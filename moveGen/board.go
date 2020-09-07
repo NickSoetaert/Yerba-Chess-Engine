@@ -86,6 +86,7 @@ func SetUpBoardNoPawns() Board {
 }
 
 //Todo: account for pinned pieces
+//TODO: fix bug where origin/target square/piece type isn't always set
 func (b Board) GenerateLegalMoves() (moves []Move) {
 	pChan := make(chan []Move)
 	nChan := make(chan []Move)
@@ -96,12 +97,12 @@ func (b Board) GenerateLegalMoves() (moves []Move) {
 	kChan := make(chan []Move)
 	castleChan := make(chan []Move)
 
-	go b.getPawnMoves(pChan)                                                                           //pawns
+	go b.getPawnMoves(pChan)  //pawns
 	go getSliderMoves(b.Bishops, b.WhitePieces, b.BlackPieces, b.IsWhiteMove, true, b.BishopDB, bChan) //bishops
 	go getSliderMoves(b.Rooks, b.WhitePieces, b.BlackPieces, b.IsWhiteMove, false, b.RookDB, rChan)    //rooks
 	go getSliderMoves(b.Queens, b.WhitePieces, b.BlackPieces, b.IsWhiteMove, true, b.BishopDB, qbChan) //queens
 	go getSliderMoves(b.Queens, b.WhitePieces, b.BlackPieces, b.IsWhiteMove, false, b.RookDB, qrChan)  //queens
-	go b.getCastlingMoves(EmptyBoard, castleChan)                                                      //Todo: pass attacked squares
+	go b.getCastlingMoves(EmptyBoard, castleChan)  //Todo: pass attacked squares
 
 	if b.IsWhiteMove {
 		go getKnightMoves(b.Knights, b.WhitePieces, nChan)
