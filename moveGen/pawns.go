@@ -32,7 +32,7 @@ func (b Board) getPawnMoves(c chan []Move) {
 func pawnPromotionsHelper(move Move, isWhiteToMove bool) (allMoves []Move) {
 	if isWhiteToMove {
 		if (move.getDestSquare() & EighthRank) == 0 { //if there are no possible promotions, return base move
-			return nil
+			panic(fmt.Sprintf("impossible promotion - dest square: %064b", move.getDestSquare()))
 		}
 		allMoves = append(allMoves, move.copyMoveAndSetDestOccupancy(whiteKnight))
 		allMoves = append(allMoves, move.copyMoveAndSetDestOccupancy(whiteBishop))
@@ -54,33 +54,44 @@ func (b Board) pawnSinglePushMoves() (moves []Move) {
 	var openSquares uint64
 	baseMove := Move(0)
 	baseMove.setMoveType(normalMove)
-	openSquares = b.Pawns << 8
-	openSquares ^= b.WhitePieces | b.BlackPieces //Get all squares without a piece on them
 
+	if b.IsWhiteMove {
+		openSquares = (b.Pawns & b.WhitePieces) << 8
+	} else {
+		openSquares = (b.Pawns & b.BlackPieces) >> 8
+	}
+
+	openSquares &^= b.WhitePieces | b.BlackPieces //Filter out all squares with pieces on them
 	for openSquares != 0 { 	//Convert all available squares to a Move
 
 		dest := utils.IsolateLsb(openSquares)
 		newMove := baseMove
 		newMove.setDestFromBB(dest)
 		if b.IsWhiteMove {
-			newMove.setOriginFromBB(dest >> 8)
-		} else {
+			newMove.setOriginFromBB(dest >> 8) //record the square we started at
+
+			if (dest & EighthRank) != 0 { // Factor in if a promotion is possible.
+				for _, promotion := range pawnPromotionsHelper(newMove, true) {
+					moves = append(moves, promotion)
+				}
+			} else {	//If not, just add the unpromoted move to list of moves.
+				moves = append(moves, newMove)
+			}
+
+		} else { //if black's move
 			newMove.setOriginFromBB(dest << 8)
+
+			if (dest & FirstRank) != 0 { // Factor in if a promotion is possible.
+				for _, promotion := range pawnPromotionsHelper(newMove, false) {
+					moves = append(moves, promotion)
+				}
+			} else {	//If not, just add the unpromoted move to list of moves.
+				moves = append(moves, newMove)
+			}
 		}
-		moves = append(moves, newMove)
 		openSquares &= openSquares - 1
 	}
-	fmt.Printf("pawn pre-promotion: %v", len(moves))
-	//Todo - optimize by only applying to moves on last rank
-	var promotedMoves []Move
-	for _, move := range moves {
-		if move.
-		for _, promotion := range pawnPromotionsHelper(move, b.IsWhiteMove) {
-			promotedMoves = append(moves, promotion)
-		}
-	}
-	fmt.Printf("pawn post-promotion: %v", len(promotedMoves))
-	return promotedMoves
+	return moves
 }
 
 func (b Board) pawnNormalCaptures() (moves []Move) {
@@ -89,11 +100,9 @@ func (b Board) pawnNormalCaptures() (moves []Move) {
 	baseMove.setMoveType(normalMove)
 
 	if b.IsWhiteMove {
-		//openSquares = ((b.Pawns << 7) & ^HFile) & b.BlackPieces //old
-		openSquares = ((b.Pawns & b.WhitePieces) << 7) & b.BlackPieces //all squares that white pawns can attack
+		openSquares = ((b.Pawns << 7) & ^HFile) & b.BlackPieces
 	} else {
-		//openSquares = ((b.Pawns >> 7) & ^AFile) & b.WhitePieces //old
-		openSquares = ((b.Pawns & b.BlackPieces) >> 7) & b.WhitePieces //all squares that black pawns can attack
+		openSquares = ((b.Pawns >> 7) & ^AFile) & b.WhitePieces
 	}
 
 	//Convert all available squares to a Move
@@ -122,10 +131,27 @@ func (b Board) pawnNormalCaptures() (moves []Move) {
 		newMove.setDestFromBB(dest)
 		if b.IsWhiteMove {
 			newMove.setOriginFromBB(dest >> 9)
-		} else {
+
+			//Check for promotions
+			if (dest & EighthRank) != 0 {
+				for _, promotion := range pawnPromotionsHelper(newMove, true) {
+					moves = append(moves, promotion)
+				}
+			} else {	//If not, just add the unpromoted move to list of moves.
+				moves = append(moves, newMove)
+			}
+
+		} else { //If black's move
 			newMove.setOriginFromBB(dest << 9)
+
+			if (dest & FirstRank) != 0 {
+				for _, promotion := range pawnPromotionsHelper(newMove, false) {
+					moves = append(moves, promotion)
+				}
+			} else {
+				moves = append(moves, newMove)
+			}
 		}
-		moves = append(moves, newMove)
 		openSquares &= openSquares - 1
 	}
 
