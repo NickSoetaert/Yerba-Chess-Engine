@@ -121,10 +121,10 @@ func (b Board) GenerateLegalMoves() (moves []Move) {
 
 	for _, move := range moves {
 		fmt.Printf("before set: %032b\n",move)
-		move.setDestFromSquare(9)
+		move.setDestFromBB(C4)
 		fmt.Printf("after set:  %032b\n",move)
-		//fmt.Printf("%064b, %064b\n\n\n",move.getDestSquare(), D4)
-		fmt.Println("")
+		fmt.Printf("%064b, %064b\n\n\n",move.getDestSquare(), C4)
+
 	}
 
 	return moves

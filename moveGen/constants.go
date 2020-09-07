@@ -1,6 +1,7 @@
 package moveGen
 
 //type Move: 32 bit unsigned int.
+//When talking about bit 0, we mean the MOST significant bit (that is, reading from left to right.)
 //Origin square coordinate bits: 0-5 (0 represents A1, and 64 represents H8)
 //Destination square coordinate bits: 6-11
 //Origin square occupancy type: 12-15

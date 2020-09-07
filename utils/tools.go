@@ -1,13 +1,11 @@
 package utils
 
 import (
-	"fmt"
 	"math/bits"
 )
 
 //GetBoardKey takes a board state for a single piece, and returns
 //the long representation. For debug purposes only.
-
 func GetBoardKey() uint64 {
 	b := [8][8]string{
 		{" ", " ", " ", " ", " ", " ", " ", " "}, //8
@@ -22,13 +20,11 @@ func GetBoardKey() uint64 {
 	}
 
 	var result uint64
-
 	for i := uint8(0); i < 64; i++ {
 		if b[7-(i/8)][i%8] != " " {
 			result += 1 << i
 		}
 	}
-
 	return result << 1
 }
 
@@ -44,9 +40,11 @@ func IsolateLsb(b uint64) uint64 {
 	return 1 << bits.TrailingZeros64(b)
 }
 
-//expects 0 <= startIndex <= endIndex <= 31, with 0 representing the least significant bit.
-//will return the resulting bits in said range.
+//Expects 0 <= startIndex <= endIndex <= 31, with 0 representing the most significant bit.
+//will return the resulting bits in said range, not keeping their "significance".
 //setting the start and end at the same index will clear the single bit at that index.
+//Example(using 8 bits instead of 32):
+//IsolateBits(0b11101111, 2, 7) -> 111011. Note that this is NOT 11101100 (which is keeping significance)
 func IsolateBitsU32(bits, startIndex, endIndex uint32) uint32 {
 	//Step one: Set all the bits to the left of startIndex to 0
 	bitsToTheLeft := uint32(1 << (startIndex) - 1) //get all the bits to the left of startIndex
@@ -55,24 +53,25 @@ func IsolateBitsU32(bits, startIndex, endIndex uint32) uint32 {
 	return bits >> (31 - endIndex) // Clear bits to the right of endIndex
 }
 
-//With the idea that newBits will be a subset of oldBits,
-//sets the bits starting at startIndex with newBits
-//Example(using 8 bits instead of 32):
-//SetBits(01010101, 2, 6, 0b0100) -> 00100101
+//Expects 0 <= startIndex <= endIndex <= 31, with 0 representing the most significant bit.
+//First, sets all bits in the given range to 0.
+//Then, starting at the least significant bit WITHIN the given range, set the cleared bits to the new bits.
+//Examples(using 8 bits instead of 32):
+//SetBits(0b11111111, 0, 0, 0) -> 01111111
+//SetBits(0b01010101, 2, 5, 0b100) ->(clear) 01000001 -> (set) 01010001 (notice this is not 01 1000 01 but rather 01 0100 01)
+//SetBits(0b11111111, 2, 7, 0b010101) -> 11010101
+
 func SetBitsU32(oldBits, startIndex, endIndex, newBits uint32) uint32 {
 	//First, clear the bits in range [startIndex, endIndex]
-	fmt.Printf("~~~old bits: %032b\n",oldBits)
 	oldBits = ClearBitsU32(oldBits, startIndex, endIndex)
-
 	//Now, line up the new bits with the cleared bits
 	//We need to ensure that 0s will be left filled if end-start > num bits. (What if you passed 0b001 to set 3 bits?)
-	newBits = newBits << uint32(7-endIndex)
-	fmt.Printf("~~~new bits: %032b\n", oldBits | newBits)
+	newBits = newBits << (31-endIndex)
 
 	return oldBits | newBits
 }
 
-//expects 0 <= startIndex <= endIndex <= 31, with 0 representing the least significant bit.
+//Expects 0 <= startIndex <= endIndex <= 31, with 0 representing the most significant bit.
 //will set the bits in said range to 0
 //setting the start and end at the same index will clear the single bit at that index.
 func ClearBitsU32(oldBits, startIndex, endIndex uint32) uint32 {
@@ -80,7 +79,7 @@ func ClearBitsU32(oldBits, startIndex, endIndex uint32) uint32 {
 	block := 1 << (endIndex+1 - startIndex)-1
 
 	//Shift these bits until they line up with the bits you wish to clear
-	clear := uint32(block << startIndex)
+	clear := uint32(block << (31-endIndex))
 
 	//use those bits to clear oldBits
 	return oldBits &^ clear
