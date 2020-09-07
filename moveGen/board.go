@@ -1,8 +1,6 @@
 package moveGen
 
-import (
-	"fmt"
-)
+import "fmt"
 
 //An instance of a Board represents a single possible game state.
 //The a1 square is bit position 0, b2 = 1,..., g8 = 62, h8 = 63
@@ -113,21 +111,28 @@ func (b Board) GenerateLegalMoves() (moves []Move) {
 	}
 
 	moves = append(moves, <-pChan...)
-	fmt.Printf("number of pawn moves: %v\n", len(moves))
 	moves = append(moves, <-nChan...)
-	fmt.Printf("knight moves: %v\n",len(moves))
 	moves = append(moves, <-bChan...)
-	fmt.Printf("bishop moves: %v\n",len(moves))
 	moves = append(moves, <-rChan...)
-	fmt.Printf("rook moves: %v\n",len(moves))
 	moves = append(moves, <-qbChan...)
-	fmt.Printf("queen bishop moves: %v\n",len(moves))
 	moves = append(moves, <-qrChan...)
-	fmt.Printf("queen rook moves: %v\n",len(moves))
 	moves = append(moves, <-kChan...)
-	fmt.Printf("king moves: %v\n",len(moves))
 	moves = append(moves, <-castleChan...)
-	fmt.Printf("castle moves: %v\n",len(moves))
+
+	for _, move := range moves {
+		fmt.Printf("before set: %032b\n",move)
+		move.setDestFromSquare(9)
+		fmt.Printf("after set:  %032b\n",move)
+		//fmt.Printf("%064b, %064b\n\n\n",move.getDestSquare(), D4)
+		fmt.Println("")
+	}
 
 	return moves
 }
+//getDestOccupancyAfterMove
+//getDestOccupancyAfterMove
+//getMoveType
+
+//good:
+//getOriginSquare
+//getDestSquare (always 1)

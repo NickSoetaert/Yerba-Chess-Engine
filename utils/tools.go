@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"math/bits"
 )
 
@@ -59,13 +60,18 @@ func IsolateBitsU32(bits, startIndex, endIndex uint32) uint32 {
 //SetBits(01010101, 2, 6, 0100) -> 00100101
 func SetBitsU32(oldBits, startIndex, endIndex, newBits uint32) uint32 {
 	//First, clear the bits in range [startIndex, endIndex]
+	fmt.Printf("~~~old bits: %032b\n",oldBits)
 	oldBits = ClearBitsU32(oldBits, startIndex, endIndex)
 	//Now, line up the new bits with the cleared bits
 	//We need to ensure that 0s will be left filled if end-start > num bits. (What if you passed 0b001 to set 3 bits?)
 	newBits = newBits << uint32(7-endIndex)
+	fmt.Printf("~~~new bits: %032b\n", oldBits | newBits)
+
 	return oldBits | newBits
 }
 
+//expects 0 <= startIndex <= endIndex <= 31
+//will set the bits in said range to 0
 func ClearBitsU32(oldBits, startIndex, endIndex uint32) uint32 {
 	//Get a block of bits n long to clear with
 	block := 1 << (endIndex+1 - startIndex)-1

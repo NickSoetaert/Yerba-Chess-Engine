@@ -265,7 +265,7 @@ func (b *Board) putPieceOnTargetSquare(m Move) {
 	case blackKing:
 		b.Kings |= m.getDestSquare()
 	default:
-		panic(fmt.Sprintf("m.getDestOccupancyAfterMove() returned: %v, piece:%v\n", m.getDestOccupancyAfterMove(), m.getDestOccupancyBeforeMove()))
+		panic(fmt.Sprintf("m.getDestOccupancyAfterMove() returned: %v, piece:%032b\n", m.getDestOccupancyAfterMove(), m))
 	}
 }
 
@@ -319,11 +319,17 @@ func (m *Move) setOriginFromSquare(origin uint8) {
 
 //Expects a bitboard with a pop count of one, and sets the destination square of given move to that square.
 func (m *Move) setDestFromBB(dest uint64) {
+	fmt.Printf("move before: %064b\n",m)
 	*m = Move(utils.SetBitsU32(uint32(*m), destSquareBitsStart, destSquareBitsEnd, uint32(bits.TrailingZeros64(dest))))
+	fmt.Printf("move after:  %064b\n",m)
 }
 
 func (m *Move) setDestFromSquare(dest uint8) {
-	*m = Move(utils.SetBitsU32(uint32(*m), destSquareBitsStart, destSquareBitsEnd, uint32(dest)))
+	fmt.Printf("~move before: %064b\n",*m)
+	fmt.Printf("~move before: %064b\n",m)
+	x := Move(utils.SetBitsU32(uint32(*m), destSquareBitsStart, destSquareBitsEnd, uint32(dest)))
+	*m = x
+	fmt.Printf("~move after:  %064b\n",m)
 }
 
 //Move type bits: 26-29
