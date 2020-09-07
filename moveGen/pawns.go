@@ -50,6 +50,7 @@ func (b Board) pawnSinglePushMoves() (moves []Move) {
 	var openSquares uint64
 	baseMove := Move(0)
 	baseMove.setMoveType(normalMove)
+	baseMove.setDestOccupancyBeforeMove(empty)
 
 	if b.IsWhiteMove {
 		openSquares = (b.Pawns & b.WhitePieces) << 8
@@ -164,13 +165,17 @@ func (b Board) pawnDoublePushMoves() (moves []Move) {
 	var openSquares uint64
 	baseMove := Move(0)
 	baseMove.setMoveType(pawnDoublePush)
+	baseMove.setDestOccupancyBeforeMove(empty)
 	if b.IsWhiteMove {
 		//Get moves that move forward 2 ranks and end up on proper rank, and don't jump over anything
 		openSquares |= ((b.Pawns << 16) & FourthRank) ^ (((b.WhitePieces | b.BlackPieces) & ThirdRank) << 8)
 		baseMove.setOriginOccupancy(whitePawn)
+		baseMove.setDestOccupancyAfterMove(whitePawn)
+		//todo: set
 	} else {
 		openSquares |= ((b.Pawns >> 16) & FifthRank) ^ (((b.WhitePieces | b.BlackPieces) & SixthRank) >> 8)
 		baseMove.setOriginOccupancy(blackPawn)
+		baseMove.setDestOccupancyAfterMove(blackPawn)
 	}
 	openSquares = openSquares & ^(b.WhitePieces | b.BlackPieces)
 

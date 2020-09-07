@@ -19,7 +19,7 @@ func main() {
 		//undo()
 	}
 
-	//todo: setDestOccupancyBeforeMove
+	//todo: m.getDestOccupancyAfterMove and such
 
 	//start := time.Now()
 	//ply := 6

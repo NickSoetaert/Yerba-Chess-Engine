@@ -223,6 +223,8 @@ func (b *Board) clearTargetSquare(m Move) {
 		b.Queens = b.Queens &^ m.getDestSquare()
 	case blackKing:
 		b.Kings = b.Kings &^ m.getDestSquare()
+	case empty:
+		//do nothing
 	default:
 		panic(fmt.Sprintf("m.getDestOccupancyBeforeMove() returned %v - piece %064b", m.getDestOccupancyBeforeMove(), m.getOriginSquare()))
 	}
@@ -345,6 +347,11 @@ func (m *Move) setOriginOccupancy(oldPiece tileOccupancy) {
 //Sets the occupancy (piece type) of the destination square.
 func (m *Move) setDestOccupancyAfterMove(newPiece tileOccupancy) {
 	*m = Move(utils.SetBitsU32(uint32(*m), destSquarePostMoveOccBitsStart, destSquarePostMoveOccBitsEnd, uint32(newPiece)))
+}
+
+//Sets the piece that was on the target square before the move
+func (m *Move) setDestOccupancyBeforeMove(oldPiece tileOccupancy) {
+	*m = Move(utils.SetBitsU32(uint32(*m), destSquarePreMoveOccBitsStart, destSquarePreMoveOccBitsEnd, uint32(oldPiece)))
 }
 
 //Helper for pawn promotions. Copies a move, but also sets the occupancy of the destination square.
