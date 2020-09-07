@@ -1,6 +1,6 @@
 package moveGen
 
 func tester(){
-	b := SetUpBoard()
+	//b := SetUpBoard()
 
 }

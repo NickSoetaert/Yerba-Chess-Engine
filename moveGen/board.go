@@ -1,5 +1,9 @@
 package moveGen
 
+import (
+	"fmt"
+)
+
 //An instance of a Board represents a single possible game state.
 //The a1 square is bit position 0, b2 = 1,..., g8 = 62, h8 = 63
 //EnPassantFile encoding: Square that en passant is currently possible on. To get square, AND with turn.
@@ -83,7 +87,6 @@ func SetUpBoardNoPawns() Board {
 
 //Todo: account for pinned pieces
 func (b Board) GenerateLegalMoves() (moves []Move) {
-
 	pChan := make(chan []Move)
 	nChan := make(chan []Move)
 	bChan := make(chan []Move)
@@ -109,13 +112,21 @@ func (b Board) GenerateLegalMoves() (moves []Move) {
 	}
 
 	moves = append(moves, <-pChan...)
+	fmt.Printf("number of pawn moves: %v\n", len(moves))
 	moves = append(moves, <-nChan...)
+	fmt.Printf("knight moves: %v\n",len(moves))
 	moves = append(moves, <-bChan...)
+	fmt.Printf("bishop moves: %v\n",len(moves))
 	moves = append(moves, <-rChan...)
+	fmt.Printf("rook moves: %v\n",len(moves))
 	moves = append(moves, <-qbChan...)
+	fmt.Printf("queen bishop moves: %v\n",len(moves))
 	moves = append(moves, <-qrChan...)
+	fmt.Printf("queen rook moves: %v\n",len(moves))
 	moves = append(moves, <-kChan...)
+	fmt.Printf("king moves: %v\n",len(moves))
 	moves = append(moves, <-castleChan...)
+	fmt.Printf("castle moves: %v\n",len(moves))
 
 	return moves
 }

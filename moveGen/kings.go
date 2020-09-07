@@ -2,6 +2,7 @@ package moveGen
 
 import (
 	"Yerba/utils"
+	"fmt"
 	"math/bits"
 )
 
@@ -28,6 +29,7 @@ func getNormalKingMoves(kings, ownPieces, attackedSquares uint64, ch chan []Move
 func (b *Board) getCastlingMoves(attackedSquares uint64, ch chan []Move) {
 	var moves []Move
 	allPieces := b.BlackPieces & b.WhitePieces
+	fmt.Printf("all pieces: %v",allPieces)
 
 	if b.IsWhiteMove && b.WhiteKingHasNeverMoved {
 		if b.H1RookHasNeverMoved {	//Try to castle kingside
