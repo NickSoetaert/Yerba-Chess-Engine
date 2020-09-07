@@ -1,7 +1,5 @@
 package moveGen
 
-import "fmt"
-
 //An instance of a Board represents a single possible game state.
 //The a1 square is bit position 0, b2 = 1,..., g8 = 62, h8 = 63
 //EnPassantFile encoding: Square that en passant is currently possible on. To get square, AND with turn.
@@ -118,14 +116,6 @@ func (b Board) GenerateLegalMoves() (moves []Move) {
 	moves = append(moves, <-qrChan...)
 	moves = append(moves, <-kChan...)
 	moves = append(moves, <-castleChan...)
-
-	for _, move := range moves {
-		fmt.Printf("before set: %032b\n",move)
-		move.setDestFromBB(C4)
-		fmt.Printf("after set:  %032b\n",move)
-		fmt.Printf("%064b, %064b\n\n\n",move.getDestSquare(), C4)
-
-	}
 
 	return moves
 }

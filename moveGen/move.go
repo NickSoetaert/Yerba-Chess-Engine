@@ -14,7 +14,8 @@ type UndoMove func()
 func (b *Board) ApplyMove(m Move) UndoMove {
 	oldBoard := *b //TODO: Optimize
 
-	b.clearTargetSquare(m) //Must clear starting square for all move types
+	b.clearOriginSquare(m) //Must clear starting square for all move types
+	b.clearTargetSquare(m) //Must clear end square for all move types
 
 	switch m.getMoveType() {
 	case normalMove:
@@ -278,8 +279,6 @@ func (m Move) getOriginSquare() uint64 {
 //Returns binary-board (64 bit) representation of destination square.
 //Destination square: bits 6-11
 func (m Move) getDestSquare() uint64 {
-	fmt.Printf("%032b\n",m)
-	fmt.Printf("unshifted dest:        %b\n",utils.IsolateBitsU32(uint32(m), destSquareBitsStart, destSquareBitsEnd))
 	return 1 << uint64(utils.IsolateBitsU32(uint32(m), destSquareBitsStart, destSquareBitsEnd))
 }
 
@@ -321,10 +320,7 @@ func (m *Move) setOriginFromSquare(origin uint8) {
 
 //Expects a bitboard with a pop count of one, and sets the destination square of given move to that square.
 func (m *Move) setDestFromBB(dest uint64) {
-	//fmt.Printf("move before:%032b\n",*m)
-	//fmt.Printf("trailing 0s: %v\n",bits.TrailingZeros64(dest))
 	*m = Move(utils.SetBitsU32(uint32(*m), destSquareBitsStart, destSquareBitsEnd, uint32(bits.TrailingZeros64(dest))))
-	//fmt.Printf("move after: %032b\n",*m)
 }
 
 func (m *Move) setDestFromSquare(dest uint8) {
