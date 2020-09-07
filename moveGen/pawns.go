@@ -55,9 +55,11 @@ func (b Board) pawnSinglePushMoves() (moves []Move) {
 	if b.IsWhiteMove {
 		openSquares = (b.Pawns & b.WhitePieces) << 8
 		baseMove.setOriginOccupancy(whitePawn)
+		baseMove.setDestOccupancyAfterMove(whitePawn)
 	} else {
 		openSquares = (b.Pawns & b.BlackPieces) >> 8
 		baseMove.setOriginOccupancy(blackPawn)
+		baseMove.setDestOccupancyAfterMove(whitePawn)
 	}
 
 	openSquares &^= b.WhitePieces | b.BlackPieces //Filter out all squares with pieces on them
@@ -101,9 +103,11 @@ func (b Board) pawnNormalCaptures() (moves []Move) {
 	if b.IsWhiteMove {
 		openSquares = ((b.Pawns << 7) & ^HFile) & b.BlackPieces
 		baseMove.setOriginOccupancy(whitePawn)
+		baseMove.setDestOccupancyAfterMove(whitePawn)
 	} else {
 		openSquares = ((b.Pawns >> 7) & ^AFile) & b.WhitePieces
 		baseMove.setOriginOccupancy(blackPawn)
+		baseMove.setDestOccupancyAfterMove(blackPawn)
 	}
 
 	//Convert all available squares to a Move
@@ -171,7 +175,6 @@ func (b Board) pawnDoublePushMoves() (moves []Move) {
 		openSquares |= ((b.Pawns << 16) & FourthRank) ^ (((b.WhitePieces | b.BlackPieces) & ThirdRank) << 8)
 		baseMove.setOriginOccupancy(whitePawn)
 		baseMove.setDestOccupancyAfterMove(whitePawn)
-		//todo: set
 	} else {
 		openSquares |= ((b.Pawns >> 16) & FifthRank) ^ (((b.WhitePieces | b.BlackPieces) & SixthRank) >> 8)
 		baseMove.setOriginOccupancy(blackPawn)

@@ -265,7 +265,7 @@ func (b *Board) putPieceOnTargetSquare(m Move) {
 	case blackKing:
 		b.Kings |= m.getDestSquare()
 	default:
-		panic(fmt.Sprintf("m.getDestOccupancyAfterMove() returned: %v", m.getDestOccupancyAfterMove()))
+		panic(fmt.Sprintf("m.getDestOccupancyAfterMove() returned: %v, piece:%v\n", m.getDestOccupancyAfterMove(), m.getDestOccupancyBeforeMove()))
 	}
 }
 

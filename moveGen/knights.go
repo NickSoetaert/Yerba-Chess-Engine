@@ -3,12 +3,20 @@ package moveGen
 import (
 	"math/bits"
 )
-
-func getKnightMoves(knights, ownPieces uint64, ch chan []Move) {
+func getKnightMoves(knights, ownPieces uint64, ch chan []Move, isWhiteMove bool) {
 	var moves []Move
 	knights = knights & ownPieces //filter out enemy knights
 	baseMove := Move(0)
 	baseMove.setMoveType(normalMove)
+
+	if isWhiteMove {
+		baseMove.setOriginOccupancy(whiteKnight)
+		baseMove.setDestOccupancyAfterMove(whiteKnight)
+	} else {
+		baseMove.setOriginOccupancy(blackKnight)
+		baseMove.setDestOccupancyAfterMove(blackKnight)
+	}
+
 	for bits.OnesCount64(knights) != 0 { //While there are still knights left
 		originSquareMove := baseMove
 		currentSquare := uint8(bits.TrailingZeros64(knights))     //square number that we're looking at

@@ -105,10 +105,10 @@ func (b Board) GenerateLegalMoves() (moves []Move) {
 	go b.getCastlingMoves(EmptyBoard, castleChan)  //Todo: pass attacked squares
 
 	if b.IsWhiteMove {
-		go getKnightMoves(b.Knights, b.WhitePieces, nChan)
+		go getKnightMoves(b.Knights, b.WhitePieces, nChan, true)
 		go getNormalKingMoves(b.Kings, b.WhitePieces, EmptyBoard, kChan) //Todo: pass attacked squares
 	} else {
-		go getKnightMoves(b.Knights, b.BlackPieces, nChan)
+		go getKnightMoves(b.Knights, b.BlackPieces, nChan, false)
 		go getNormalKingMoves(b.Kings, b.BlackPieces, EmptyBoard, kChan)
 	}
 
