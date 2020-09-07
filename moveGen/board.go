@@ -122,22 +122,22 @@ func (b Board) GenerateLegalMoves() (moves []Move) {
 	go b.getCastlingMoves(EmptyBoard, castleChan) //Todo: pass attacked squares
 
 	if b.IsWhiteMove {
-		go getSliderMoves(b.Bishops, b.WhitePieces, b.BlackPieces, true, true, b.BishopDB, bChan, whiteBishop) //bishops
-		go getSliderMoves(b.Rooks, b.WhitePieces, b.BlackPieces, true, false, b.RookDB, rChan, whiteRook)      //rooks
-		go getSliderMoves(b.Queens, b.WhitePieces, b.BlackPieces, true, true, b.BishopDB, qbChan, whiteQueen)  //queens
-		go getSliderMoves(b.Queens, b.WhitePieces, b.BlackPieces, true, false, b.RookDB, qrChan, whiteQueen)   //queens
+		go b.getSliderMoves(b.Bishops, true, bChan, whiteBishop) //bishops
+		go b.getSliderMoves(b.Rooks, false, rChan, whiteRook)    //rooks
+		go b.getSliderMoves(b.Queens, true, qbChan, whiteQueen)  //queens
+		go b.getSliderMoves(b.Queens, false, qrChan, whiteQueen) //queens
 
-		go getKnightMoves(b.Knights, b.WhitePieces, nChan, true)
-		go getNormalKingMoves(b.Kings, b.WhitePieces, EmptyBoard, kChan, true) //Todo: pass attacked squares
+		go b.getKnightMoves(nChan)
+		go b.getNormalKingMoves(EmptyBoard, kChan) //Todo: pass attacked squares
 
 	} else {
-		go getSliderMoves(b.Bishops, b.WhitePieces, b.BlackPieces, false, true, b.BishopDB, bChan, blackBishop) //bishops
-		go getSliderMoves(b.Rooks, b.WhitePieces, b.BlackPieces, false, false, b.RookDB, rChan, blackRook)      //rooks
-		go getSliderMoves(b.Queens, b.WhitePieces, b.BlackPieces, false, true, b.BishopDB, qbChan, blackQueen)  //queens
-		go getSliderMoves(b.Queens, b.WhitePieces, b.BlackPieces, false, false, b.RookDB, qrChan, blackQueen)   //queens
+		go b.getSliderMoves(b.Bishops, true, bChan, blackBishop) //bishops
+		go b.getSliderMoves(b.Rooks, false, rChan, blackRook)    //rooks
+		go b.getSliderMoves(b.Queens, true, qbChan, blackQueen)  //queens
+		go b.getSliderMoves(b.Queens, false, qrChan, blackQueen) //queens
 
-		go getKnightMoves(b.Knights, b.BlackPieces, nChan, false)
-		go getNormalKingMoves(b.Kings, b.BlackPieces, EmptyBoard, kChan, false)
+		go b.getKnightMoves(nChan)
+		go b.getNormalKingMoves(EmptyBoard, kChan)
 	}
 
 	moves = append(moves, <-pChan...)

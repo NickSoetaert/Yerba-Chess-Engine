@@ -190,16 +190,17 @@ func slowCalcBishopMoves(square uint8, blockers uint64) uint64 {
 }
 
 //Calculates bishop XOR rook-like moves for a given piece set (rooks, bishops, queens)
-func getSliderMoves(sliders, whitePieces, blackPieces uint64, isWhiteMove, bishopMove bool, db [][]uint64, c chan []Move, piece tileOccupancy) {
+func (b *Board) getSliderMoves(sliders uint64, bishopMove bool, c chan []Move, piece tileOccupancy) {
+
 	var moves []Move
 	baseMove := Move(0)
 	baseMove.setMoveType(normalMove)
 	baseMove.setOriginOccupancy(piece)
 	baseMove.setDestOccupancyAfterMove(piece)
-	if isWhiteMove {
-		sliders &= whitePieces
+	if b.IsWhiteMove {
+		sliders &= b.WhitePieces
 	} else {
-		sliders &= blackPieces
+		sliders &= b.BlackPieces
 	}
 	for sliders != 0 { //While there are any sliders left to calculate moves for
 		originSquareMove := baseMove
@@ -208,14 +209,14 @@ func getSliderMoves(sliders, whitePieces, blackPieces uint64, isWhiteMove, bisho
 
 		var possibleAttacks uint64
 		if bishopMove {
-			possibleAttacks = GetUnfilteredBishopAttacks(db, currentSquareNum, blackPieces|whitePieces)
+			possibleAttacks = GetUnfilteredBishopAttacks(b.BishopDB, currentSquareNum, b.BlackPieces|b.WhitePieces)
 		} else {
-			possibleAttacks = GetUnfilteredRookAttacks(db, currentSquareNum, blackPieces|whitePieces)
+			possibleAttacks = GetUnfilteredRookAttacks(b.RookDB, currentSquareNum, b.BlackPieces|b.WhitePieces)
 		}
-		if isWhiteMove {
-			possibleAttacks = possibleAttacks &^ whitePieces
+		if b.IsWhiteMove {
+			possibleAttacks = possibleAttacks &^ b.WhitePieces
 		} else {
-			possibleAttacks = possibleAttacks &^ blackPieces
+			possibleAttacks = possibleAttacks &^ b.BlackPieces
 		}
 		for possibleAttacks != 0 {
 			move := originSquareMove

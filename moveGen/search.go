@@ -25,7 +25,8 @@ func (b *Board) MiniMax(plyLeft int, alpha, beta float64) float64 {
 		fmt.Printf("num black kings: %v\n", bits.OnesCount64(b.BlackPieces&b.Kings))
 		fmt.Printf("black king on e1: %v\n",b.BlackPieces & b.Kings & E1 != 0)
 		fmt.Printf("white king on e1: %v\n",b.WhitePieces & b.Kings & E1 != 0)
-
+		fmt.Printf("black bishop on e1: %v\n",b.BlackPieces & b.Bishops & E1 != 0)
+		fmt.Printf("ply left: %v\n",plyLeft)
 		PrintBoard(*b)
 		os.Exit(0)
 		return eval

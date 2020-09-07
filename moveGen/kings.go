@@ -5,30 +5,33 @@ import (
 	"math/bits"
 )
 
-func getNormalKingMoves(kings, ownPieces, attackedSquares uint64, ch chan []Move, isWhiteMove bool) {
+//todo: dest occupancy before move
+func (b *Board) getNormalKingMoves(attackedSquares uint64, ch chan []Move) {
 	var moves []Move
-	kings &= ownPieces
+	var currentSquare uint8
+	var possibleAttacks uint64
+
 	baseMove := Move(0)
-	currentSquare := uint8(bits.TrailingZeros64(kings))
-
 	baseMove.setMoveType(normalMove)
-	baseMove.setOriginFromSquare(currentSquare)
 
-	if isWhiteMove {
+	if b.IsWhiteMove {
+		currentSquare = uint8(bits.TrailingZeros64(b.Kings & b.WhitePieces))
+		possibleAttacks = KingMask[currentSquare] &^ attackedSquares &^ b.WhitePieces
 		baseMove.setOriginOccupancy(whiteKing)
 		baseMove.setDestOccupancyAfterMove(whiteKing)
 	} else {
+		currentSquare = uint8(bits.TrailingZeros64(b.Kings & b.BlackPieces))
+		possibleAttacks = KingMask[currentSquare] &^ attackedSquares &^ b.WhitePieces
 		baseMove.setOriginOccupancy(blackKing)
 		baseMove.setDestOccupancyAfterMove(blackKing)
 	}
-
-	possibleAttacks := KingMask[currentSquare]
-	possibleAttacks = possibleAttacks &^ attackedSquares &^ ownPieces
+	baseMove.setOriginFromSquare(currentSquare)
 
 	for possibleAttacks != 0 {
 		move := baseMove
 		attack := utils.IsolateLsb(possibleAttacks)
 		move.setDestFromBB(attack)
+
 		possibleAttacks ^= attack
 		moves = append(moves, move)
 	}

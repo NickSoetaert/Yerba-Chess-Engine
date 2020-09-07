@@ -4,16 +4,21 @@ import (
 	"math/bits"
 )
 
-func getKnightMoves(knights, ownPieces uint64, ch chan []Move, isWhiteMove bool) {
+func (b *Board) getKnightMoves(ch chan []Move) {
 	var moves []Move
-	knights = knights & ownPieces //filter out enemy knights
+	var knights uint64
+	var ownPieces uint64
 	baseMove := Move(0)
 	baseMove.setMoveType(normalMove)
 
-	if isWhiteMove {
+	if b.IsWhiteMove {
+		ownPieces = b.WhitePieces
+		knights = b.Knights & b.WhitePieces
 		baseMove.setOriginOccupancy(whiteKnight)
 		baseMove.setDestOccupancyAfterMove(whiteKnight)
 	} else {
+		ownPieces = b.BlackPieces
+		knights = b.Knights & b.BlackPieces
 		baseMove.setOriginOccupancy(blackKnight)
 		baseMove.setDestOccupancyAfterMove(blackKnight)
 	}
