@@ -13,19 +13,19 @@ package moveGen
 type Move uint32
 
 const (
-	originSquareBitsStart = 0
-	originSquareBitsEnd = 5
-	destSquareBitsStart = 6
-	destSquareBitsEnd = 11
-	originSquareOccBitsStart = 12
-	originSquareOccBitsEnd = 15
-	destSquarePreMoveOccBitsStart = 16
-	destSquarePreMoveOccBitsEnd = 20
+	originSquareBitsStart          = 0
+	originSquareBitsEnd            = 5
+	destSquareBitsStart            = 6
+	destSquareBitsEnd              = 11
+	originSquareOccBitsStart       = 12
+	originSquareOccBitsEnd         = 15
+	destSquarePreMoveOccBitsStart  = 16
+	destSquarePreMoveOccBitsEnd    = 20
 	destSquarePostMoveOccBitsStart = 21
-	destSquarePostMoveOccBitsEnd = 25
-	moveTypeBitsStart = 26
-	moveTypeBitsEnd = 28
-	whoseTurnBit = 29
+	destSquarePostMoveOccBitsEnd   = 25
+	moveTypeBitsStart              = 26
+	moveTypeBitsEnd                = 28
+	whoseTurnBit                   = 29
 )
 
 //"move type" bits. These are the 4 bits inside a Move at bits 26-29

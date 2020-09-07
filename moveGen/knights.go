@@ -3,6 +3,7 @@ package moveGen
 import (
 	"math/bits"
 )
+
 func getKnightMoves(knights, ownPieces uint64, ch chan []Move, isWhiteMove bool) {
 	var moves []Move
 	knights = knights & ownPieces //filter out enemy knights

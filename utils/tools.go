@@ -48,10 +48,10 @@ func IsolateLsb(b uint64) uint64 {
 //IsolateBits(0b11101111, 2, 7) -> 111011. Note that this is NOT 11101100 (which is keeping significance)
 func IsolateBitsU32(bits, startIndex, endIndex uint32) uint32 {
 	//Step one: Set all the bits to the left of startIndex to 0
-	bitsToTheLeft := uint32(1 << (startIndex) - 1) //get all the bits to the left of startIndex
+	bitsToTheLeft := uint32(1<<(startIndex) - 1)       //get all the bits to the left of startIndex
 	bitsToTheLeft = bitsToTheLeft << (32 - startIndex) //this will align bitsToTheLeft with the original move
-	bits = bits &^ bitsToTheLeft // Clear all bits to the left of startIndex
-	return bits >> (31 - endIndex) // Clear bits to the right of endIndex
+	bits = bits &^ bitsToTheLeft                       // Clear all bits to the left of startIndex
+	return bits >> (31 - endIndex)                     // Clear bits to the right of endIndex
 }
 
 //Expects 0 <= startIndex <= endIndex <= 31, with 0 representing the most significant bit.
@@ -67,7 +67,7 @@ func SetBitsU32(oldBits, startIndex, endIndex, newBits uint32) uint32 {
 	oldBits = ClearBitsU32(oldBits, startIndex, endIndex)
 	//Now, line up the new bits with the cleared bits
 	//We need to ensure that 0s will be left filled if end-start > num bits. (What if you passed 0b001 to set 3 bits?)
-	newBits = newBits << (31-endIndex)
+	newBits = newBits << (31 - endIndex)
 
 	return oldBits | newBits
 }
@@ -77,10 +77,10 @@ func SetBitsU32(oldBits, startIndex, endIndex, newBits uint32) uint32 {
 //setting the start and end at the same index will clear the single bit at that index.
 func ClearBitsU32(oldBits, startIndex, endIndex uint32) uint32 {
 	//Get a block of bits n long to clear with
-	block := 1 << (endIndex+1 - startIndex)-1
+	block := 1<<(endIndex+1-startIndex) - 1
 
 	//Shift these bits until they line up with the bits you wish to clear
-	clear := uint32(block << (31-endIndex))
+	clear := uint32(block << (31 - endIndex))
 
 	//use those bits to clear oldBits
 	return oldBits &^ clear

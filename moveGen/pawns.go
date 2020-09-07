@@ -5,7 +5,6 @@ import (
 	"fmt"
 )
 
-
 // TODO Don't pass by value - optimize
 func (b Board) getPawnMoves(c chan []Move) {
 	var moves []Move
@@ -22,7 +21,6 @@ func (b Board) getPawnMoves(c chan []Move) {
 
 	c <- moves
 }
-
 
 //Expects a pawn that is eligible for a promotion, and will return all possible promotions.
 func pawnPromotionsHelper(move Move, isWhiteToMove bool) (allMoves []Move) {
@@ -63,7 +61,7 @@ func (b Board) pawnSinglePushMoves() (moves []Move) {
 	}
 
 	openSquares &^= b.WhitePieces | b.BlackPieces //Filter out all squares with pieces on them
-	for openSquares != 0 { 	//Convert all available squares to a Move
+	for openSquares != 0 {                        //Convert all available squares to a Move
 		dest := utils.IsolateLsb(openSquares)
 		newMove := baseMove
 		newMove.setDestFromBB(dest)
@@ -75,7 +73,7 @@ func (b Board) pawnSinglePushMoves() (moves []Move) {
 				for _, promotion := range pawnPromotionsHelper(newMove, true) {
 					moves = append(moves, promotion)
 				}
-			} else {	//If not, just add the unpromoted move to list of moves.
+			} else { //If not, just add the unpromoted move to list of moves.
 				moves = append(moves, newMove)
 			}
 
@@ -86,7 +84,7 @@ func (b Board) pawnSinglePushMoves() (moves []Move) {
 				for _, promotion := range pawnPromotionsHelper(newMove, false) {
 					moves = append(moves, promotion)
 				}
-			} else {	//If not, just add the unpromoted move to list of moves.
+			} else { //If not, just add the unpromoted move to list of moves.
 				moves = append(moves, newMove)
 			}
 		}
@@ -144,7 +142,7 @@ func (b Board) pawnNormalCaptures() (moves []Move) {
 				for _, promotion := range pawnPromotionsHelper(newMove, true) {
 					moves = append(moves, promotion)
 				}
-			} else {	//If not, just add the unpromoted move to list of moves.
+			} else { //If not, just add the unpromoted move to list of moves.
 				moves = append(moves, newMove)
 			}
 

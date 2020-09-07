@@ -7,6 +7,7 @@ import (
 )
 
 type UndoMove func()
+
 var EpCount = 0
 
 //Given a starting board and a move, ApplyMove applies said move to said board,
@@ -44,26 +45,32 @@ func (b *Board) ApplyMove(m Move) UndoMove {
 		fmt.Println("CASTLE KINGSIDE!")
 		if b.IsWhiteMove {
 			b.Kings |= G1
+			b.WhitePieces |= G1
 			b.Rooks = b.Rooks &^ H1
-			b.WhitePieces = b.WhitePieces &^ A1
+			b.WhitePieces = b.WhitePieces &^ H1
 			b.Rooks |= F1
+			b.WhitePieces |= F1
 		} else {
 			b.Kings |= G8
+			b.WhitePieces |= G8
 			b.Rooks = b.Rooks &^ H8
-			b.BlackPieces = b.BlackPieces &^ A8
+			b.BlackPieces = b.BlackPieces &^ H8
 			b.Rooks |= F8
+			b.WhitePieces |= F8
 		}
 
 	case castleQueenside:
 		fmt.Println("CASTLE Q!")
 		if b.IsWhiteMove {
 			b.Kings |= C1
+			b.WhitePieces |= C1
 			b.Rooks = b.Rooks &^ A1
 			b.WhitePieces = b.WhitePieces &^ A1
 			b.Rooks |= D1
 			b.WhitePieces |= D1
 		} else {
 			b.Kings |= C8
+			b.WhitePieces |= C8
 			b.Rooks = b.Rooks &^ A8
 			b.BlackPieces = b.BlackPieces &^ A8
 			b.Rooks |= D8
@@ -239,8 +246,10 @@ func (b *Board) clearTargetSquare(m Move) {
 func (b *Board) putPieceOnTargetSquare(m Move) {
 	if b.IsWhiteMove {
 		b.WhitePieces |= m.getDestSquare()
+		b.BlackPieces &^= m.getDestSquare()
 	} else {
 		b.BlackPieces |= m.getDestSquare()
+		b.WhitePieces &^= m.getDestSquare()
 	}
 
 	switch m.getDestOccupancyAfterMove() {
@@ -365,5 +374,3 @@ func (m *Move) copyMoveAndSetDestOccupancy(newPiece tileOccupancy) Move {
 	newMove.setDestOccupancyAfterMove(newPiece)
 	return newMove
 }
-
-

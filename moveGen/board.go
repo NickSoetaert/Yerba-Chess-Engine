@@ -85,6 +85,27 @@ func SetUpBoardNoPawns() Board {
 	return board
 }
 
+func SetUpCastlingBoard() Board {
+	r, b := InitSlidingPieces()
+	board := Board{
+		Kings:                  E1 | E8,
+		WhitePieces:            E1 | A1 | H1,
+		BlackPieces:            E8 | A8 | H8,
+		Rooks:                  A1 | H1 | A8 | H8,
+		RookDB:                 r,
+		BishopDB:               b,
+		IsWhiteMove:            true,
+		WhiteKingHasNeverMoved: true,
+		H8RookHasNeverMoved:    true,
+		A1RookHasNeverMoved:    true,
+		BlackKingHasNeverMoved: true,
+		H1RookHasNeverMoved:    true,
+		A8RookHasNeverMoved:    true,
+		EnPassantFile:          uint8(0),
+	}
+	return board
+}
+
 //Todo: account for pinned pieces
 //TODO: fix bug where origin/target square/piece type isn't always set
 func (b Board) GenerateLegalMoves() (moves []Move) {
@@ -97,23 +118,23 @@ func (b Board) GenerateLegalMoves() (moves []Move) {
 	kChan := make(chan []Move)
 	castleChan := make(chan []Move)
 
-	go b.getPawnMoves(pChan)                                                                              //pawns
-	go b.getCastlingMoves(EmptyBoard, castleChan)                                                         //Todo: pass attacked squares
+	go b.getPawnMoves(pChan)                      //pawns
+	go b.getCastlingMoves(EmptyBoard, castleChan) //Todo: pass attacked squares
 
 	if b.IsWhiteMove {
 		go getSliderMoves(b.Bishops, b.WhitePieces, b.BlackPieces, true, true, b.BishopDB, bChan, whiteBishop) //bishops
-		go getSliderMoves(b.Rooks, b.WhitePieces, b.BlackPieces, true, false, b.RookDB, rChan, whiteRook)    //rooks
-		go getSliderMoves(b.Queens, b.WhitePieces, b.BlackPieces, true, true, b.BishopDB, qbChan, whiteQueen) //queens
-		go getSliderMoves(b.Queens, b.WhitePieces, b.BlackPieces, true, false, b.RookDB, qrChan, whiteQueen)  //queens
+		go getSliderMoves(b.Rooks, b.WhitePieces, b.BlackPieces, true, false, b.RookDB, rChan, whiteRook)      //rooks
+		go getSliderMoves(b.Queens, b.WhitePieces, b.BlackPieces, true, true, b.BishopDB, qbChan, whiteQueen)  //queens
+		go getSliderMoves(b.Queens, b.WhitePieces, b.BlackPieces, true, false, b.RookDB, qrChan, whiteQueen)   //queens
 
 		go getKnightMoves(b.Knights, b.WhitePieces, nChan, true)
 		go getNormalKingMoves(b.Kings, b.WhitePieces, EmptyBoard, kChan, true) //Todo: pass attacked squares
 
 	} else {
 		go getSliderMoves(b.Bishops, b.WhitePieces, b.BlackPieces, false, true, b.BishopDB, bChan, blackBishop) //bishops
-		go getSliderMoves(b.Rooks, b.WhitePieces, b.BlackPieces, false, false, b.RookDB, rChan, blackRook)    //rooks
-		go getSliderMoves(b.Queens, b.WhitePieces, b.BlackPieces, false, true, b.BishopDB, qbChan, blackQueen) //queens
-		go getSliderMoves(b.Queens, b.WhitePieces, b.BlackPieces, false, false, b.RookDB, qrChan, blackQueen)  //queens
+		go getSliderMoves(b.Rooks, b.WhitePieces, b.BlackPieces, false, false, b.RookDB, rChan, blackRook)      //rooks
+		go getSliderMoves(b.Queens, b.WhitePieces, b.BlackPieces, false, true, b.BishopDB, qbChan, blackQueen)  //queens
+		go getSliderMoves(b.Queens, b.WhitePieces, b.BlackPieces, false, false, b.RookDB, qrChan, blackQueen)   //queens
 
 		go getKnightMoves(b.Knights, b.BlackPieces, nChan, false)
 		go getNormalKingMoves(b.Kings, b.BlackPieces, EmptyBoard, kChan, false)
@@ -130,13 +151,6 @@ func (b Board) GenerateLegalMoves() (moves []Move) {
 
 	return moves
 }
-//getDestOccupancyAfterMove
-//getDestOccupancyAfterMove
-//getMoveType
-
-//good:
-//getOriginSquare
-//getDestSquare (always 1)
 
 //PrintBoard prints out an ascii representation of the given board
 func PrintBoard(b Board) {
