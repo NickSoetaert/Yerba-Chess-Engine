@@ -5,13 +5,24 @@ import (
 	"math/bits"
 )
 
-func getNormalKingMoves(kings, ownPieces, attackedSquares uint64, ch chan []Move) {
+func getNormalKingMoves(kings, ownPieces, attackedSquares uint64, ch chan []Move, isWhiteMove bool) {
 	var moves []Move
 	kings &= ownPieces
 	baseMove := Move(0)
+
 	baseMove.setMoveType(normalMove)
+
 	currentSquare := uint8(bits.TrailingZeros64(kings))
 	baseMove.setOriginFromSquare(currentSquare)
+
+	if isWhiteMove{
+		baseMove.setOriginOccupancy(whiteKing)
+		baseMove.setDestOccupancyAfterMove(whiteKing)
+	} else {
+		baseMove.setOriginOccupancy(blackKing)
+		baseMove.setDestOccupancyAfterMove(blackKing)
+	}
+
 	possibleAttacks := KingMask[currentSquare]
 	possibleAttacks = possibleAttacks &^ attackedSquares &^ ownPieces
 
@@ -35,7 +46,8 @@ func (b *Board) getCastlingMoves(attackedSquares uint64, ch chan []Move) {
 			//If there are no blocking pieces, and the king is not in or will be traveling through check
 			if allPieces & (F1|G1) == 0 && allPieces & (E1|F1|G1) == 0 {
 				var move Move
-				move.setOriginFromBB(E1) //all that's needed to update castling rights
+				move.setOriginFromBB(E1)
+				move.setOriginOccupancy(whiteKing)
 				move.setMoveType(castleKingside)
 				moves = append(moves, move)
 			}
@@ -44,7 +56,8 @@ func (b *Board) getCastlingMoves(attackedSquares uint64, ch chan []Move) {
 		if b.H1RookHasNeverMoved{	//Try to castle queenside
 			if allPieces & (D1|C1|B1) == 0 && attackedSquares&(E1|D1|C1) == 0 {
 				var move Move
-				move.setOriginFromBB(E1) //all that's needed to update castling rights
+				move.setOriginFromBB(E1)
+				move.setOriginOccupancy(blackKing)
 				move.setMoveType(castleQueenside)
 				moves = append(moves, move)
 			}

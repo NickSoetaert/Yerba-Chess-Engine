@@ -208,8 +208,12 @@ func (b Board) enPassantCaptures() (moves []Move) {
 
 	if b.IsWhiteMove {
 		openSquares |= ((b.Pawns << 7) & ^HFile) & (uint64(b.EnPassantFile) << 16)
+		baseMove.setOriginOccupancy(whitePawn)
+		baseMove.setDestOccupancyAfterMove(whitePawn)
 	} else {
 		openSquares |= ((b.Pawns >> 7) & ^AFile) & (uint64(b.EnPassantFile) << 40)
+		baseMove.setOriginOccupancy(blackPawn)
+		baseMove.setDestOccupancyAfterMove(blackPawn)
 	}
 	for openSquares != 0 {
 		dest := utils.IsolateLsb(openSquares)

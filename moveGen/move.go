@@ -79,8 +79,8 @@ func (b *Board) ApplyMove(m Move) UndoMove {
 	//Finally, change who's turn it is
 	b.IsWhiteMove = !b.IsWhiteMove
 
-	return func() { //Idea here is to return a function that will undo this move.
-		//todo
+	return func() {
+		//todo: idea here is to return a function that will undo this move without keeping whole the board in memory
 		*b = oldBoard
 	}
 }

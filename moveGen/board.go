@@ -93,19 +93,26 @@ func (b Board) GenerateLegalMoves() (moves []Move) {
 	kChan := make(chan []Move)
 	castleChan := make(chan []Move)
 
-	go b.getPawnMoves(pChan)  //pawns
-	go getSliderMoves(b.Bishops, b.WhitePieces, b.BlackPieces, b.IsWhiteMove, true, b.BishopDB, bChan) //bishops
-	go getSliderMoves(b.Rooks, b.WhitePieces, b.BlackPieces, b.IsWhiteMove, false, b.RookDB, rChan)    //rooks
-	go getSliderMoves(b.Queens, b.WhitePieces, b.BlackPieces, b.IsWhiteMove, true, b.BishopDB, qbChan) //queens
-	go getSliderMoves(b.Queens, b.WhitePieces, b.BlackPieces, b.IsWhiteMove, false, b.RookDB, qrChan)  //queens
-	go b.getCastlingMoves(EmptyBoard, castleChan)  //Todo: pass attacked squares
+	go b.getPawnMoves(pChan)                                                                              //pawns
+	go b.getCastlingMoves(EmptyBoard, castleChan)                                                         //Todo: pass attacked squares
 
 	if b.IsWhiteMove {
+		go getSliderMoves(b.Bishops, b.WhitePieces, b.BlackPieces, true, true, b.BishopDB, bChan, whiteBishop) //bishops
+		go getSliderMoves(b.Rooks, b.WhitePieces, b.BlackPieces, true, false, b.RookDB, rChan, whiteRook)    //rooks
+		go getSliderMoves(b.Queens, b.WhitePieces, b.BlackPieces, true, true, b.BishopDB, qbChan, whiteQueen) //queens
+		go getSliderMoves(b.Queens, b.WhitePieces, b.BlackPieces, true, false, b.RookDB, qrChan, whiteQueen)  //queens
+
 		go getKnightMoves(b.Knights, b.WhitePieces, nChan, true)
-		go getNormalKingMoves(b.Kings, b.WhitePieces, EmptyBoard, kChan) //Todo: pass attacked squares
+		go getNormalKingMoves(b.Kings, b.WhitePieces, EmptyBoard, kChan, true) //Todo: pass attacked squares
+
 	} else {
+		go getSliderMoves(b.Bishops, b.WhitePieces, b.BlackPieces, false, true, b.BishopDB, bChan, blackBishop) //bishops
+		go getSliderMoves(b.Rooks, b.WhitePieces, b.BlackPieces, false, false, b.RookDB, rChan, blackRook)    //rooks
+		go getSliderMoves(b.Queens, b.WhitePieces, b.BlackPieces, false, true, b.BishopDB, qbChan, blackQueen) //queens
+		go getSliderMoves(b.Queens, b.WhitePieces, b.BlackPieces, false, false, b.RookDB, qrChan, blackQueen)  //queens
+
 		go getKnightMoves(b.Knights, b.BlackPieces, nChan, false)
-		go getNormalKingMoves(b.Kings, b.BlackPieces, EmptyBoard, kChan)
+		go getNormalKingMoves(b.Kings, b.BlackPieces, EmptyBoard, kChan, false)
 	}
 
 	moves = append(moves, <-pChan...)
