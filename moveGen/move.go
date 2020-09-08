@@ -202,9 +202,9 @@ func (b *Board) clearOriginSquare(m Move) {
 //Captures (removes) the piece on the target square
 func (b *Board) clearTargetSquare(m Move) {
 	if b.IsWhiteMove {
-		b.WhitePieces = b.WhitePieces &^  m.getDestSquare()
+		b.WhitePieces = b.WhitePieces &^ m.getDestSquare()
 	} else {
-		b.BlackPieces = b.BlackPieces &^  m.getDestSquare()
+		b.BlackPieces = b.BlackPieces &^ m.getDestSquare()
 	}
 
 	switch m.getDestOccupancyBeforeMove() {

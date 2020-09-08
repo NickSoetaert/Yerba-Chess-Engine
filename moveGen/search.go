@@ -65,7 +65,9 @@ func (b *Board) MiniMax(plyLeft int, alpha, beta float64) float64 {
 	}
 	return eval
 }
+
 var Total int
+
 //Counts the number of legal moves at a given ply, used for testing
 func (b *Board) CountVariationsAtPly(ply, legalMoves int, printBoard bool) int {
 	ply--

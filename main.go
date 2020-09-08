@@ -12,7 +12,7 @@ func main() {
 
 	b := moveGen.SetUpBoard()
 
-	fmt.Println(b.CountVariationsAtPly(3,0, false))
+	fmt.Println(b.CountVariationsAtPly(3, 0, false))
 
 	//start := time.Now()
 	//ply := 3
