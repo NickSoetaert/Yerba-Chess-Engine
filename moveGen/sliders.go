@@ -204,7 +204,7 @@ func (b *Board) getSliderMoves(sliders uint64, bishopMove bool, c chan []Move, p
 	}
 	for sliders != 0 { //While there are any sliders left to calculate moves for
 		originSquareMove := baseMove
-		currentSquareNum := utils.IsolateLsb(sliders)
+ 		currentSquareNum := utils.IsolateLsb(sliders)
 		originSquareMove.setOriginFromBB(currentSquareNum)
 
 		var possibleAttacks uint64

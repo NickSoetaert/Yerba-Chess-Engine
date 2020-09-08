@@ -8,11 +8,11 @@ import (
 // TODO Don't pass by value - optimize
 func (b Board) getPawnMoves(c chan []Move) {
 	var moves []Move
-	if b.IsWhiteMove {
-		b.Pawns &= b.WhitePieces
-	} else {
-		b.Pawns &= b.BlackPieces
-	}
+	//if b.IsWhiteMove {
+	//	b.Pawns &= b.WhitePieces
+	//} else {
+	//	b.Pawns &= b.BlackPieces
+	//}
 
 	moves = append(moves, b.pawnNormalCaptures()...)
 	moves = append(moves, b.pawnSinglePushMoves()...)
@@ -57,7 +57,7 @@ func (b Board) pawnSinglePushMoves() (moves []Move) {
 	} else {
 		openSquares = (b.Pawns & b.BlackPieces) >> 8
 		baseMove.setOriginOccupancy(blackPawn)
-		baseMove.setDestOccupancyAfterMove(whitePawn)
+		baseMove.setDestOccupancyAfterMove(blackPawn)
 	}
 
 	openSquares &^= b.WhitePieces | b.BlackPieces //Filter out all squares with pieces on them
@@ -99,11 +99,11 @@ func (b Board) pawnNormalCaptures() (moves []Move) {
 	baseMove.setMoveType(normalMove)
 
 	if b.IsWhiteMove {
-		openSquares = ((b.Pawns << 7) & ^HFile) & b.BlackPieces
+		openSquares = ((b.Pawns & b.WhitePieces << 7) & ^HFile) & b.BlackPieces
 		baseMove.setOriginOccupancy(whitePawn)
 		baseMove.setDestOccupancyAfterMove(whitePawn)
 	} else {
-		openSquares = ((b.Pawns >> 7) & ^AFile) & b.WhitePieces
+		openSquares = ((b.Pawns & b.BlackPieces >> 7) & ^AFile) & b.WhitePieces
 		baseMove.setOriginOccupancy(blackPawn)
 		baseMove.setDestOccupancyAfterMove(blackPawn)
 	}
@@ -124,9 +124,9 @@ func (b Board) pawnNormalCaptures() (moves []Move) {
 	}
 
 	if b.IsWhiteMove {
-		openSquares |= ((b.Pawns << 9) & ^AFile) & b.BlackPieces
+		openSquares |= ((b.Pawns & b.WhitePieces << 9) & ^AFile) & b.BlackPieces
 	} else {
-		openSquares |= ((b.Pawns >> 9) & ^HFile) & b.WhitePieces
+		openSquares |= ((b.Pawns & b.BlackPieces >> 9) & ^HFile) & b.WhitePieces
 	}
 	//Convert all available squares to a Move
 	for openSquares != 0 {
@@ -170,11 +170,11 @@ func (b Board) pawnDoublePushMoves() (moves []Move) {
 	baseMove.setDestOccupancyBeforeMove(empty)
 	if b.IsWhiteMove {
 		//Get moves that move forward 2 ranks and end up on proper rank, and don't jump over anything
-		openSquares |= ((b.Pawns << 16) & FourthRank) ^ (((b.WhitePieces | b.BlackPieces) & ThirdRank) << 8)
+		openSquares |= ((b.Pawns & b.WhitePieces << 16) & FourthRank) ^ (((b.WhitePieces | b.BlackPieces) & ThirdRank) << 8)
 		baseMove.setOriginOccupancy(whitePawn)
 		baseMove.setDestOccupancyAfterMove(whitePawn)
 	} else {
-		openSquares |= ((b.Pawns >> 16) & FifthRank) ^ (((b.WhitePieces | b.BlackPieces) & SixthRank) >> 8)
+		openSquares |= ((b.Pawns & b.BlackPieces >> 16) & FifthRank) ^ (((b.WhitePieces | b.BlackPieces) & SixthRank) >> 8)
 		baseMove.setOriginOccupancy(blackPawn)
 		baseMove.setDestOccupancyAfterMove(blackPawn)
 	}
@@ -206,11 +206,11 @@ func (b Board) enPassantCaptures() (moves []Move) {
 	var openSquares uint64
 
 	if b.IsWhiteMove {
-		openSquares |= ((b.Pawns << 7) & ^HFile) & (uint64(b.EnPassantFile) << 16)
+		openSquares |= ((b.Pawns & b.BlackPieces << 7) & ^HFile) & (uint64(b.EnPassantFile) << 16) //todo - possible bug. Should it be & b.WhitePieces?
 		baseMove.setOriginOccupancy(whitePawn)
 		baseMove.setDestOccupancyAfterMove(whitePawn)
 	} else {
-		openSquares |= ((b.Pawns >> 7) & ^AFile) & (uint64(b.EnPassantFile) << 40)
+		openSquares |= ((b.Pawns & b.WhitePieces >> 7) & ^AFile) & (uint64(b.EnPassantFile) << 40)
 		baseMove.setOriginOccupancy(blackPawn)
 		baseMove.setDestOccupancyAfterMove(blackPawn)
 	}
@@ -228,9 +228,9 @@ func (b Board) enPassantCaptures() (moves []Move) {
 	}
 
 	if b.IsWhiteMove {
-		openSquares |= ((b.Pawns << 9) & ^HFile) & (uint64(b.EnPassantFile) << 16)
+		openSquares |= ((b.Pawns & b.BlackPieces << 9) & ^HFile) & (uint64(b.EnPassantFile) << 16)
 	} else {
-		openSquares |= ((b.Pawns >> 9) & ^AFile) & (uint64(b.EnPassantFile) << 40)
+		openSquares |= ((b.Pawns & b.WhitePieces >> 9) & ^AFile) & (uint64(b.EnPassantFile) << 40)
 	}
 	for openSquares != 0 {
 		dest := utils.IsolateLsb(openSquares)

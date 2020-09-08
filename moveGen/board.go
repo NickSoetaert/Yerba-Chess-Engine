@@ -157,45 +157,45 @@ func PrintBoard(b Board) {
 	boardString := [8][8]rune{}
 
 	for i := 0; i < 64; i++ {
-		boardString[i/8][i%8] = EmptySquare
+		boardString[i/8][i%8] = EmptySquareIcon
 	}
 
 	for i := uint(0); i < 64; i++ {
 		if (b.Pawns&b.WhitePieces>>i)&1 == 1 {
-			boardString[7-(i/8)][i%8] = WhitePawn
+			boardString[7-(i/8)][i%8] = WhitePawnIcon
 		}
 		if (b.Pawns&b.BlackPieces>>i)&1 == 1 {
-			boardString[7-(i/8)][i%8] = BlackPawn
+			boardString[7-(i/8)][i%8] = BlackPawnIcon
 		}
 		if (b.Knights&b.WhitePieces>>i)&1 == 1 {
-			boardString[7-(i/8)][i%8] = WhiteKnight
+			boardString[7-(i/8)][i%8] = WhiteKnightIcon
 		}
 		if (b.Knights&b.BlackPieces>>i)&1 == 1 {
-			boardString[7-(i/8)][i%8] = BlackKnight
+			boardString[7-(i/8)][i%8] = BlackKnightIcon
 		}
 		if (b.Bishops&b.WhitePieces>>i)&1 == 1 {
-			boardString[7-(i/8)][i%8] = WhiteBishop
+			boardString[7-(i/8)][i%8] = WhiteBishopIcon
 		}
 		if (b.Bishops&b.BlackPieces>>i)&1 == 1 {
-			boardString[7-(i/8)][i%8] = BlackBishop
+			boardString[7-(i/8)][i%8] = BlackBishopIcon
 		}
 		if (b.Rooks&b.WhitePieces>>i)&1 == 1 {
-			boardString[7-(i/8)][i%8] = WhiteRook
+			boardString[7-(i/8)][i%8] = WhiteRookIcon
 		}
 		if (b.Rooks&b.BlackPieces>>i)&1 == 1 {
-			boardString[7-(i/8)][i%8] = BlackRook
+			boardString[7-(i/8)][i%8] = BlackRookIcon
 		}
 		if (b.Queens&b.WhitePieces>>i)&1 == 1 {
-			boardString[7-(i/8)][i%8] = WhiteQueen
+			boardString[7-(i/8)][i%8] = WhiteQueenIcon
 		}
 		if (b.Queens&b.BlackPieces>>i)&1 == 1 {
-			boardString[7-(i/8)][i%8] = BlackQueen
+			boardString[7-(i/8)][i%8] = BlackQueenIcon
 		}
 		if (b.Kings&b.WhitePieces>>i)&1 == 1 {
-			boardString[7-(i/8)][i%8] = WhiteKing
+			boardString[7-(i/8)][i%8] = WhiteKingIcon
 		}
 		if (b.Kings&b.BlackPieces>>i)&1 == 1 {
-			boardString[7-(i/8)][i%8] = BlackKing
+			boardString[7-(i/8)][i%8] = BlackKingIcon
 		}
 	}
 	for i := 0; i < 8; i++ {

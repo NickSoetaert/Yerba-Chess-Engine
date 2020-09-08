@@ -26,7 +26,21 @@ func (b *Board) getTileOccupancy(tile uint64) tileOccupancy {
 		} else {
 			PrintBoard(*b)
 			utils.PrintBinaryBoard(tile)
-			panic("impossible tile occupancy")
+			utils.PrintBinaryBoard(b.BlackPieces)
+			fmt.Printf("\n\n\n\n\n")
+			utils.PrintBinaryBoard(b.Pawns)
+			fmt.Printf("\n\n\n\n\n")
+			fmt.Printf("tile and white == empty: %v\n",tile & b.WhitePieces == EmptyBoard)
+			fmt.Printf("tile and black == empty: %v\n",tile & b.BlackPieces == EmptyBoard)
+
+			fmt.Printf("tile and pawn == empty: %v\n",tile & b.Pawns == EmptyBoard)
+			fmt.Printf("tile and kn == empty: %v\n",tile & b.Knights == EmptyBoard)
+			fmt.Printf("tile and b == empty: %v\n",tile & b.Bishops == EmptyBoard)
+			fmt.Printf("tile and r == empty: %v\n",tile & b.Rooks == EmptyBoard)
+			fmt.Printf("tile and q == empty: %v\n",tile & b.Queens == EmptyBoard)
+			fmt.Printf("tile and k == empty: %v\n",tile & b.Kings == EmptyBoard)
+
+			panic("white move - impossible tile occupancy")
 		}
 	} else {
 		if tile&b.BlackPieces == EmptyBoard {
@@ -45,7 +59,7 @@ func (b *Board) getTileOccupancy(tile uint64) tileOccupancy {
 			fmt.Println("capturing a king!")
 			return whiteKing
 		} else {
-			panic("impossible tile occupancy")
+			panic("black move - impossible tile occupancy")
 		}
 	}
 }

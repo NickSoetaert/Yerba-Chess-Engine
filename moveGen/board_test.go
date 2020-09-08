@@ -31,3 +31,11 @@ func TestBoard_GenerateLegalMoves(t *testing.T) {
 	b = SetUpCastlingTestBoard()
 	assert.Equal(t, 26, len(b.GenerateLegalMoves()))
 }
+
+//https://en.wikipedia.org/wiki/Shannon_number
+func TestBoard_CountLegalMovesAtPly(t *testing.T) {
+	b := SetUpBoard()
+	assert.Equal(t, 20, b.CountVariationsAtPly(1, 0, false))
+	assert.Equal(t, 400, b.CountVariationsAtPly(2, 0, false))
+	assert.Equal(t, 8902, b.CountVariationsAtPly(3, 0, false))
+}

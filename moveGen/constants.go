@@ -67,19 +67,19 @@ const (
 
 //graphics
 const (
-	BlackKing   rune = 9812
-	BlackQueen  rune = 9813
-	BlackRook   rune = 9814
-	BlackBishop rune = 9815
-	BlackKnight rune = 9816
-	BlackPawn   rune = 9817
+	BlackKingIcon   rune = 9812
+	BlackQueenIcon  rune = 9813
+	BlackRookIcon   rune = 9814
+	BlackBishopIcon rune = 9815
+	BlackKnightIcon rune = 9816
+	BlackPawnIcon   rune = 9817
 
-	WhiteKing   rune = 9818
-	WhiteQueen  rune = 9819
-	WhiteRook   rune = 9820
-	WhiteBishop rune = 9821
-	WhiteKnight rune = 9822
-	WhitePawn   rune = 9823
+	WhiteKingIcon   rune = 9818
+	WhiteQueenIcon  rune = 9819
+	WhiteRookIcon   rune = 9820
+	WhiteBishopIcon rune = 9821
+	WhiteKnightIcon rune = 9822
+	WhitePawnIcon   rune = 9823
 
-	EmptySquare rune = 32
+	EmptySquareIcon rune = 32
 )
