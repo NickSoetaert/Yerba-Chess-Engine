@@ -3,16 +3,23 @@ package main
 
 import (
 	"Yerba/moveGen"
-	//"Yerba/utils"
 	"fmt"
 )
+
+//todo: Generating incorrect number of moves at 3+ ply
+// -Account for moving through check when castling
+// -Implement checkmate
+// -Don't count capturing a king as a legal move
+// -Index out of range on getNormalKingMoves() on higher plies.
+// -Account for absolutely pinned pieces
+// -Optimize undo move function
 
 func main() {
 	//fmt.Println("Hello World")
 
 	b := moveGen.SetUpBoard()
 
-	fmt.Println(b.CountVariationsAtPly(3, 0, false))
+	fmt.Println(b.CountVariationsAtPly(6, 0, false))
 
 	//start := time.Now()
 	//ply := 3

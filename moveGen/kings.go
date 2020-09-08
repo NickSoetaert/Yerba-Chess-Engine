@@ -20,7 +20,7 @@ func (b *Board) getNormalKingMoves(attackedSquares uint64, ch chan []Move) {
 		baseMove.setDestOccupancyAfterMove(whiteKing)
 	} else {
 		currentSquare = utils.IsolateLsb(b.Kings & b.BlackPieces)
-		possibleAttacks = KingMask[bits.TrailingZeros64(currentSquare)] &^ attackedSquares &^ b.BlackPieces
+		possibleAttacks = KingMask[bits.TrailingZeros64(currentSquare)] &^ attackedSquares &^ b.BlackPieces //todo - currentSquare possibly wrong
 		baseMove.setOriginOccupancy(blackKing)
 		baseMove.setDestOccupancyAfterMove(blackKing)
 	}

@@ -5,14 +5,8 @@ import (
 	"fmt"
 )
 
-// TODO Don't pass by value - optimize
 func (b Board) getPawnMoves(c chan []Move) {
 	var moves []Move
-	//if b.IsWhiteMove {
-	//	b.Pawns &= b.WhitePieces
-	//} else {
-	//	b.Pawns &= b.BlackPieces
-	//}
 
 	moves = append(moves, b.pawnNormalCaptures()...)
 	moves = append(moves, b.pawnSinglePushMoves()...)
