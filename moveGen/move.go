@@ -1,257 +1,376 @@
 package moveGen
 
 import (
+	"Yerba/utils"
+	"fmt"
 	"math/bits"
 )
 
-//type Move:
-//Origin square bits:	   	0-5
-//Destination square bits: 	6-11
-//Special move bits:		12-15
-
-//Origin/dest square bits:
-//0 represents A1, and 64 represents H8
-
-//Special move flag bits
-//Note that all flags are mutually exclusive
-//0000 - normal pawn push
-//0001 - normal pawn capture
-//0010 - double pawn push
-//0011 - en passant capture
-//0100 - knight move
-//0101 - bishop move
-//0110 - rook move
-//0111 - queen move
-//1000 - king move
-//1001 - castle kingside
-//1010 - castle queenside
-//1011 - knight promotion
-//1100 - bishop promotion
-//1101 - rook promotion
-//1110 - queen promotion
-//1111 - UNUSED
-
-type Move uint16
-
 type UndoMove func()
 
-//Given a starting board and a move, return the resulting board.
-//Returns a function that undoes the previously applied move.
+var EpCount = 0
+
+//Given a starting board and a move, ApplyMove applies said move to said board,
+//and returns a function that will undo the previously applied move.
 //ApplyMove does NOT check for legality; that is the responsibility of MoveGen.
 func (b *Board) ApplyMove(m Move) UndoMove {
 	oldBoard := *b //TODO: Optimize
 
-	//Note - adding/removing pieces from the White/Black bitboards is taken care of in a single case after the switch.
-	switch m.getMoveType() {
-	case normalPawnPush:
-		b.Pawns = b.Pawns &^ m.getOrigin() //clear pawn
-		b.Pawns |= m.getDest()             //add pawn
+	b.clearOriginSquare(m) //Must clear starting square for all move types
+	b.clearTargetSquare(m) //Must clear end square for all move types
 
-	case normalPawnCapture:
-		b.Pawns = b.Pawns &^ m.getOrigin() //clear pawn
-		b.clearTargetSquare(m.getDest())   //clear captured piece
-		b.Pawns |= m.getDest()             //add pawn
+	switch m.getMoveType() {
+	case normalMove:
+		b.putPieceOnTargetSquare(m)
 
 	case pawnDoublePush:
-		b.EnPassantFile = uint8(bits.TrailingZeros64(m.getOrigin()) % 8)
-		b.Pawns = b.Pawns &^ m.getOrigin() //clear pawn
-		b.Pawns |= m.getDest()             //add pawn
+		b.EnPassantFile = uint8(bits.TrailingZeros64(m.getOriginSquare()) % 8) //can capture e.p. next turn
+		b.putPieceOnTargetSquare(m)
 
 	case enPassantCapture:
-		b.Pawns = b.Pawns &^ m.getOrigin() //clear pawn
-		b.Pawns |= m.getDest()             //add pawn
-		if b.IsWhiteMove {
-			b.clearTargetSquare(uint64(b.EnPassantFile) << 16) //remove captured piece
+		EpCount++
+		//add and remove pawns for Pawns bitboards
+		b.Pawns |= m.getDestSquare()                                               //add pawn
+		b.Pawns = b.Pawns &^ enPassantFileToSquare(b.EnPassantFile, b.IsWhiteMove) //remove pawn
+
+		if b.IsWhiteMove { //add and remove pawns for WhitePieces and BlackPieces bitboards
+			b.WhitePieces |= m.getDestSquare()                                                     //add pawn
+			b.BlackPieces = b.BlackPieces &^ enPassantFileToSquare(b.EnPassantFile, b.IsWhiteMove) //remove pawn
 		} else {
-			b.clearTargetSquare(uint64(b.EnPassantFile) << 40) //TODO: check
+			b.BlackPieces |= m.getDestSquare()                                                     //add pawn
+			b.WhitePieces = b.WhitePieces &^ enPassantFileToSquare(b.EnPassantFile, b.IsWhiteMove) //remove pawn
 		}
-
-	case knightMove:
-		b.Knights = b.Knights &^ m.getOrigin()
-		b.clearTargetSquare(m.getDest())
-		b.Knights |= m.getDest()
-
-	case bishopMove:
-		b.Bishops = b.Bishops &^ m.getOrigin()
-		b.clearTargetSquare(m.getDest())
-		b.Bishops |= m.getDest()
-
-	case rookMove:
-		//It's possible that we were moving a non-original rook from a corner square, but that doesn't matter as
-		//the original rook is no longer on that corner square. (So castle rights were revoked in the first place.)
-		if m.getOrigin() == A1 {
-			b.WhiteQueensideCastleRights = false
-		} else if m.getOrigin() == H1 {
-			b.WhiteKingsideCastleRights = false
-		} else if m.getOrigin() == A8 {
-			b.BlackQueensideCastleRights = false
-		} else if m.getOrigin() == H8 {
-			b.BlackKingsideCastleRights = false
-		}
-
-		b.Rooks = b.Rooks &^ m.getOrigin()
-		b.clearTargetSquare(m.getDest())
-		b.Rooks |= m.getDest()
-
-	case queenMove:
-		b.Queens = b.Queens &^ m.getOrigin()
-		b.clearTargetSquare(m.getDest())
-		b.Queens |= m.getDest()
-
-	case normalKingMove:
-		if b.IsWhiteMove {
-			b.WhiteKingsideCastleRights = false
-			b.WhiteQueensideCastleRights = false
-		} else {
-			b.BlackKingsideCastleRights = false
-			b.WhiteQueensideCastleRights = false
-		}
-		b.Kings = b.Kings &^ m.getOrigin()
-		b.clearTargetSquare(m.getDest())
-		b.Kings |= m.getDest()
 
 	case castleKingside:
-		b.Kings = b.Kings &^ m.getOrigin()
 		if b.IsWhiteMove {
 			b.Kings |= G1
+			b.WhitePieces |= G1
 			b.Rooks = b.Rooks &^ H1
+			b.WhitePieces = b.WhitePieces &^ H1
 			b.Rooks |= F1
-			b.WhiteKingsideCastleRights = false
-			b.WhiteQueensideCastleRights = false
+			b.WhitePieces |= F1
 		} else {
 			b.Kings |= G8
+			b.WhitePieces |= G8
 			b.Rooks = b.Rooks &^ H8
+			b.BlackPieces = b.BlackPieces &^ H8
 			b.Rooks |= F8
-			b.BlackKingsideCastleRights = false
-			b.BlackQueensideCastleRights = false
+			b.WhitePieces |= F8
 		}
 
 	case castleQueenside:
-		b.Kings = b.Kings &^ m.getOrigin()
 		if b.IsWhiteMove {
 			b.Kings |= C1
+			b.WhitePieces |= C1
 			b.Rooks = b.Rooks &^ A1
 			b.WhitePieces = b.WhitePieces &^ A1
 			b.Rooks |= D1
 			b.WhitePieces |= D1
-			b.WhiteKingsideCastleRights = false
-			b.WhiteQueensideCastleRights = false
 		} else {
 			b.Kings |= C8
+			b.WhitePieces |= C8
 			b.Rooks = b.Rooks &^ A8
 			b.BlackPieces = b.BlackPieces &^ A8
 			b.Rooks |= D8
 			b.BlackPieces |= D8
-			b.BlackKingsideCastleRights = false
-			b.BlackQueensideCastleRights = false
 		}
-
-	case knightPromotion:
-		b.Pawns = b.Pawns &^ m.getOrigin() //clear pawn
-		b.clearTargetSquare(m.getDest())   //clear possible capture
-		b.Knights |= m.getDest()           //add knight
-
-	case bishopPromotion:
-		b.Pawns = b.Pawns &^ m.getOrigin() //clear pawn
-		b.clearTargetSquare(m.getDest())   //clear possible capture
-		b.Bishops |= m.getDest()           //add bishop
-
-	case rookPromotion:
-		b.Pawns = b.Pawns &^ m.getOrigin() //clear pawn
-		b.clearTargetSquare(m.getDest())   //clear possible capture
-		b.Rooks |= m.getDest()             //add rook
-
-	case queenPromotion:
-		b.Pawns = b.Pawns &^ m.getOrigin() //clear pawn
-		b.clearTargetSquare(m.getDest())   //clear possible capture
-		b.Queens |= m.getDest()            //add queen
-
+	default:
+		panic("didn't set move type for move")
 	}
+
+	b.updateCastlingRights(m) //update flags relevant to castling
 
 	//Clear en passant capture unless we just pushed a pawn two squares
 	if m.getMoveType() != pawnDoublePush {
 		b.EnPassantFile = 0
 	}
 
-	//Take care of adding/removing pieces from the color bitboards.
-	if b.IsWhiteMove {
-		b.WhitePieces = b.WhitePieces &^ m.getOrigin()
-		b.WhitePieces |= m.getDest()
-	} else {
-		b.BlackPieces = b.BlackPieces &^ m.getOrigin()
-		b.BlackPieces |= m.getDest()
-	}
-
 	//Finally, change who's turn it is
 	b.IsWhiteMove = !b.IsWhiteMove
 
 	return func() {
+		//todo: idea here is to return a function that will undo this move without keeping whole the board in memory
 		*b = oldBoard
 	}
 }
 
-//Removes all possible pieces in the way of a potential capture square
-func (b *Board) clearTargetSquare(square uint64) {
-	b.Pawns = b.Pawns &^ square
-	b.Knights = b.Knights &^ square
-	b.Bishops = b.Bishops &^ square
-	b.Rooks = b.Rooks &^ square
-	b.Queens = b.Queens &^ square
+func (b *Board) updateCastlingRights(m Move) {
+	//We don't need to check for piece type because once that piece is off its home square,
+	//its corresponding bool is already false. Hence no harm in setting a false value to false.
+	if m.getOriginSquare() == A1 {
+		b.A1RookHasNeverMoved = false
+	} else if m.getOriginSquare() == A8 {
+		b.A8RookHasNeverMoved = false
+	} else if m.getOriginSquare() == H1 {
+		b.H1RookHasNeverMoved = false
+	} else if m.getOriginSquare() == H8 {
+		b.H8RookHasNeverMoved = false
+	} else if m.getOriginSquare() == E1 {
+		b.WhiteKingHasNeverMoved = false
+	} else if m.getOriginSquare() == E8 {
+		b.BlackKingHasNeverMoved = false
+	}
+}
 
-	if b.IsWhiteMove {
-		b.BlackPieces = b.BlackPieces &^ square
+//Given a file number (with 1==A, 8==h) and who's turn it is,
+//Returns the square on which an en passant capture would take place. Wordy but fast.
+func enPassantFileToSquare(file uint8, isWhiteToMove bool) uint64 {
+	if isWhiteToMove {
+		switch file {
+		case 1:
+			return A4
+		case 2:
+			return B4
+		case 3:
+			return C4
+		case 4:
+			return D4
+		case 5:
+			return E4
+		case 6:
+			return F4
+		case 7:
+			return G4
+		case 8:
+			return H4
+		default:
+			panic(fmt.Sprintf("impossible e.p. file %v", file))
+		}
 	} else {
-		b.WhitePieces = b.WhitePieces &^ square
+		switch file {
+		case 1:
+			return A5
+		case 2:
+			return B5
+		case 3:
+			return C5
+		case 4:
+			return D5
+		case 5:
+			return E5
+		case 6:
+			return F5
+		case 7:
+			return G5
+		case 8:
+			return H5
+		default:
+			panic(fmt.Sprintf("impossible e.p. file %v", file))
+		}
+	}
+}
+
+// Removes a piece from its start square
+func (b *Board) clearOriginSquare(m Move) {
+	if b.IsWhiteMove {
+		b.WhitePieces = b.WhitePieces &^ m.getOriginSquare()
+	} else {
+		b.BlackPieces = b.BlackPieces &^ m.getOriginSquare()
+	}
+
+	switch m.getOriginOccupancy() {
+	case whitePawn:
+		b.Pawns = b.Pawns &^ m.getOriginSquare()
+	case whiteKnight:
+		b.Knights = b.Knights &^ m.getOriginSquare()
+	case whiteBishop:
+		b.Bishops = b.Bishops &^ m.getOriginSquare()
+	case whiteRook:
+		b.Rooks = b.Rooks &^ m.getOriginSquare()
+	case whiteQueen:
+		b.Queens = b.Queens &^ m.getOriginSquare()
+	case whiteKing:
+		b.Kings = b.Kings &^ m.getOriginSquare()
+
+	case blackPawn:
+		b.Pawns = b.Pawns &^ m.getOriginSquare()
+	case blackKnight:
+		b.Knights = b.Knights &^ m.getOriginSquare()
+	case blackBishop:
+		b.Bishops = b.Bishops &^ m.getOriginSquare()
+	case blackRook:
+		b.Rooks = b.Rooks &^ m.getOriginSquare()
+	case blackQueen:
+		b.Queens = b.Queens &^ m.getOriginSquare()
+	case blackKing:
+		b.Kings = b.Kings &^ m.getOriginSquare()
+	default:
+		panic(fmt.Sprintf("m.getOriginOccupancy() returned: %v", m.getOriginOccupancy()))
+	}
+}
+
+//Captures (removes) the piece on the target square
+func (b *Board) clearTargetSquare(m Move) {
+	if b.IsWhiteMove {
+		b.WhitePieces = b.WhitePieces &^ m.getDestSquare()
+	} else {
+		b.BlackPieces = b.BlackPieces &^ m.getDestSquare()
+	}
+
+	switch m.getDestOccupancyBeforeMove() {
+	case whitePawn:
+		b.Pawns = b.Pawns &^ m.getDestSquare()
+	case whiteKnight:
+		b.Knights = b.Knights &^ m.getDestSquare()
+	case whiteBishop:
+		b.Bishops = b.Bishops &^ m.getDestSquare()
+	case whiteRook:
+		b.Rooks = b.Rooks &^ m.getDestSquare()
+	case whiteQueen:
+		b.Queens = b.Queens &^ m.getDestSquare()
+	case whiteKing:
+		b.Kings = b.Kings &^ m.getDestSquare()
+
+	case blackPawn:
+		b.Pawns = b.Pawns &^ m.getDestSquare()
+	case blackKnight:
+		b.Knights = b.Knights &^ m.getDestSquare()
+	case blackBishop:
+		b.Bishops = b.Bishops &^ m.getDestSquare()
+	case blackRook:
+		b.Rooks = b.Rooks &^ m.getDestSquare()
+	case blackQueen:
+		b.Queens = b.Queens &^ m.getDestSquare()
+	case blackKing:
+		b.Kings = b.Kings &^ m.getDestSquare()
+	case empty:
+		//do nothing
+	default:
+		panic(fmt.Sprintf("m.getDestOccupancyBeforeMove() returned %v - piece %064b", m.getDestOccupancyBeforeMove(), m.getOriginSquare()))
+	}
+}
+
+//Puts the piece on its destination square, accounting for promotions.
+func (b *Board) putPieceOnTargetSquare(m Move) {
+	if b.IsWhiteMove {
+		b.WhitePieces |= m.getDestSquare()
+		b.BlackPieces &^= m.getDestSquare()
+	} else {
+		b.BlackPieces |= m.getDestSquare()
+		b.WhitePieces &^= m.getDestSquare()
+	}
+
+	switch m.getDestOccupancyAfterMove() {
+	case whitePawn:
+		b.Pawns |= m.getDestSquare()
+	case whiteKnight:
+		b.Knights |= m.getDestSquare()
+	case whiteBishop:
+		b.Bishops |= m.getDestSquare()
+	case whiteRook:
+		b.Rooks |= m.getDestSquare()
+	case whiteQueen:
+		b.Queens |= m.getDestSquare()
+	case whiteKing:
+		b.Kings |= m.getDestSquare()
+
+	case blackPawn:
+		b.Pawns |= m.getDestSquare()
+	case blackKnight:
+		b.Knights |= m.getDestSquare()
+	case blackBishop:
+		b.Bishops |= m.getDestSquare()
+	case blackRook:
+		b.Rooks |= m.getDestSquare()
+	case blackQueen:
+		b.Queens |= m.getDestSquare()
+	case blackKing:
+		b.Kings |= m.getDestSquare()
+	default:
+		panic(fmt.Sprintf("m.getDestOccupancyAfterMove() returned: %v, piece:%032b\n", m.getDestOccupancyAfterMove(), m))
 	}
 }
 
 //Returns binary-board (64 bit) representation of origin square.
-func (m Move) getOrigin() uint64 {
-	return 1 << (m >> 10)
+//Origin square: bits 0-5
+func (m Move) getOriginSquare() uint64 {
+	return 1 << (m >> 26)
 }
 
-//001000 010000 0000
-//		 100000
-//1 00000000 00000000
-func (m Move) getDest() uint64 {
-	m &= 0b0000001111110000
-	return 1 << (m >> 4)
+//Returns binary-board (64 bit) representation of destination square.
+//Destination square: bits 6-11
+func (m Move) getDestSquare() uint64 {
+	return 1 << uint64(utils.IsolateBitsU32(uint32(m), destSquareBitsStart, destSquareBitsEnd))
 }
 
+//Returns a tileOccupancy representing the piece that occupied the origin square
+//Orig occupancy bits: 12-15
+func (m Move) getOriginOccupancy() tileOccupancy {
+	return tileOccupancy(utils.IsolateBitsU32(uint32(m), originSquareOccBitsStart, originSquareOccBitsEnd))
+}
+
+//returns the tileOccupancy that was on the destination square before the move was made.
+//bits: 16-20
+func (m Move) getDestOccupancyBeforeMove() tileOccupancy {
+	return tileOccupancy(utils.IsolateBitsU32(uint32(m), destSquarePreMoveOccBitsStart, destSquarePreMoveOccBitsEnd))
+}
+
+//returns the tileOccupancy that is on the destination square after the move was made.
+//bits: 21-25
+func (m Move) getDestOccupancyAfterMove() tileOccupancy {
+	return tileOccupancy(utils.IsolateBitsU32(uint32(m), destSquarePostMoveOccBitsStart, destSquarePostMoveOccBitsEnd))
+}
+
+//Returns the moveType bits (bits 26-29)
 func (m Move) getMoveType() moveType {
-	return moveType(m & 0b0000000000001111)
+	return moveType(utils.IsolateBitsU32(uint32(m), moveTypeBitsStart, moveTypeBitsEnd))
 }
 
 //Expects a bitboard with a pop count of one, and sets the origin square of given move to that square.
+//Origin square coordinate bits: 0-5
 func (m *Move) setOriginFromBB(origin uint64) {
-	*m = *m &^ (0b111111 << 10)                    //clear origin bits
-	*m |= Move(bits.TrailingZeros64(origin)) << 10 //set the cleared bits
+	*m = *m &^ (0b111111 << moveTypeBitsStart)                    //clear origin bits
+	*m |= Move(bits.TrailingZeros64(origin)) << moveTypeBitsStart //set the cleared bits
 }
 
-//Expects a square position
+//Expects a square position - e.g. 7 to represent A8, and will set the origin square to be that square.
+//Deprecated: use setOriginFromBB
 func (m *Move) setOriginFromSquare(origin uint8) {
-	*m = *m &^ (0b111111 << 10) //clear origin bits
-	*m |= Move(origin) << 10    //set the cleared bits
+	*m = *m &^ (0b111111 << moveTypeBitsStart) //clear origin bits
+	*m |= Move(origin) << moveTypeBitsStart    //set the cleared bits
 }
 
 //Expects a bitboard with a pop count of one, and sets the destination square of given move to that square.
 func (m *Move) setDestFromBB(dest uint64) {
-	*m = *m &^ (0b111111 << 4)                  //clear origin bits
-	*m |= Move(bits.TrailingZeros64(dest)) << 4 //set the cleared bits
+	*m = Move(utils.SetBitsU32(uint32(*m), destSquareBitsStart, destSquareBitsEnd, uint32(bits.TrailingZeros64(dest))))
 }
 
+//Deprecated: use setDestFromBB
 func (m *Move) setDestFromSquare(dest uint8) {
-	*m = *m &^ (0b111111 << 4) //clear origin bits
-	*m |= Move(dest) << 4      //set the cleared bits
+	*m = Move(utils.SetBitsU32(uint32(*m), destSquareBitsStart, destSquareBitsEnd, uint32(dest)))
 }
 
+//Move type bits: 26-29
 func (m *Move) setMoveType(mt moveType) {
-	*m = *m &^ 0b111111 //clear origin bits
-	*m |= Move(mt)      //set the cleared bits
+	*m = Move(utils.SetBitsU32(uint32(*m), moveTypeBitsStart, moveTypeBitsEnd, uint32(mt)))
 }
 
-func (m *Move) copyMoveSetType (mt moveType) Move {
+//Duplicates a Move, but also sets the moveType
+func (m *Move) copyMoveAndSetType(mt moveType) Move {
 	newMove := *m
 	newMove.setMoveType(mt)
+	return newMove
+}
+
+//Sets the occupancy (piece type) of the origin square.
+//You can think of this as the piece you're picking up.
+func (m *Move) setOriginOccupancy(oldPiece tileOccupancy) {
+	*m = Move(utils.SetBitsU32(uint32(*m), originSquareOccBitsStart, originSquareOccBitsEnd, uint32(oldPiece)))
+}
+
+//Sets the occupancy (piece type) of the destination square.
+func (m *Move) setDestOccupancyAfterMove(newPiece tileOccupancy) {
+	*m = Move(utils.SetBitsU32(uint32(*m), destSquarePostMoveOccBitsStart, destSquarePostMoveOccBitsEnd, uint32(newPiece)))
+}
+
+//Sets the piece that was on the target square before the move
+func (m *Move) setDestOccupancyBeforeMove(oldPiece tileOccupancy) {
+	*m = Move(utils.SetBitsU32(uint32(*m), destSquarePreMoveOccBitsStart, destSquarePreMoveOccBitsEnd, uint32(oldPiece)))
+}
+
+//Helper for pawn promotions. Copies a move, but also sets the occupancy of the destination square.
+func (m *Move) copyMoveAndSetDestOccupancy(newPiece tileOccupancy) Move {
+	newMove := *m
+	newMove.setDestOccupancyAfterMove(newPiece)
 	return newMove
 }
