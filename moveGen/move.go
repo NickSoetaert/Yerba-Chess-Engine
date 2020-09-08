@@ -42,7 +42,6 @@ func (b *Board) ApplyMove(m Move) UndoMove {
 		}
 
 	case castleKingside:
-		fmt.Println("CASTLE KINGSIDE!")
 		if b.IsWhiteMove {
 			b.Kings |= G1
 			b.WhitePieces |= G1
@@ -60,7 +59,6 @@ func (b *Board) ApplyMove(m Move) UndoMove {
 		}
 
 	case castleQueenside:
-		fmt.Println("CASTLE Q!")
 		if b.IsWhiteMove {
 			b.Kings |= C1
 			b.WhitePieces |= C1
@@ -214,7 +212,6 @@ func (b *Board) clearTargetSquare(m Move) {
 		b.BlackPieces &^= m.getDestSquare()
 	}
 
-
 	switch m.getDestOccupancyBeforeMove() {
 	case whitePawn:
 		b.Pawns = b.Pawns &^ m.getDestSquare()
@@ -332,6 +329,7 @@ func (m *Move) setOriginFromBB(origin uint64) {
 }
 
 //Expects a square position - e.g. 7 to represent A8, and will set the origin square to be that square.
+//Deprecated: use setOriginFromBB
 func (m *Move) setOriginFromSquare(origin uint8) {
 	*m = *m &^ (0b111111 << moveTypeBitsStart) //clear origin bits
 	*m |= Move(origin) << moveTypeBitsStart    //set the cleared bits
@@ -342,6 +340,7 @@ func (m *Move) setDestFromBB(dest uint64) {
 	*m = Move(utils.SetBitsU32(uint32(*m), destSquareBitsStart, destSquareBitsEnd, uint32(bits.TrailingZeros64(dest))))
 }
 
+//Deprecated: use setDestFromBB
 func (m *Move) setDestFromSquare(dest uint8) {
 	*m = Move(utils.SetBitsU32(uint32(*m), destSquareBitsStart, destSquareBitsEnd, uint32(dest)))
 }

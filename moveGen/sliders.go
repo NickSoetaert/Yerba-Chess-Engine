@@ -64,14 +64,14 @@ func initSlidingPiecesHelper(square, blockersLeft uint8, mask uint64, isRook boo
 	initSlidingPiecesHelper(square, blockersLeft, mask, isRook, db)
 }
 
-func GetUnfilteredRookAttacks(db [][]uint64, square uint8, allPieces uint64) uint64 {
+func GetUnfilteredRookAttacks(db [][]uint64, square int, allPieces uint64) uint64 {
 	blockers := RookBlockerMask[square] & allPieces
 	hash := blockers * rookMagic[square]
 	hash >>= 64 - uint8(utils.UPopCount(RookBlockerMask[square]))
 	return db[square][hash]
 }
 
-func GetUnfilteredBishopAttacks(db [][]uint64, square uint8, allPieces uint64) uint64 {
+func GetUnfilteredBishopAttacks(db [][]uint64, square int, allPieces uint64) uint64 {
 	blockers := BishopBlockerMask[square] & allPieces
 	hash := blockers * bishopMagic[square]
 	hash >>= 64 - uint8(utils.UPopCount(BishopBlockerMask[square]))
@@ -204,14 +204,14 @@ func (b *Board) getSliderMoves(sliders uint64, bishopMove bool, c chan []Move, p
 	}
 	for sliders != 0 { //While there are any sliders left to calculate moves for
 		originSquareMove := baseMove
-		currentSquareNum := uint8(bits.TrailingZeros64(sliders))
-		originSquareMove.setOriginFromSquare(currentSquareNum)
+		currentSquareNum := utils.IsolateLsb(sliders)
+		originSquareMove.setOriginFromBB(currentSquareNum)
 
 		var possibleAttacks uint64
 		if bishopMove {
-			possibleAttacks = GetUnfilteredBishopAttacks(b.BishopDB, currentSquareNum, b.BlackPieces|b.WhitePieces)
+			possibleAttacks = GetUnfilteredBishopAttacks(b.BishopDB, bits.TrailingZeros64(currentSquareNum), b.BlackPieces|b.WhitePieces)
 		} else {
-			possibleAttacks = GetUnfilteredRookAttacks(b.RookDB, currentSquareNum, b.BlackPieces|b.WhitePieces)
+			possibleAttacks = GetUnfilteredRookAttacks(b.RookDB, bits.TrailingZeros64(currentSquareNum), b.BlackPieces|b.WhitePieces)
 		}
 		if b.IsWhiteMove {
 			possibleAttacks = possibleAttacks &^ b.WhitePieces
@@ -220,13 +220,14 @@ func (b *Board) getSliderMoves(sliders uint64, bishopMove bool, c chan []Move, p
 		}
 		for possibleAttacks != 0 {
 			move := originSquareMove
+			attack := utils.IsolateLsb(possibleAttacks)
+			move.setDestFromBB(attack)
+			move.setDestOccupancyBeforeMove(b.getTileOccupancy(attack)) //note the piece (or lack of) that's on the square before we capture
 
-			attack := uint8(bits.TrailingZeros64(possibleAttacks))
-			move.setDestFromSquare(attack)
+			possibleAttacks ^= attack
 			moves = append(moves, move)
-			possibleAttacks ^= uint64(1 << attack) //clear the attack we just processed
 		}
-		sliders ^= uint64(1 << currentSquareNum) //clear the slider we just processed.
+		sliders ^= currentSquareNum
 	}
 	c <- moves
 }

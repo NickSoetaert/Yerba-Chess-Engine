@@ -113,7 +113,7 @@ func (b Board) pawnNormalCaptures() (moves []Move) {
 		dest := utils.IsolateLsb(openSquares)
 		newMove := baseMove
 		newMove.setDestFromBB(dest)
-
+		newMove.setDestOccupancyBeforeMove(b.getTileOccupancy(dest))
 		if b.IsWhiteMove {
 			newMove.setOriginFromBB(dest >> 7)
 		} else {
@@ -202,6 +202,7 @@ func (b Board) enPassantCaptures() (moves []Move) {
 	}
 	baseMove := Move(0)
 	baseMove.setMoveType(enPassantCapture)
+	baseMove.setDestOccupancyBeforeMove(empty)
 	var openSquares uint64
 
 	if b.IsWhiteMove {

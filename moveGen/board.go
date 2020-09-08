@@ -60,7 +60,7 @@ func SetUpBoard() Board {
 	return board
 }
 
-//For benchmarking
+//For benchmarking and testing
 func SetUpBoardNoPawns() Board {
 	r, b := InitSlidingPieces()
 	board := Board{
@@ -85,13 +85,14 @@ func SetUpBoardNoPawns() Board {
 	return board
 }
 
-func SetUpCastlingBoard() Board {
+//For testing
+func SetUpCastlingTestBoard() Board {
 	r, b := InitSlidingPieces()
 	board := Board{
 		Kings:                  E1 | E8,
 		WhitePieces:            E1 | A1 | H1,
-		BlackPieces:            E8 | A8 | H8,
-		Rooks:                  A1 | H1 | A8 | H8,
+		BlackPieces:            E8,
+		Rooks:                  A1 | H1,
 		RookDB:                 r,
 		BishopDB:               b,
 		IsWhiteMove:            true,
@@ -107,7 +108,6 @@ func SetUpCastlingBoard() Board {
 }
 
 //Todo: account for pinned pieces
-//TODO: fix bug where origin/target square/piece type isn't always set
 func (b Board) GenerateLegalMoves() (moves []Move) {
 	pChan := make(chan []Move)
 	nChan := make(chan []Move)
