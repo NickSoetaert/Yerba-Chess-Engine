@@ -213,6 +213,7 @@ func (b Board) pawnDoublePushMoves() (moves []Move) {
 	if b.IsWhiteMove {
 		//Get moves that move forward 2 ranks and end up on proper rank, and don't jump over anything
 		openSquares |= ((b.Pawns & b.WhitePieces << 16) & FourthRank) &^ (((b.WhitePieces | b.BlackPieces) & ThirdRank) << 8)
+		utils.PrintBinaryBoard(openSquares)
 		baseMove.setOriginOccupancy(whitePawn)
 		baseMove.setDestOccupancyAfterMove(whitePawn)
 	} else {
@@ -242,19 +243,44 @@ func (b Board) enPassantCaptures() (moves []Move) {
 	if b.EnPassantFile == 0 {
 		return nil
 	}
+	fmt.Println("\n\n~~~~~~~~~~~~EpFile:", b.EnPassantFile)
 	baseMove := Move(0)
 	baseMove.setMoveType(enPassantCapture)
 	baseMove.setDestOccupancyBeforeMove(empty)
 	var openSquares uint64
 
-	if b.IsWhiteMove {
-		openSquares |= ((b.Pawns & b.BlackPieces << 7) & ^HFile) & (uint64(b.EnPassantFile) << 16) //todo - possible bug. Should it be & b.WhitePieces?
+	if b.IsWhiteMove { //todo
+		//get squares to left diagonal that can be attacked - avoid wrapping to h file
+		//Do not get right diagonals yet, as we won't know the origin square
+		reachable := ((b.Pawns & b.WhitePieces) << 9) &^ HFile
+
+		//get squares that can actually be attacked, given current E.P. square.
+		canEpCapture := enPassantFileToAttackedSquare(b.EnPassantFile, b.IsWhiteMove)
+
+		openSquares |= reachable & canEpCapture //should only be 1 square
+
 		baseMove.setOriginOccupancy(whitePawn)
 		baseMove.setDestOccupancyAfterMove(whitePawn)
-	} else {
-		openSquares |= ((b.Pawns & b.WhitePieces >> 7) & ^AFile) & (uint64(b.EnPassantFile) << 40)
+		fmt.Println("white captures:")
+		utils.PrintBinaryBoard(openSquares)
+
+	} else { //todo this is the block I most checked before I had to leave
+		//get own pawns to diagonal of EP square to attack - want C4
+		utils.PrintBinaryBoard(b.Pawns & b.BlackPieces)
+
+		//get squares to left diagonal that can be attacked - avoid wrapping to h file
+		//Do not get right diagonals yet, as we won't know the origin square
+		reachable := ((b.Pawns & b.BlackPieces) >> 9) &^ HFile
+
+		//get squares that can actually be attacked, given current E.P. square.
+		canEpCapture := enPassantFileToAttackedSquare(b.EnPassantFile, b.IsWhiteMove)
+
+		openSquares |= reachable & canEpCapture //should only be 1 square
+
 		baseMove.setOriginOccupancy(blackPawn)
 		baseMove.setDestOccupancyAfterMove(blackPawn)
+		fmt.Println("black captures:")
+		utils.PrintBinaryBoard(openSquares)
 	}
 	for openSquares != 0 {
 		dest := utils.IsolateLsb(openSquares)
@@ -270,11 +296,41 @@ func (b Board) enPassantCaptures() (moves []Move) {
 	}
 
 	if b.IsWhiteMove {
-		openSquares |= ((b.Pawns & b.BlackPieces << 9) & ^HFile) & (uint64(b.EnPassantFile) << 16)
+		//get own pawns to diagonal of EP square to attack - want C4
+		utils.PrintBinaryBoard(b.Pawns & b.WhitePieces)
+
+		//get squares to right diagonal that can be attacked - avoid wrapping to h file
+		reachable := ((b.Pawns & b.BlackPieces) << 7) &^ AFile
+
+		//get squares that can actually be attacked, given current E.P. square.
+		canEpCapture := enPassantFileToAttackedSquare(b.EnPassantFile, b.IsWhiteMove)
+
+		openSquares |= reachable & canEpCapture //should only be 1 square
+
+		baseMove.setOriginOccupancy(whitePawn)
+		baseMove.setDestOccupancyAfterMove(whitePawn)
+		fmt.Println("white captures:")
+		utils.PrintBinaryBoard(openSquares)
 	} else {
-		openSquares |= ((b.Pawns & b.WhitePieces >> 9) & ^AFile) & (uint64(b.EnPassantFile) << 40)
+		//get own pawns to diagonal of EP square to attack - want C4
+		utils.PrintBinaryBoard(b.Pawns & b.BlackPieces)
+
+		//get squares to right diagonal that can be attacked - avoid wrapping to h file
+		reachable := ((b.Pawns & b.BlackPieces) >> 7) &^ AFile
+
+		//get squares that can actually be attacked, given current E.P. square.
+		canEpCapture := enPassantFileToAttackedSquare(b.EnPassantFile, b.IsWhiteMove)
+
+		openSquares |= reachable & canEpCapture //should only be 1 square
+
+		baseMove.setOriginOccupancy(blackPawn)
+		baseMove.setDestOccupancyAfterMove(blackPawn)
+		fmt.Println("black captures:")
+		utils.PrintBinaryBoard(openSquares)
 	}
+	utils.PrintBinaryBoard(openSquares)
 	for openSquares != 0 {
+		fmt.Println("AAAAAAAAAA")
 		dest := utils.IsolateLsb(openSquares)
 		newMove := baseMove
 		newMove.setDestFromBB(dest)

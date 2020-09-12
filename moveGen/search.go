@@ -1,7 +1,6 @@
 package moveGen
 
 import (
-	"Yerba/utils"
 	"fmt"
 	"math"
 	"math/bits"
@@ -73,8 +72,6 @@ func (b *Board) CountVariationsAtPly(ply, legalMoves int, printBoard bool) int {
 	for _, move := range b.GenerateLegalMoves() {
 		undo := b.ApplyMove(move)
 		if printBoard {
-			fmt.Println("white pieces:")
-			utils.PrintBinaryBoard(b.WhitePieces)
 			PrintBoard(*b)
 			fmt.Println("")
 		}

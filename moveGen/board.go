@@ -32,7 +32,7 @@ type Board struct {
 	H1RookHasNeverMoved    bool //True if black rook on H1 has never moved, regardless of if captured or not.
 	H8RookHasNeverMoved    bool //True if black rook on H8 has never moved, regardless of if captured or not.
 
-	EnPassantFile uint8 //File on which an E.P. capture is currently legal, 0 if no E.P. is legal.
+	EnPassantFile uint8 //File on which an E.P. capture is currently legal A=1, H=8. 0 if no E.P. is legal.
 }
 
 //SetUpBoard inits a board in the default state
@@ -70,6 +70,28 @@ func SetUpCheckmateBoard() Board {
 		RookDB:                 r,
 		BishopDB:               b,
 		IsWhiteMove:            true,
+	}
+}
+
+func SetUpPromotionBoard() Board {
+	return Board{
+		Pawns:                  D7,
+		Knights:                E8,
+		Kings:                  A1 | A3,
+		WhitePieces:            A1 | D7,
+		BlackPieces:            A3 | E8,
+		IsWhiteMove:            true,
+	}
+}
+
+func SetUpEPBoard() Board {
+	return Board{
+		Pawns:                  B2 | C4,
+		Kings:                  F8 | H8,
+		WhitePieces:            B2 | F8,
+		BlackPieces:            C4 | H8,
+		IsWhiteMove:            true,
+		EnPassantFile:          0,
 	}
 }
 

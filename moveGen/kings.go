@@ -20,6 +20,9 @@ func(b *Board) getKingDefendedSquares() (defendedSquares uint64) {
 // Gets all squares that a King can legally move to without castling this turn.
 func (b Board) getNormalKingMoves(attackedSquares uint64, ch chan []Move) {
 	var moves []Move
+	//todo - remove this once done with debug
+	ch <- moves
+	return
 	var currentSquare uint64
 	var possibleAttacks uint64
 

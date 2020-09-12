@@ -23,21 +23,21 @@ func (b *Board) ApplyMove(m Move) UndoMove {
 		b.putPieceOnTargetSquare(m)
 
 	case pawnDoublePush:
-		b.EnPassantFile = uint8(bits.TrailingZeros64(m.getOriginSquare()) % 8) //can capture e.p. next turn
+		b.EnPassantFile = uint8(bits.TrailingZeros64(m.getOriginSquare()) % 8) + 1//can capture e.p. next turn
 		b.putPieceOnTargetSquare(m)
 
 	case enPassantCapture:
 		EpCount++
 		//add and remove pawns for Pawns bitboards
-		b.Pawns |= m.getDestSquare()                                               //add pawn
-		b.Pawns = b.Pawns &^ enPassantFileToSquare(b.EnPassantFile, b.IsWhiteMove) //remove pawn
+		b.Pawns |= m.getDestSquare()                                                       //add pawn
+		b.Pawns = b.Pawns &^ enPassantFileToCapturedSquare(b.EnPassantFile, b.IsWhiteMove) //remove pawn
 
 		if b.IsWhiteMove { //add and remove pawns for WhitePieces and BlackPieces bitboards
-			b.WhitePieces |= m.getDestSquare()                                                     //add pawn
-			b.BlackPieces = b.BlackPieces &^ enPassantFileToSquare(b.EnPassantFile, b.IsWhiteMove) //remove pawn
+			b.WhitePieces |= m.getDestSquare()                                                             //add pawn
+			b.BlackPieces = b.BlackPieces &^ enPassantFileToCapturedSquare(b.EnPassantFile, b.IsWhiteMove) //remove pawn
 		} else {
-			b.BlackPieces |= m.getDestSquare()                                                     //add pawn
-			b.WhitePieces = b.WhitePieces &^ enPassantFileToSquare(b.EnPassantFile, b.IsWhiteMove) //remove pawn
+			b.BlackPieces |= m.getDestSquare()                                                             //add pawn
+			b.WhitePieces = b.WhitePieces &^ enPassantFileToCapturedSquare(b.EnPassantFile, b.IsWhiteMove) //remove pawn
 		}
 
 	case castleKingside:
@@ -82,6 +82,8 @@ func (b *Board) ApplyMove(m Move) UndoMove {
 	//Clear en passant capture unless we just pushed a pawn two squares
 	if m.getMoveType() != pawnDoublePush {
 		b.EnPassantFile = 0
+	} else {
+		fmt.Println("E.P file:", b.EnPassantFile)
 	}
 
 	//Finally, change who's turn it is
@@ -112,30 +114,58 @@ func (b *Board) updateCastlingRights(m Move) {
 }
 
 //Given a file number (with 1==A, 8==h) and who's turn it is,
-//Returns the square on which an en passant capture would take place. Wordy but fast.
-func enPassantFileToSquare(file uint8, isWhiteToMove bool) uint64 {
+//Returns the square on which in en passant the captured pawn would be removed. Wordy but fast.
+func enPassantFileToAttackedSquare(file uint8, isWhiteToMove bool) uint64 {
 	if isWhiteToMove {
 		switch file {
 		case 1:
-			return A4
+			return A6
 		case 2:
-			return B4
+			return B6
 		case 3:
-			return C4
+			return C6
 		case 4:
-			return D4
+			return D6
 		case 5:
-			return E4
+			return E6
 		case 6:
-			return F4
+			return F6
 		case 7:
-			return G4
+			return G6
 		case 8:
-			return H4
+			return H6
 		default:
 			panic(fmt.Sprintf("impossible e.p. file %v", file))
 		}
 	} else {
+		switch file {
+		case 1:
+			return A3
+		case 2:
+			return B3
+		case 3:
+			return C3
+		case 4:
+			return D3
+		case 5:
+			return E3
+		case 6:
+			return F3
+		case 7:
+			return G3
+		case 8:
+			return H3
+		default:
+			panic(fmt.Sprintf("impossible e.p. file %v", file))
+		}
+	}
+}
+
+
+//Given a file number (with 1==A, 8==h) and who's turn it is,
+//Returns the square on which in en passant the captured pawn would be removed. Wordy but fast.
+func enPassantFileToCapturedSquare(file uint8, isWhiteToMove bool) uint64 {
+	if isWhiteToMove {
 		switch file {
 		case 1:
 			return A5
@@ -153,6 +183,27 @@ func enPassantFileToSquare(file uint8, isWhiteToMove bool) uint64 {
 			return G5
 		case 8:
 			return H5
+		default:
+			panic(fmt.Sprintf("impossible e.p. file %v", file))
+		}
+	} else {
+		switch file {
+		case 1:
+			return A4
+		case 2:
+			return B4
+		case 3:
+			return C4
+		case 4:
+			return D4
+		case 5:
+			return E4
+		case 6:
+			return F4
+		case 7:
+			return G4
+		case 8:
+			return H4
 		default:
 			panic(fmt.Sprintf("impossible e.p. file %v", file))
 		}

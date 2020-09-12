@@ -7,7 +7,7 @@ import (
 )
 
 //todo:
-// -I am generating a few illegal moves at 4+ ply. Figure them out and patch.
+// -Fix EP moves
 // -Optimize undo move function
 // -Evaluate function
 // -A BUNCH general optimization
@@ -15,18 +15,12 @@ import (
 func main() {
 	fmt.Println("Hello World")
 
-	b := moveGen.SetUpCheckmateBoard()
+	b := moveGen.SetUpEPBoard()
 	moveGen.PrintBoard(b)
-	fmt.Println(b.CountVariationsAtPly(6, 0, false))
+	fmt.Println("possible moves:")
 
-	//b := moveGen.SetUpBoardNoPawns()
-	//
-	//for i, move := range b.GenerateLegalMoves() {
-	//	undo := b.ApplyMove(move)
-	//	moveGen.PrintBoard(b)
-	//	undo()
-	//	fmt.Println(i)
-	//}
+	b.CountVariationsAtPly(2, 0, true)
+
 
 	//start := time.Now()
 	//ply := 3
