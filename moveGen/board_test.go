@@ -39,6 +39,8 @@ func TestBoard_CountLegalMovesAtPly(t *testing.T) {
 	assert.Equal(t, 400, b.CountVariationsAtPly(2, 0, false))
 	assert.Equal(t, 8902, b.CountVariationsAtPly(3, 0, false))
 	assert.Equal(t, 197281, b.CountVariationsAtPly(4, 0, false))
-
-	assert.Equal(t, 84998978956 , b.CountVariationsAtPly(8, 0, false))
+	assert.Equal(t, 4865609, b.CountVariationsAtPly(5, 0, false))
+	//assert.Equal(t, 119060324, b.CountVariationsAtPly(6, 0, false))
+	//assert.Equal(t, 3195901860, b.CountVariationsAtPly(7, 0, false))
+	//assert.Equal(t, 84998978956 , b.CountVariationsAtPly(8, 0, false))
 }
