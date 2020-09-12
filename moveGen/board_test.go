@@ -26,7 +26,7 @@ func TestBoard_GenerateLegalMoves(t *testing.T) {
 	assert.Equal(t, 20, len(b.GenerateLegalMoves()))
 
 	b = SetUpBoardNoPawns()
-	assert.Equal(t, 51, len(b.GenerateLegalMoves()))
+	assert.Equal(t, 50, len(b.GenerateLegalMoves())) //would be 51 if enemy queen wasn't blocking D2
 
 	b = SetUpCastlingTestBoard()
 	assert.Equal(t, 26, len(b.GenerateLegalMoves()))
@@ -38,4 +38,7 @@ func TestBoard_CountLegalMovesAtPly(t *testing.T) {
 	assert.Equal(t, 20, b.CountVariationsAtPly(1, 0, false))
 	assert.Equal(t, 400, b.CountVariationsAtPly(2, 0, false))
 	assert.Equal(t, 8902, b.CountVariationsAtPly(3, 0, false))
+	assert.Equal(t, 197281, b.CountVariationsAtPly(4, 0, false))
+
+	assert.Equal(t, 84998978956 , b.CountVariationsAtPly(8, 0, false))
 }

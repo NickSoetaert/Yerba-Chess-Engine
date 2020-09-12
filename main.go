@@ -6,19 +6,27 @@ import (
 	"fmt"
 )
 
-//todo: Generating incorrect number of moves at 3+ ply
-// -Account for moving through check when castling
+//todo:
 // -Implement checkmate
-// -Don't count capturing a king as a legal move
-// -Index out of range on getNormalKingMoves() on higher plies.
-// -Account for absolutely pinned pieces
 // -Optimize undo move function
+// -Evaluate function
+// -A BUNCH general optimization
 
 func main() {
 	fmt.Println("Hello World")
 
 	b := moveGen.SetUpCheckmateBoard()
-	fmt.Println(b.CountVariationsAtPly(6, 0, true))
+	moveGen.PrintBoard(b)
+	fmt.Println(b.CountVariationsAtPly(6, 0, false))
+
+	//b := moveGen.SetUpBoardNoPawns()
+	//
+	//for i, move := range b.GenerateLegalMoves() {
+	//	undo := b.ApplyMove(move)
+	//	moveGen.PrintBoard(b)
+	//	undo()
+	//	fmt.Println(i)
+	//}
 
 	//start := time.Now()
 	//ply := 3

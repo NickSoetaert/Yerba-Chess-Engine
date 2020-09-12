@@ -19,6 +19,15 @@ func (b Board) getPawnDefendedSquares() (defendedSquares uint64) {
 
 func (b Board) getPawnMoves(c chan []Move) {
 	var unfilteredMoves []Move
+
+	//If there are no pawns, take a shortcut and return no moves.
+	if b.IsWhiteMove && (b.Pawns & b.WhitePieces == 0) {
+		c <- unfilteredMoves
+	}
+	if ! b.IsWhiteMove &&  (b.Pawns & b.BlackPieces == 0) {
+		c <- unfilteredMoves
+	}
+
 	unfilteredMoves = append(unfilteredMoves, b.pawnNormalCaptures()...)
 	unfilteredMoves = append(unfilteredMoves, b.pawnSinglePushMoves()...)
 	unfilteredMoves = append(unfilteredMoves, b.pawnDoublePushMoves()...)
@@ -34,9 +43,6 @@ func (b Board) getPawnMoves(c chan []Move) {
 			undo := b.ApplyMove(move)
 			//Must be attacked by self because ApplyMove flips the turn
 			if b.GetSquaresAttackedThisHalfTurn() & (b.Kings & b.WhitePieces) != 0 { //If we are in check
-				fmt.Printf("pawn move - white in check - is white turn: %v\n", b.IsWhiteMove)
-				utils.PrintBinaryBoard(b.GetSquaresAttackedByOpponent())
-				PrintBoard(b)
 				undo()
 				continue
 			}
@@ -207,11 +213,11 @@ func (b Board) pawnDoublePushMoves() (moves []Move) {
 	baseMove.setDestOccupancyBeforeMove(empty)
 	if b.IsWhiteMove {
 		//Get moves that move forward 2 ranks and end up on proper rank, and don't jump over anything
-		openSquares |= ((b.Pawns & b.WhitePieces << 16) & FourthRank) ^ (((b.WhitePieces | b.BlackPieces) & ThirdRank) << 8)
+		openSquares |= ((b.Pawns & b.WhitePieces << 16) & FourthRank) &^ (((b.WhitePieces | b.BlackPieces) & ThirdRank) << 8)
 		baseMove.setOriginOccupancy(whitePawn)
 		baseMove.setDestOccupancyAfterMove(whitePawn)
 	} else {
-		openSquares |= ((b.Pawns & b.BlackPieces >> 16) & FifthRank) ^ (((b.WhitePieces | b.BlackPieces) & SixthRank) >> 8)
+		openSquares |= ((b.Pawns & b.BlackPieces >> 16) & FifthRank) &^ (((b.WhitePieces | b.BlackPieces) & SixthRank) >> 8)
 		baseMove.setOriginOccupancy(blackPawn)
 		baseMove.setDestOccupancyAfterMove(blackPawn)
 	}

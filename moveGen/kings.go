@@ -28,7 +28,7 @@ func(b *Board) getKingDefendedSquares() (defendedSquares uint64) {
 }
 
 // Gets all squares that a King can legally move to without castling this turn.
-func (b *Board) getNormalKingMoves(attackedSquares uint64, ch chan []Move) {
+func (b Board) getNormalKingMoves(attackedSquares uint64, ch chan []Move) {
 	var moves []Move
 	var currentSquare uint64
 	var possibleAttacks uint64
@@ -40,7 +40,7 @@ func (b *Board) getNormalKingMoves(attackedSquares uint64, ch chan []Move) {
 		currentSquare = utils.IsolateLsb(b.Kings & b.WhitePieces)
 		if bits.TrailingZeros64(currentSquare) >= 64 {
 			utils.PrintBinaryBoard(b.Kings)
-			PrintBoard(*b)
+			PrintBoard(b)
 		}
 		possibleAttacks = KingMask[bits.TrailingZeros64(currentSquare)] &^ attackedSquares &^ b.WhitePieces
 		baseMove.setOriginOccupancy(whiteKing)
@@ -49,7 +49,7 @@ func (b *Board) getNormalKingMoves(attackedSquares uint64, ch chan []Move) {
 		currentSquare = utils.IsolateLsb(b.Kings & b.BlackPieces)
 		if bits.TrailingZeros64(currentSquare) >= 64 {
 			utils.PrintBinaryBoard(b.Kings)
-			PrintBoard(*b)
+			PrintBoard(b)
 		}
 		possibleAttacks = KingMask[bits.TrailingZeros64(currentSquare)] &^ attackedSquares &^ b.BlackPieces
 		baseMove.setOriginOccupancy(blackKing)
@@ -72,15 +72,15 @@ func (b *Board) getNormalKingMoves(attackedSquares uint64, ch chan []Move) {
 			undo := b.ApplyMove(move)
 			//Must be attacked by self because ApplyMove flips the turn
 			if b.GetSquaresAttackedThisHalfTurn() & (b.Kings & b.WhitePieces) != 0 { //If we are in check
-				fmt.Println("filtered white move:")
-				fmt.Println("white pieces:")
-				utils.PrintBinaryBoard(b.WhitePieces)
-				fmt.Println("black pieces")
-				utils.PrintBinaryBoard(b.BlackPieces)
-				fmt.Println("kings:")
-				utils.PrintBinaryBoard(b.Kings)
-				PrintBoard(*b)
-				fmt.Println("^^^^^^^^^^^\n")
+				//fmt.Println("filtered white move:")
+				//fmt.Println("white pieces:")
+				//utils.PrintBinaryBoard(b.WhitePieces)
+				//fmt.Println("black pieces")
+				//utils.PrintBinaryBoard(b.BlackPieces)
+				//fmt.Println("kings:")
+				//utils.PrintBinaryBoard(b.Kings)
+				//PrintBoard(b)
+				//fmt.Println("^^^^^^^^^^^")
 				undo()
 				continue //ignore this move because it is illegal
 			}
@@ -89,15 +89,15 @@ func (b *Board) getNormalKingMoves(attackedSquares uint64, ch chan []Move) {
 			undo := b.ApplyMove(move)
 			//Must be attacked by self because ApplyMove flips the turn
 			if b.GetSquaresAttackedThisHalfTurn() & (b.Kings & b.BlackPieces) != 0 { //If we are in check
-				fmt.Println("filtered black move:")
-				fmt.Println("white pieces:")
-				utils.PrintBinaryBoard(b.WhitePieces)
-				fmt.Println("black pieces")
-				utils.PrintBinaryBoard(b.BlackPieces)
-				fmt.Println("kings:")
-				utils.PrintBinaryBoard(b.Kings)
-				PrintBoard(*b)
-				fmt.Println("^^^^^^^^^^^\n")
+				//fmt.Println("filtered black move:")
+				//fmt.Println("white pieces:")
+				//utils.PrintBinaryBoard(b.WhitePieces)
+				//fmt.Println("black pieces")
+				//utils.PrintBinaryBoard(b.BlackPieces)
+				//fmt.Println("kings:")
+				//utils.PrintBinaryBoard(b.Kings)
+				//PrintBoard(b)
+				//fmt.Println("^^^^^^^^^^^")
 				undo()
 				continue
 			}
@@ -109,7 +109,7 @@ func (b *Board) getNormalKingMoves(attackedSquares uint64, ch chan []Move) {
 	ch <- moves
 }
 
-func (b *Board) getCastlingMoves(attackedSquares uint64, ch chan []Move) {
+func (b Board) getCastlingMoves(attackedSquares uint64, ch chan []Move) {
 	var moves []Move
 	allPieces := b.BlackPieces | b.WhitePieces
 

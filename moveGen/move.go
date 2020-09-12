@@ -18,7 +18,6 @@ func (b *Board) ApplyMove(m Move) UndoMove {
 
 	b.clearOriginSquare(m) //Must clear starting square for all move types
 	b.clearTargetSquare(m) //Must clear end square for all move types
-
 	switch m.getMoveType() {
 	case normalMove:
 		b.putPieceOnTargetSquare(m)

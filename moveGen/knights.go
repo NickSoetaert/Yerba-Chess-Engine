@@ -25,7 +25,7 @@ func (b *Board) getKnightDefendedSquares() (defendedSquares uint64) {
 	return defendedSquares
 }
 
-func (b *Board) getKnightMoves(ch chan []Move) {
+func (b Board) getKnightMoves(ch chan []Move) {
 	var moves []Move
 	var knights uint64
 	var ownPieces uint64

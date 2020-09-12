@@ -63,9 +63,9 @@ func SetUpBoard() Board {
 func SetUpCheckmateBoard() Board {
 	r, b := InitSlidingPieces()
 	return Board{
-		Rooks:                  H1 | H2 | C6,
+		Rooks:                  H1 | H2,
 		Kings:                  A1 | H8,
-		WhitePieces:            A1 | C6,
+		WhitePieces:            A1,
 		BlackPieces:            H1 | H2 | H8,
 		RookDB:                 r,
 		BishopDB:               b,
@@ -207,13 +207,10 @@ func (b Board) GenerateLegalMoves() (moves []Move) {
 
 	attackedSquares := b.GetSquaresAttackedByOpponent()
 
+	go b.getPawnMoves(pChan) //pawns
+	go b.getCastlingMoves(attackedSquares, castleChan)
 
 	if b.IsWhiteMove {
-		if currentTurnKingIsInCheck(b.Kings & b.WhitePieces, attackedSquares) {
-			fmt.Println("White king in check!")
-			PrintBoard(b)
-			fmt.Println("~~~~~~~~~~~~~~~~~~~~")
-		}
 		go b.getSliderMoves(b.Bishops, true, bChan, whiteBishop) //bishops
 		go b.getSliderMoves(b.Rooks, false, rChan, whiteRook)    //rooks
 		go b.getSliderMoves(b.Queens, true, qbChan, whiteQueen)  //queens
@@ -223,12 +220,6 @@ func (b Board) GenerateLegalMoves() (moves []Move) {
 		go b.getNormalKingMoves(attackedSquares, kChan)
 
 	} else {
-
-		if currentTurnKingIsInCheck(b.Kings & b.BlackPieces, attackedSquares) {
-			fmt.Println("Black King in check!")
-			PrintBoard(b)
-			fmt.Println("~~~~~~~~~~~~~~~~~~~~")
-		}
 		go b.getSliderMoves(b.Bishops, true, bChan, blackBishop) //bishops
 		go b.getSliderMoves(b.Rooks, false, rChan, blackRook)    //rooks
 		go b.getSliderMoves(b.Queens, true, qbChan, blackQueen)  //queens
@@ -238,8 +229,6 @@ func (b Board) GenerateLegalMoves() (moves []Move) {
 		go b.getNormalKingMoves(attackedSquares, kChan)
 	}
 
-	go b.getPawnMoves(pChan) //pawns
-	go b.getCastlingMoves(attackedSquares, castleChan)
 
 	moves = append(moves, <-pChan...)
 	moves = append(moves, <-nChan...)

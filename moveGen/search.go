@@ -79,7 +79,7 @@ func (b *Board) CountVariationsAtPly(ply, legalMoves int, printBoard bool) int {
 			fmt.Println("white pieces:")
 			utils.PrintBinaryBoard(b.WhitePieces)
 			PrintBoard(*b)
-			fmt.Println("\n\n")
+			fmt.Println("")
 		}
 		if ply > 0 {
 			legalMoves = b.CountVariationsAtPly(ply, legalMoves, printBoard)
