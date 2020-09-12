@@ -36,7 +36,6 @@ func (b Board) getPawnMoves(c chan []Move) {
 	//Moves filtered by king being in check or not
 	var filteredMoves []Move
 
-
 	//Check if each move is legal because of king being in check
 	if b.IsWhiteMove {
 		for _, move := range unfilteredMoves {

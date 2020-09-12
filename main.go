@@ -7,7 +7,7 @@ import (
 )
 
 //todo:
-// -Implement checkmate
+// -I am generating a few illegal moves at 4+ ply. Figure them out and patch.
 // -Optimize undo move function
 // -Evaluate function
 // -A BUNCH general optimization
