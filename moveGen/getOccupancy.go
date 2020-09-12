@@ -21,7 +21,7 @@ func (b *Board) getTileOccupancy(tile uint64) tileOccupancy {
 		} else if tile&b.Queens != EmptyBoard {
 			return blackQueen
 		} else if tile&b.Kings != EmptyBoard { //todo: take this out once I add checkmate
-			fmt.Println("capturing a king!")
+			fmt.Println("capturing black king!")
 			return blackKing
 		} else {
 			PrintBoard(*b)
@@ -51,7 +51,7 @@ func (b *Board) getTileOccupancy(tile uint64) tileOccupancy {
 		} else if tile&b.Queens != EmptyBoard {
 			return whiteQueen
 		} else if tile&b.Kings != EmptyBoard { //todo: take this out once I add checkmate
-			fmt.Println("capturing a king!")
+			fmt.Println("capturing white king!")
 			return whiteKing
 		} else {
 			PrintBoard(*b)

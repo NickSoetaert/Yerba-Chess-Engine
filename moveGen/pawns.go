@@ -5,15 +5,58 @@ import (
 	"fmt"
 )
 
+func (b Board) getPawnDefendedSquares() (defendedSquares uint64) {
+	if b.IsWhiteMove {
+		defendedSquares |= (b.Pawns & b.WhitePieces << 7) & ^HFile
+		defendedSquares |= (b.Pawns & b.WhitePieces << 9) & ^AFile
+
+	} else {
+		defendedSquares |= (b.Pawns & b.BlackPieces >> 7) & ^AFile
+		defendedSquares |= (b.Pawns & b.BlackPieces >> 9) & ^HFile
+	}
+	return  defendedSquares
+}
+
 func (b Board) getPawnMoves(c chan []Move) {
-	var moves []Move
+	var unfilteredMoves []Move
+	unfilteredMoves = append(unfilteredMoves, b.pawnNormalCaptures()...)
+	unfilteredMoves = append(unfilteredMoves, b.pawnSinglePushMoves()...)
+	unfilteredMoves = append(unfilteredMoves, b.pawnDoublePushMoves()...)
+	unfilteredMoves = append(unfilteredMoves, b.enPassantCaptures()...)
 
-	moves = append(moves, b.pawnNormalCaptures()...)
-	moves = append(moves, b.pawnSinglePushMoves()...)
-	moves = append(moves, b.pawnDoublePushMoves()...)
-	moves = append(moves, b.enPassantCaptures()...)
+	//Moves filtered by king being in check or not
+	var filteredMoves []Move
 
-	c <- moves
+
+	//Check if each move is legal because of king being in check
+	if b.IsWhiteMove {
+		for _, move := range unfilteredMoves {
+			undo := b.ApplyMove(move)
+			//Must be attacked by self because ApplyMove flips the turn
+			if b.GetSquaresAttackedThisHalfTurn() & (b.Kings & b.WhitePieces) != 0 { //If we are in check
+				fmt.Printf("pawn move - white in check - is white turn: %v\n", b.IsWhiteMove)
+				utils.PrintBinaryBoard(b.GetSquaresAttackedByOpponent())
+				PrintBoard(b)
+				undo()
+				continue
+			}
+			undo()
+			filteredMoves = append(filteredMoves, move)
+		}
+	} else {
+		for _, move := range unfilteredMoves {
+			undo := b.ApplyMove(move)
+			//Must be attacked by self because ApplyMove flips the turn
+			if b.GetSquaresAttackedThisHalfTurn() & (b.Kings & b.BlackPieces) != 0 { //If we are in check
+				undo()
+				continue
+			}
+			undo()
+			filteredMoves = append(filteredMoves, move)
+		}
+	}
+
+	c <- filteredMoves
 }
 
 //Expects a pawn that is eligible for a promotion, and will return all possible promotions.

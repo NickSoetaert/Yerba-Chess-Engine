@@ -2,9 +2,32 @@ package moveGen
 
 import (
 	"Yerba/utils"
+	"fmt"
 	"math/bits"
 )
 
+// Gets all squares that the king is attacking, regardless of if it can move there or not.
+func(b *Board) getKingDefendedSquares() (defendedSquares uint64) {
+	var currentSquare uint64
+	if b.IsWhiteMove {
+		currentSquare = utils.IsolateLsb(b.Kings & b.WhitePieces)
+	} else {
+		currentSquare = utils.IsolateLsb(b.Kings & b.BlackPieces)
+	}
+	if bits.TrailingZeros64(currentSquare) >= 64 {
+		fmt.Println("getKingDefendedSquares() panic")
+		fmt.Println("white pieces:")
+		utils.PrintBinaryBoard(b.WhitePieces)
+		fmt.Println("black pieces:")
+		utils.PrintBinaryBoard(b.BlackPieces)
+		fmt.Println("kings:")
+		utils.PrintBinaryBoard(b.Kings)
+		PrintBoard(*b)
+	}
+	return KingMask[bits.TrailingZeros64(currentSquare)]
+}
+
+// Gets all squares that a King can legally move to without castling this turn.
 func (b *Board) getNormalKingMoves(attackedSquares uint64, ch chan []Move) {
 	var moves []Move
 	var currentSquare uint64
@@ -15,12 +38,20 @@ func (b *Board) getNormalKingMoves(attackedSquares uint64, ch chan []Move) {
 
 	if b.IsWhiteMove {
 		currentSquare = utils.IsolateLsb(b.Kings & b.WhitePieces)
+		if bits.TrailingZeros64(currentSquare) >= 64 {
+			utils.PrintBinaryBoard(b.Kings)
+			PrintBoard(*b)
+		}
 		possibleAttacks = KingMask[bits.TrailingZeros64(currentSquare)] &^ attackedSquares &^ b.WhitePieces
 		baseMove.setOriginOccupancy(whiteKing)
 		baseMove.setDestOccupancyAfterMove(whiteKing)
 	} else {
 		currentSquare = utils.IsolateLsb(b.Kings & b.BlackPieces)
-		possibleAttacks = KingMask[bits.TrailingZeros64(currentSquare)] &^ attackedSquares &^ b.BlackPieces //todo - currentSquare possibly wrong
+		if bits.TrailingZeros64(currentSquare) >= 64 {
+			utils.PrintBinaryBoard(b.Kings)
+			PrintBoard(*b)
+		}
+		possibleAttacks = KingMask[bits.TrailingZeros64(currentSquare)] &^ attackedSquares &^ b.BlackPieces
 		baseMove.setOriginOccupancy(blackKing)
 		baseMove.setDestOccupancyAfterMove(blackKing)
 	}
@@ -34,6 +65,45 @@ func (b *Board) getNormalKingMoves(attackedSquares uint64, ch chan []Move) {
 		move.setDestFromBB(attack)
 
 		possibleAttacks ^= attack
+
+		//Only add attack if king isn't in check.
+		//Say a rook is on A8, and king is on G8. This prevents king from thinking H8 is safe. Clearly room to optimize.
+		if b.IsWhiteMove {
+			undo := b.ApplyMove(move)
+			//Must be attacked by self because ApplyMove flips the turn
+			if b.GetSquaresAttackedThisHalfTurn() & (b.Kings & b.WhitePieces) != 0 { //If we are in check
+				fmt.Println("filtered white move:")
+				fmt.Println("white pieces:")
+				utils.PrintBinaryBoard(b.WhitePieces)
+				fmt.Println("black pieces")
+				utils.PrintBinaryBoard(b.BlackPieces)
+				fmt.Println("kings:")
+				utils.PrintBinaryBoard(b.Kings)
+				PrintBoard(*b)
+				fmt.Println("^^^^^^^^^^^\n")
+				undo()
+				continue //ignore this move because it is illegal
+			}
+			undo()
+		} else {
+			undo := b.ApplyMove(move)
+			//Must be attacked by self because ApplyMove flips the turn
+			if b.GetSquaresAttackedThisHalfTurn() & (b.Kings & b.BlackPieces) != 0 { //If we are in check
+				fmt.Println("filtered black move:")
+				fmt.Println("white pieces:")
+				utils.PrintBinaryBoard(b.WhitePieces)
+				fmt.Println("black pieces")
+				utils.PrintBinaryBoard(b.BlackPieces)
+				fmt.Println("kings:")
+				utils.PrintBinaryBoard(b.Kings)
+				PrintBoard(*b)
+				fmt.Println("^^^^^^^^^^^\n")
+				undo()
+				continue
+			}
+			undo()
+		}
+
 		moves = append(moves, move)
 	}
 	ch <- moves

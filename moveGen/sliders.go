@@ -189,7 +189,31 @@ func slowCalcBishopMoves(square uint8, blockers uint64) uint64 {
 	return moves
 }
 
-//Calculates bishop XOR rook-like moves for a given piece set (rooks, bishops, queens)
+//Gets all squares defended by bishop XOR rook-like moves for a given piece type
+func (b *Board) getSliderDefendedSquares(sliders uint64, bishopMove bool) (defendedSquares uint64) {
+
+	if b.IsWhiteMove {
+		sliders &= b.WhitePieces
+	} else {
+		sliders &= b.BlackPieces
+	}
+
+	for sliders != 0 { //While there are any sliders left to calculate moves for
+		currentSquareNum := utils.IsolateLsb(sliders)
+
+		if bishopMove {
+			defendedSquares |= GetUnfilteredBishopAttacks(b.BishopDB, bits.TrailingZeros64(currentSquareNum), b.BlackPieces|b.WhitePieces)
+		} else {
+			defendedSquares |= GetUnfilteredRookAttacks(b.RookDB, bits.TrailingZeros64(currentSquareNum), b.BlackPieces|b.WhitePieces)
+		}
+
+		sliders ^= currentSquareNum
+	}
+
+		return defendedSquares
+}
+
+//Calculates bishop XOR rook-like moves for a given piece type (rooks, bishops, queens)
 func (b *Board) getSliderMoves(sliders uint64, bishopMove bool, c chan []Move, piece tileOccupancy) {
 
 	var moves []Move
@@ -213,18 +237,41 @@ func (b *Board) getSliderMoves(sliders uint64, bishopMove bool, c chan []Move, p
 		} else {
 			possibleAttacks = GetUnfilteredRookAttacks(b.RookDB, bits.TrailingZeros64(currentSquareNum), b.BlackPieces|b.WhitePieces)
 		}
-		if b.IsWhiteMove {
+		if b.IsWhiteMove { //filter out squares with your own color.
 			possibleAttacks = possibleAttacks &^ b.WhitePieces
 		} else {
 			possibleAttacks = possibleAttacks &^ b.BlackPieces
 		}
-		for possibleAttacks != 0 {
+		for possibleAttacks != 0 { //convert each attacked square into a move
 			move := originSquareMove
 			attack := utils.IsolateLsb(possibleAttacks)
 			move.setDestFromBB(attack)
 			move.setDestOccupancyBeforeMove(b.getTileOccupancy(attack)) //note the piece (or lack of) that's on the square before we capture
 
 			possibleAttacks ^= attack
+
+			//Only add move if your king is not in check
+			//Note that we don't pass if our own king is in check at start of move,
+			//Because we'd have to check regardless. This is because you can put your own king in check if pinned.
+			if b.IsWhiteMove {
+				undo := b.ApplyMove(move)
+				//Must be attacked by self because ApplyMove flips the turn
+				if b.GetSquaresAttackedThisHalfTurn() & (b.Kings & b.WhitePieces) != 0 { //If we are in check
+					undo()
+					continue //ignore this move because it is illegal
+				}
+				undo()
+			} else {
+				undo := b.ApplyMove(move)
+				//Must be attacked by self because ApplyMove flips the turn
+				if b.GetSquaresAttackedThisHalfTurn() & (b.Kings & b.BlackPieces) != 0 { //If we are in check
+					undo()
+					continue
+				}
+				undo()
+			}
+
+			//If we are not in check, just add the move
 			moves = append(moves, move)
 		}
 		sliders ^= currentSquareNum

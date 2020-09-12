@@ -22,6 +22,7 @@ type Board struct {
 	WhitePieces, BlackPieces                      uint64
 	RookDB, BishopDB                              [][]uint64 //All possible (precomputed) moves for rooks and bishops
 	IsWhiteMove                                   bool       //True if it is currently white's move
+	//CurrentKingInCheck							  bool 		 //True if the color who's turn it is starts their turn in check
 
 	WhiteKingHasNeverMoved bool //True if the white king has never moved (including castling)
 	A1RookHasNeverMoved    bool //True if white rook on A1 has never moved, regardless of if captured or not.
@@ -59,6 +60,18 @@ func SetUpBoard() Board {
 	}
 	return board
 }
+func SetUpCheckmateBoard() Board {
+	r, b := InitSlidingPieces()
+	return Board{
+		Rooks:                  H1 | H2 | C6,
+		Kings:                  A1 | H8,
+		WhitePieces:            A1 | C6,
+		BlackPieces:            H1 | H2 | H8,
+		RookDB:                 r,
+		BishopDB:               b,
+		IsWhiteMove:            true,
+	}
+}
 
 //For benchmarking and testing
 func SetUpBoardNoPawns() Board {
@@ -85,6 +98,39 @@ func SetUpBoardNoPawns() Board {
 	return board
 }
 
+func SetUpBoardAllPawns() Board {
+	return Board{
+		Pawns: SecondRank | SeventhRank,
+		Kings:                  E1 | E8,
+		WhitePieces:            E1 | SecondRank,
+		BlackPieces:            E8 | SeventhRank,
+		IsWhiteMove:            true,
+		WhiteKingHasNeverMoved: true,
+		BlackKingHasNeverMoved: true,
+	}
+}
+
+func KingOnlyTestBoard() Board {
+	return Board{
+		Kings:                  E1 | E8,
+		WhitePieces:            E1,
+		BlackPieces:            E8,
+		IsWhiteMove:            true,
+		WhiteKingHasNeverMoved: true,
+		BlackKingHasNeverMoved: true,
+	}
+}
+
+func KnightOnlyTestBoard() Board {
+	return Board{
+		Kings:                  E1 | E8,
+		Knights: B1 | G1 | B8 | G8,
+		WhitePieces:            B1 | G1 | E1,
+		BlackPieces:            B8 | G8 | E8,
+		IsWhiteMove:            true,
+	}
+}
+
 //For testing
 func SetUpCastlingTestBoard() Board {
 	r, b := InitSlidingPieces()
@@ -107,7 +153,48 @@ func SetUpCastlingTestBoard() Board {
 	return board
 }
 
+// Todo: keep part of this cached from previous move.
+func (b Board) GetSquaresAttackedThisHalfTurn() (defendedSquares uint64) {
+	//Pretend it is the opponent's move to see what squares they can currently attack
+	defendedSquares |= b.getPawnDefendedSquares()
+	defendedSquares |= b.getKnightDefendedSquares()
+
+	defendedSquares |= b.getSliderDefendedSquares(b.Bishops, true) //bishops
+	defendedSquares |= b.getSliderDefendedSquares(b.Rooks, false)  //rooks
+	defendedSquares |= b.getSliderDefendedSquares(b.Queens, true)  //queen bishop moves
+	defendedSquares |= b.getSliderDefendedSquares(b.Queens, false) //queen rook moves
+
+	defendedSquares |= b.getKingDefendedSquares()
+
+
+	return defendedSquares
+}
+
+// Todo: keep part of this cached from previous move.
+func (b Board) GetSquaresAttackedByOpponent() (defendedSquares uint64) {
+	//Pretend it is the opponent's move to see what squares they can currently attack
+	b.IsWhiteMove = ! b.IsWhiteMove
+
+	defendedSquares |= b.getPawnDefendedSquares()
+	defendedSquares |= b.getKnightDefendedSquares()
+
+	defendedSquares |= b.getSliderDefendedSquares(b.Bishops, true) //bishops
+	defendedSquares |= b.getSliderDefendedSquares(b.Rooks, false)  //rooks
+	defendedSquares |= b.getSliderDefendedSquares(b.Queens, true)  //queen bishop moves
+	defendedSquares |= b.getSliderDefendedSquares(b.Queens, false) //queen rook moves
+
+	defendedSquares |= b.getKingDefendedSquares()
+
+
+	return defendedSquares
+}
+
+func currentTurnKingIsInCheck(king uint64, attackedSquares uint64) bool {
+	return king & attackedSquares != 0
+}
+
 //Todo: account for pinned pieces
+//Todo: account for check/checkmate
 func (b Board) GenerateLegalMoves() (moves []Move) {
 	pChan := make(chan []Move)
 	nChan := make(chan []Move)
@@ -118,27 +205,41 @@ func (b Board) GenerateLegalMoves() (moves []Move) {
 	kChan := make(chan []Move)
 	castleChan := make(chan []Move)
 
-	go b.getPawnMoves(pChan)                      //pawns
-	go b.getCastlingMoves(EmptyBoard, castleChan) //Todo: pass attacked squares
+	attackedSquares := b.GetSquaresAttackedByOpponent()
+
 
 	if b.IsWhiteMove {
+		if currentTurnKingIsInCheck(b.Kings & b.WhitePieces, attackedSquares) {
+			fmt.Println("White king in check!")
+			PrintBoard(b)
+			fmt.Println("~~~~~~~~~~~~~~~~~~~~")
+		}
 		go b.getSliderMoves(b.Bishops, true, bChan, whiteBishop) //bishops
 		go b.getSliderMoves(b.Rooks, false, rChan, whiteRook)    //rooks
 		go b.getSliderMoves(b.Queens, true, qbChan, whiteQueen)  //queens
 		go b.getSliderMoves(b.Queens, false, qrChan, whiteQueen) //queens
 
 		go b.getKnightMoves(nChan)
-		go b.getNormalKingMoves(EmptyBoard, kChan) //Todo: pass attacked squares
+		go b.getNormalKingMoves(attackedSquares, kChan)
 
 	} else {
+
+		if currentTurnKingIsInCheck(b.Kings & b.BlackPieces, attackedSquares) {
+			fmt.Println("Black King in check!")
+			PrintBoard(b)
+			fmt.Println("~~~~~~~~~~~~~~~~~~~~")
+		}
 		go b.getSliderMoves(b.Bishops, true, bChan, blackBishop) //bishops
 		go b.getSliderMoves(b.Rooks, false, rChan, blackRook)    //rooks
 		go b.getSliderMoves(b.Queens, true, qbChan, blackQueen)  //queens
 		go b.getSliderMoves(b.Queens, false, qrChan, blackQueen) //queens
 
 		go b.getKnightMoves(nChan)
-		go b.getNormalKingMoves(EmptyBoard, kChan)
+		go b.getNormalKingMoves(attackedSquares, kChan)
 	}
+
+	go b.getPawnMoves(pChan) //pawns
+	go b.getCastlingMoves(attackedSquares, castleChan)
 
 	moves = append(moves, <-pChan...)
 	moves = append(moves, <-nChan...)

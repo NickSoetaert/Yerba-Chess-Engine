@@ -15,11 +15,10 @@ import (
 // -Optimize undo move function
 
 func main() {
-	//fmt.Println("Hello World")
+	fmt.Println("Hello World")
 
-	b := moveGen.SetUpBoard()
-
-	fmt.Println(b.CountVariationsAtPly(6, 0, false))
+	b := moveGen.SetUpCheckmateBoard()
+	fmt.Println(b.CountVariationsAtPly(6, 0, true))
 
 	//start := time.Now()
 	//ply := 3
