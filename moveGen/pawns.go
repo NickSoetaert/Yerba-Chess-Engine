@@ -243,7 +243,6 @@ func (b Board) enPassantCaptures() (moves []Move) {
 	if b.EnPassantFile == 0 {
 		return nil
 	}
-	fmt.Println("\n\n~~~~~~~~~~~~EpFile:", b.EnPassantFile)
 	baseMove := Move(0)
 	baseMove.setMoveType(enPassantCapture)
 	baseMove.setDestOccupancyBeforeMove(empty)
@@ -261,12 +260,10 @@ func (b Board) enPassantCaptures() (moves []Move) {
 
 		baseMove.setOriginOccupancy(whitePawn)
 		baseMove.setDestOccupancyAfterMove(whitePawn)
-		fmt.Println("white captures:")
+		fmt.Println("white captures towards a file:")
 		utils.PrintBinaryBoard(openSquares)
 
-	} else { //todo this is the block I most checked before I had to leave
-		//get own pawns to diagonal of EP square to attack - want C4
-		utils.PrintBinaryBoard(b.Pawns & b.BlackPieces)
+	} else { //todo this is the block I most checked before I had to leave - although still likely incomplete
 
 		//get squares to left diagonal that can be attacked - avoid wrapping to h file
 		//Do not get right diagonals yet, as we won't know the origin square
@@ -279,7 +276,7 @@ func (b Board) enPassantCaptures() (moves []Move) {
 
 		baseMove.setOriginOccupancy(blackPawn)
 		baseMove.setDestOccupancyAfterMove(blackPawn)
-		fmt.Println("black captures:")
+		fmt.Println("black captures towards a file:")
 		utils.PrintBinaryBoard(openSquares)
 	}
 	for openSquares != 0 {
@@ -296,9 +293,6 @@ func (b Board) enPassantCaptures() (moves []Move) {
 	}
 
 	if b.IsWhiteMove {
-		//get own pawns to diagonal of EP square to attack - want C4
-		utils.PrintBinaryBoard(b.Pawns & b.WhitePieces)
-
 		//get squares to right diagonal that can be attacked - avoid wrapping to h file
 		reachable := ((b.Pawns & b.BlackPieces) << 7) &^ AFile
 
@@ -309,12 +303,9 @@ func (b Board) enPassantCaptures() (moves []Move) {
 
 		baseMove.setOriginOccupancy(whitePawn)
 		baseMove.setDestOccupancyAfterMove(whitePawn)
-		fmt.Println("white captures:")
+		fmt.Println("white captures towards h file:")
 		utils.PrintBinaryBoard(openSquares)
 	} else {
-		//get own pawns to diagonal of EP square to attack - want C4
-		utils.PrintBinaryBoard(b.Pawns & b.BlackPieces)
-
 		//get squares to right diagonal that can be attacked - avoid wrapping to h file
 		reachable := ((b.Pawns & b.BlackPieces) >> 7) &^ AFile
 
@@ -325,7 +316,7 @@ func (b Board) enPassantCaptures() (moves []Move) {
 
 		baseMove.setOriginOccupancy(blackPawn)
 		baseMove.setDestOccupancyAfterMove(blackPawn)
-		fmt.Println("black captures:")
+		fmt.Println("black captures towards h file:")
 		utils.PrintBinaryBoard(openSquares)
 	}
 	utils.PrintBinaryBoard(openSquares)
