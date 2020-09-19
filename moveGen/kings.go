@@ -21,8 +21,8 @@ func(b *Board) getKingDefendedSquares() (defendedSquares uint64) {
 func (b Board) getNormalKingMoves(attackedSquares uint64, ch chan []Move) {
 	var moves []Move
 	//todo - remove this once done with debug
-	ch <- moves
-	return
+	//ch <- moves
+	//return
 	var currentSquare uint64
 	var possibleAttacks uint64
 

@@ -20,9 +20,10 @@ func (b *Board) getTileOccupancy(tile uint64) tileOccupancy {
 			return blackRook
 		} else if tile&b.Queens != EmptyBoard {
 			return blackQueen
-		} else if tile&b.Kings != EmptyBoard { //todo: take this out once I add checkmate
-			fmt.Println("capturing black king!")
-			return blackKing
+		} else if tile&b.Kings != EmptyBoard {
+			panic("capturing black king!")
+			//fmt.Println("capturing black king!")
+			//return blackKing
 		} else {
 			PrintBoard(*b)
 			utils.PrintBinaryBoard(tile)
@@ -38,7 +39,7 @@ func (b *Board) getTileOccupancy(tile uint64) tileOccupancy {
 			panic("white move - impossible tile occupancy")
 		}
 	} else {
-		if tile&b.BlackPieces == EmptyBoard {
+		if tile&b.WhitePieces == EmptyBoard {
 			return empty
 		} else if tile&b.Pawns != EmptyBoard {
 			return whitePawn
@@ -50,9 +51,10 @@ func (b *Board) getTileOccupancy(tile uint64) tileOccupancy {
 			return whiteRook
 		} else if tile&b.Queens != EmptyBoard {
 			return whiteQueen
-		} else if tile&b.Kings != EmptyBoard { //todo: take this out once I add checkmate
-			fmt.Println("capturing white king!")
-			return whiteKing
+		} else if tile&b.Kings != EmptyBoard {
+			panic("capturing white king!")
+			//fmt.Println("capturing white king!")
+			//return whiteKing
 		} else {
 			PrintBoard(*b)
 			utils.PrintBinaryBoard(tile)

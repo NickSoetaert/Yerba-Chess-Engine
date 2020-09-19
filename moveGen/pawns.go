@@ -177,7 +177,6 @@ func (b Board) pawnNormalCaptures() (moves []Move) {
 		newMove := baseMove
 		newMove.setDestFromBB(dest)
 		newMove.setDestOccupancyBeforeMove(b.getTileOccupancy(dest))
-
 		if b.IsWhiteMove {
 			newMove.setOriginFromBB(dest >> 7)
 			for _, promotion := range pawnPromotionsHelper(newMove, true) {
