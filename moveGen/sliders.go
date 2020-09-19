@@ -217,6 +217,9 @@ func (b *Board) getSliderDefendedSquares(sliders uint64, bishopMove bool) (defen
 func (b Board) getSliderMoves(sliders uint64, bishopMove bool, c chan []Move, piece tileOccupancy) {
 
 	var moves []Move
+	//c <- moves //todo remove
+	//return
+
 	baseMove := Move(0)
 	baseMove.setMoveType(normalMove)
 	baseMove.setOriginOccupancy(piece)

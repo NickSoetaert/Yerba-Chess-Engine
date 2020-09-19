@@ -7,7 +7,7 @@ import (
 )
 
 //todo:
-// -Fix EP moves
+// -Find missing moves that should be legal on 5+ ply (5 ply is 4,864,863 actual vs 4,865,609 expected)
 // -Optimize undo move function
 // -Evaluate function
 // -A BUNCH general optimization
@@ -15,11 +15,11 @@ import (
 func main() {
 	fmt.Println("Hello World")
 
-	b := moveGen.SetUpEPBoard()
+	b := moveGen.SetUpBlackPawnCaptureBoard()
 	moveGen.PrintBoard(b)
 	fmt.Println("possible moves:")
 
-	b.CountVariationsAtPly(2, 0, true)
+	b.CountVariationsAtPly(1, 0, true)
 
 
 	//start := time.Now()

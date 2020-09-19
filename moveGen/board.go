@@ -65,7 +65,8 @@ func SetUpCheckmateBoard() Board {
 	return Board{
 		Rooks:                  H1 | H2,
 		Kings:                  A1 | H8,
-		WhitePieces:            A1,
+		Knights: 				C3,
+		WhitePieces:            A1 | C3,
 		BlackPieces:            H1 | H2 | H8,
 		RookDB:                 r,
 		BishopDB:               b,
@@ -73,24 +74,90 @@ func SetUpCheckmateBoard() Board {
 	}
 }
 
-func SetUpPromotionBoard() Board {
+func SetUpWhitePawnCaptureBoard() Board {
 	return Board{
-		Pawns:                  D7,
-		Knights:                E8,
+		Pawns:                  D5,
+		Knights:                C6 | E6,
 		Kings:                  A1 | A3,
-		WhitePieces:            A1 | D7,
-		BlackPieces:            A3 | E8,
+		WhitePieces:            A1 | D5,
+		BlackPieces:            A3 | C6 | E6,
 		IsWhiteMove:            true,
 	}
 }
 
-func SetUpEPBoard() Board {
+func SetUpBlackPawnCaptureBoard() Board {
 	return Board{
-		Pawns:                  B2 | C4,
-		Kings:                  F8 | H8,
-		WhitePieces:            B2 | F8,
-		BlackPieces:            C4 | H8,
+		Pawns:                  D4,
+		Knights:                C3 | E3,
+		Kings:                  A8 | C8,
+		WhitePieces:            A8 | C3 | E3,
+		BlackPieces:            C8 | D4,
+		IsWhiteMove:            false,
+	}
+}
+
+func SetUpWhitePromotionBoard() Board {
+	return Board{
+		Pawns:                  D7,
+		Knights:                C8 | E8,
+		Kings:                  A1 | A3,
+		WhitePieces:            A1 | D7,
+		BlackPieces:            A3 | C8 | E8,
 		IsWhiteMove:            true,
+	}
+}
+
+func SetUpBlackPromotionBoard() Board {
+	return Board{
+		Pawns:                  D2,
+		Knights:                C1 | E1,
+		Kings:                  A8 | C8,
+		WhitePieces:            C1 | E1 | C8,
+		BlackPieces:            A8 | D2,
+		IsWhiteMove:            false,
+	}
+}
+
+func SetUpBlackTakesTowardsAFileEPBoard() Board {
+	return Board{
+		Pawns:                  A2 | B4,
+		Kings:                  F8 | H8,
+		WhitePieces:            A2 | F8,
+		BlackPieces:            B4 | H8,
+		IsWhiteMove:            true,
+		EnPassantFile:          0,
+	}
+}
+
+func SetUpBlackTakesTowardsHFileEPBoard() Board {
+	return Board{
+		Pawns:                  H2 | G4,
+		Kings:                  A1 | C1,
+		WhitePieces:            H2 | A1,
+		BlackPieces:            G4 | C1,
+		IsWhiteMove:            true,
+		EnPassantFile:          0,
+	}
+}
+
+func SetUpWhiteTakesTowardsAFileEPBoard() Board {
+	return Board{
+		Pawns:                  A7 | B5,
+		Kings:                  F1 | H1,
+		WhitePieces:            B5 | H1,
+		BlackPieces:            A7 | F1,
+		IsWhiteMove:            false,
+		EnPassantFile:          0,
+	}
+}
+
+func SetUpWhiteTakesTowardsHFileEPBoard() Board {
+	return Board{
+		Pawns:                  H7 | G5,
+		Kings:                  F1 | H1,
+		WhitePieces:            G5 | H1,
+		BlackPieces:            H7 | F1,
+		IsWhiteMove:            false,
 		EnPassantFile:          0,
 	}
 }
@@ -159,7 +226,8 @@ func SetUpCastlingTestBoard() Board {
 	board := Board{
 		Kings:                  E1 | E8,
 		WhitePieces:            E1 | A1 | H1,
-		BlackPieces:            E8,
+		BlackPieces:            E8 | B3,
+		Knights: B3,
 		Rooks:                  A1 | H1,
 		RookDB:                 r,
 		BishopDB:               b,

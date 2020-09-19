@@ -2,7 +2,6 @@ package moveGen
 
 import (
 	"Yerba/utils"
-	"fmt"
 )
 
 func (b Board) getPawnDefendedSquares() (defendedSquares uint64) {
@@ -64,11 +63,11 @@ func (b Board) getPawnMoves(c chan []Move) {
 	c <- filteredMoves
 }
 
-//Expects a pawn that is eligible for a promotion, and will return all possible promotions.
+//Expects a pawn move, and will return all possible promotions. If no promotions are possible, returns given move.
 func pawnPromotionsHelper(move Move, isWhiteToMove bool) (allMoves []Move) {
 	if isWhiteToMove {
-		if (move.getDestSquare() & EighthRank) == 0 { //if there are no possible promotions, return base move
-			panic(fmt.Sprintf("impossible promotion - dest square: %064b", move.getDestSquare()))
+		if (move.getDestSquare() & EighthRank) == 0 { //if there are no possible promotions, return default move
+			return []Move{move}
 		}
 		allMoves = append(allMoves, move.copyMoveAndSetDestOccupancy(whiteKnight))
 		allMoves = append(allMoves, move.copyMoveAndSetDestOccupancy(whiteBishop))
@@ -76,7 +75,7 @@ func pawnPromotionsHelper(move Move, isWhiteToMove bool) (allMoves []Move) {
 		allMoves = append(allMoves, move.copyMoveAndSetDestOccupancy(whiteQueen))
 	} else {
 		if (move.getDestSquare() & FirstRank) == 0 {
-			panic("impossible promotion")
+			return []Move{move}
 		}
 		allMoves = append(allMoves, move.copyMoveAndSetDestOccupancy(blackKnight))
 		allMoves = append(allMoves, move.copyMoveAndSetDestOccupancy(blackBishop))
@@ -110,24 +109,13 @@ func (b Board) pawnSinglePushMoves() (moves []Move) {
 
 		if b.IsWhiteMove {
 			newMove.setOriginFromBB(dest >> 8) //record the square we started at
-
-			if (dest & EighthRank) != 0 { // Factor in if a promotion is possible.
-				for _, promotion := range pawnPromotionsHelper(newMove, true) {
-					moves = append(moves, promotion)
-				}
-			} else { //If not, just add the unpromoted move to list of moves.
-				moves = append(moves, newMove)
+			for _, promotion := range pawnPromotionsHelper(newMove, true) {
+				moves = append(moves, promotion)
 			}
-
 		} else { //if black's move
 			newMove.setOriginFromBB(dest << 8)
-
-			if (dest & FirstRank) != 0 { // Factor in if a promotion is possible.
-				for _, promotion := range pawnPromotionsHelper(newMove, false) {
-					moves = append(moves, promotion)
-				}
-			} else { //If not, just add the unpromoted move to list of moves.
-				moves = append(moves, newMove)
+			for _, promotion := range pawnPromotionsHelper(newMove, false) {
+				moves = append(moves, promotion)
 			}
 		}
 		openSquares &= openSquares - 1
@@ -140,8 +128,9 @@ func (b Board) pawnNormalCaptures() (moves []Move) {
 	baseMove := Move(0)
 	baseMove.setMoveType(normalMove)
 
+	// First, get all captures that go towards the H file
 	if b.IsWhiteMove {
-		openSquares = ((b.Pawns & b.WhitePieces << 7) & ^HFile) & b.BlackPieces
+		openSquares |= ((b.Pawns & b.WhitePieces << 9) & ^AFile) & b.BlackPieces
 		baseMove.setOriginOccupancy(whitePawn)
 		baseMove.setDestOccupancyAfterMove(whitePawn)
 	} else {
@@ -150,53 +139,56 @@ func (b Board) pawnNormalCaptures() (moves []Move) {
 		baseMove.setDestOccupancyAfterMove(blackPawn)
 	}
 
-	//Convert all available squares to a Move
+	//Convert all available squares to a Move, and apply promotions if applicable.
 	for openSquares != 0 {
 		dest := utils.IsolateLsb(openSquares)
 		newMove := baseMove
 		newMove.setDestFromBB(dest)
 		newMove.setDestOccupancyBeforeMove(b.getTileOccupancy(dest))
 		if b.IsWhiteMove {
-			newMove.setOriginFromBB(dest >> 7)
-		} else {
+			newMove.setOriginFromBB(dest >> 9)
+			for _, promotion := range pawnPromotionsHelper(newMove, true) {
+				moves = append(moves, promotion)
+			}
+
+		} else { //If black's move
 			newMove.setOriginFromBB(dest << 7)
+			for _, promotion := range pawnPromotionsHelper(newMove, false) {
+				moves = append(moves, promotion)
+			}
 		}
-		moves = append(moves, newMove)
 		openSquares &= openSquares - 1
 	}
 
+	//Second, get all captures towards the A file
 	if b.IsWhiteMove {
-		openSquares |= ((b.Pawns & b.WhitePieces << 9) & ^AFile) & b.BlackPieces
+		openSquares = ((b.Pawns & b.WhitePieces << 7) & ^HFile) & b.BlackPieces
+		baseMove.setOriginOccupancy(whitePawn)
+		baseMove.setDestOccupancyAfterMove(whitePawn)
 	} else {
 		openSquares |= ((b.Pawns & b.BlackPieces >> 9) & ^HFile) & b.WhitePieces
+		baseMove.setOriginOccupancy(blackPawn)
+		baseMove.setDestOccupancyAfterMove(blackPawn)
 	}
-	//Convert all available squares to a Move
+
+	//Convert all available squares to a Move, and apply promotions if applicable.
 	for openSquares != 0 {
 		dest := utils.IsolateLsb(openSquares)
 		newMove := baseMove
 		newMove.setDestFromBB(dest)
+		newMove.setDestOccupancyBeforeMove(b.getTileOccupancy(dest))
 
 		if b.IsWhiteMove {
-			newMove.setOriginFromBB(dest >> 9)
-
-			//Check for promotions
-			if (dest & EighthRank) != 0 {
-				for _, promotion := range pawnPromotionsHelper(newMove, true) {
-					moves = append(moves, promotion)
-				}
-			} else { //If not, just add the unpromoted move to list of moves.
-				moves = append(moves, newMove)
+			newMove.setOriginFromBB(dest >> 7)
+			for _, promotion := range pawnPromotionsHelper(newMove, true) {
+				moves = append(moves, promotion)
 			}
 
 		} else { //If black's move
 			newMove.setOriginFromBB(dest << 9)
 
-			if (dest & FirstRank) != 0 {
-				for _, promotion := range pawnPromotionsHelper(newMove, false) {
-					moves = append(moves, promotion)
-				}
-			} else {
-				moves = append(moves, newMove)
+			for _, promotion := range pawnPromotionsHelper(newMove, false) {
+				moves = append(moves, promotion)
 			}
 		}
 		openSquares &= openSquares - 1
@@ -213,7 +205,7 @@ func (b Board) pawnDoublePushMoves() (moves []Move) {
 	if b.IsWhiteMove {
 		//Get moves that move forward 2 ranks and end up on proper rank, and don't jump over anything
 		openSquares |= ((b.Pawns & b.WhitePieces << 16) & FourthRank) &^ (((b.WhitePieces | b.BlackPieces) & ThirdRank) << 8)
-		utils.PrintBinaryBoard(openSquares)
+		//utils.PrintBinaryBoard(openSquares)
 		baseMove.setOriginOccupancy(whitePawn)
 		baseMove.setDestOccupancyAfterMove(whitePawn)
 	} else {
@@ -248,10 +240,11 @@ func (b Board) enPassantCaptures() (moves []Move) {
 	baseMove.setDestOccupancyBeforeMove(empty)
 	var openSquares uint64
 
-	if b.IsWhiteMove { //todo
+	//First, get all attacks that go towards the A file
+	if b.IsWhiteMove {
 		//get squares to left diagonal that can be attacked - avoid wrapping to h file
 		//Do not get right diagonals yet, as we won't know the origin square
-		reachable := ((b.Pawns & b.WhitePieces) << 9) &^ HFile
+		reachable := ((b.Pawns & b.WhitePieces) << 7) &^ HFile
 
 		//get squares that can actually be attacked, given current E.P. square.
 		canEpCapture := enPassantFileToAttackedSquare(b.EnPassantFile, b.IsWhiteMove)
@@ -260,10 +253,7 @@ func (b Board) enPassantCaptures() (moves []Move) {
 
 		baseMove.setOriginOccupancy(whitePawn)
 		baseMove.setDestOccupancyAfterMove(whitePawn)
-		fmt.Println("white captures towards a file:")
-		utils.PrintBinaryBoard(openSquares)
-
-	} else { //todo this is the block I most checked before I had to leave - although still likely incomplete
+	} else {
 
 		//get squares to left diagonal that can be attacked - avoid wrapping to h file
 		//Do not get right diagonals yet, as we won't know the origin square
@@ -276,8 +266,6 @@ func (b Board) enPassantCaptures() (moves []Move) {
 
 		baseMove.setOriginOccupancy(blackPawn)
 		baseMove.setDestOccupancyAfterMove(blackPawn)
-		fmt.Println("black captures towards a file:")
-		utils.PrintBinaryBoard(openSquares)
 	}
 	for openSquares != 0 {
 		dest := utils.IsolateLsb(openSquares)
@@ -286,15 +274,16 @@ func (b Board) enPassantCaptures() (moves []Move) {
 		if b.IsWhiteMove {
 			newMove.setOriginFromBB(dest >> 7)
 		} else {
-			newMove.setOriginFromBB(dest << 7)
+			newMove.setOriginFromBB(dest << 9)
 		}
 		moves = append(moves, newMove)
 		openSquares &= openSquares - 1
 	}
 
+	//Second, get all attacks that go towards the H file
 	if b.IsWhiteMove {
-		//get squares to right diagonal that can be attacked - avoid wrapping to h file
-		reachable := ((b.Pawns & b.BlackPieces) << 7) &^ AFile
+		//get squares to left diagonal that can be attacked - avoid wrapping to A file
+		reachable := ((b.Pawns & b.WhitePieces) << 9) &^ AFile
 
 		//get squares that can actually be attacked, given current E.P. square.
 		canEpCapture := enPassantFileToAttackedSquare(b.EnPassantFile, b.IsWhiteMove)
@@ -303,10 +292,8 @@ func (b Board) enPassantCaptures() (moves []Move) {
 
 		baseMove.setOriginOccupancy(whitePawn)
 		baseMove.setDestOccupancyAfterMove(whitePawn)
-		fmt.Println("white captures towards h file:")
-		utils.PrintBinaryBoard(openSquares)
 	} else {
-		//get squares to right diagonal that can be attacked - avoid wrapping to h file
+		//get squares to left diagonal that can be attacked - avoid wrapping to A file
 		reachable := ((b.Pawns & b.BlackPieces) >> 7) &^ AFile
 
 		//get squares that can actually be attacked, given current E.P. square.
@@ -316,19 +303,16 @@ func (b Board) enPassantCaptures() (moves []Move) {
 
 		baseMove.setOriginOccupancy(blackPawn)
 		baseMove.setDestOccupancyAfterMove(blackPawn)
-		fmt.Println("black captures towards h file:")
-		utils.PrintBinaryBoard(openSquares)
 	}
-	utils.PrintBinaryBoard(openSquares)
+	//utils.PrintBinaryBoard(openSquares)
 	for openSquares != 0 {
-		fmt.Println("AAAAAAAAAA")
 		dest := utils.IsolateLsb(openSquares)
 		newMove := baseMove
 		newMove.setDestFromBB(dest)
 		if b.IsWhiteMove {
 			newMove.setOriginFromBB(dest >> 9)
 		} else {
-			newMove.setOriginFromBB(dest << 9)
+			newMove.setOriginFromBB(dest << 7)
 		}
 		moves = append(moves, newMove)
 		openSquares &= openSquares - 1

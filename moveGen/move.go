@@ -82,8 +82,6 @@ func (b *Board) ApplyMove(m Move) UndoMove {
 	//Clear en passant capture unless we just pushed a pawn two squares
 	if m.getMoveType() != pawnDoublePush {
 		b.EnPassantFile = 0
-	} else {
-		fmt.Println("E.P file:", b.EnPassantFile)
 	}
 
 	//Finally, change who's turn it is
@@ -160,7 +158,6 @@ func enPassantFileToAttackedSquare(file uint8, isWhiteToMove bool) uint64 {
 		}
 	}
 }
-
 
 //Given a file number (with 1==A, 8==h) and who's turn it is,
 //Returns the square on which in en passant the captured pawn would be removed. Wordy but fast.
