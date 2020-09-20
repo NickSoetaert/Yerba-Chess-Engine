@@ -394,40 +394,71 @@ func currentTurnKingIsInCheck(king uint64, attackedSquares uint64) bool {
 
 //Todo: account for pinned pieces
 //Todo: account for check/checkmate
-func (b Board) GenerateLegalMoves(pChan, nChan, bChan, rChan, qbChan, qrChan, kChan, castleChan chan[]Move) (moves []Move) {
+func (b Board) GenerateLegalMoves() (moves []Move) {
 
 	attackedSquares := b.GetSquaresAttackedByOpponent()
 
-	go b.getPawnMoves(pChan) //pawns
-	go b.getCastlingMoves(attackedSquares, castleChan)
-
-	if b.IsWhiteMove {
-		go b.getSliderMoves(b.Bishops, true, bChan, whiteBishop) //bishops
-		go b.getSliderMoves(b.Rooks, false, rChan, whiteRook)    //rooks
-		go b.getSliderMoves(b.Queens, true, qbChan, whiteQueen)  //queens
-		go b.getSliderMoves(b.Queens, false, qrChan, whiteQueen) //queens
-
-		go b.getKnightMoves(nChan)
-		go b.getNormalKingMoves(attackedSquares, kChan)
-
-	} else {
-		go b.getSliderMoves(b.Bishops, true, bChan, blackBishop) //bishops
-		go b.getSliderMoves(b.Rooks, false, rChan, blackRook)    //rooks
-		go b.getSliderMoves(b.Queens, true, qbChan, blackQueen)  //queens
-		go b.getSliderMoves(b.Queens, false, qrChan, blackQueen) //queens
-
-		go b.getKnightMoves(nChan)
-		go b.getNormalKingMoves(attackedSquares, kChan)
+	for _, move := range b.getPawnMoves() {
+		moves = append(moves, move)
+	}
+	for _, move := range b.getCastlingMoves(attackedSquares) {
+		moves = append(moves, move)
 	}
 
-	moves = append(moves, <-pChan...)
-	moves = append(moves, <-nChan...)
-	moves = append(moves, <-bChan...)
-	moves = append(moves, <-rChan...)
-	moves = append(moves, <-qbChan...)
-	moves = append(moves, <-qrChan...)
-	moves = append(moves, <-kChan...)
-	moves = append(moves, <-castleChan...)
+	if b.IsWhiteMove {
+		for _, move := range b.getSliderMoves(b.Bishops, true, whiteBishop) {
+			moves = append(moves, move)
+		}//bishops
+
+		for _, move := range b.getSliderMoves(b.Rooks, false, whiteRook) {
+			moves = append(moves, move)
+
+		}   //rooks
+		for _, move := range b.getSliderMoves(b.Queens, true, whiteQueen) {
+			moves = append(moves, move)
+
+		} //queens
+		for _, move := range b.getSliderMoves(b.Queens, false, whiteQueen) {
+			moves = append(moves, move)
+
+		}//queens
+
+		for _, move := range b.getKnightMoves() {
+			moves = append(moves, move)
+
+		}
+		for _, move := range b.getNormalKingMoves(attackedSquares) {
+			moves = append(moves, move)
+
+		}
+
+	} else {
+		for _, move := range b.getSliderMoves(b.Bishops, true, blackBishop) {
+			moves = append(moves, move)
+
+		}//bishops
+		for _, move := range b.getSliderMoves(b.Rooks, false, blackRook) {
+			moves = append(moves, move)
+
+		}   //rooks
+		for _, move := range b.getSliderMoves(b.Queens, true, blackQueen) {
+			moves = append(moves, move)
+
+		} //queens
+		for _, move := range b.getSliderMoves(b.Queens, false, blackQueen){
+			moves = append(moves, move)
+
+		} //queens
+
+		for _, move := range b.getKnightMoves() {
+			moves = append(moves, move)
+
+		}
+		for _, move := range b.getNormalKingMoves(attackedSquares) {
+			moves = append(moves, move)
+
+		}
+	}
 
 	return moves
 }

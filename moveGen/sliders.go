@@ -214,7 +214,7 @@ func (b *Board) getSliderDefendedSquares(sliders uint64, bishopMove bool) (defen
 }
 
 //Calculates bishop XOR rook-like moves for a given piece type (rooks, bishops, queens)
-func (b Board) getSliderMoves(sliders uint64, bishopMove bool, c chan []Move, piece tileOccupancy) {
+func (b Board) getSliderMoves(sliders uint64, bishopMove bool, piece tileOccupancy) []Move{
 
 	var moves []Move
 	//c <- moves //todo remove
@@ -279,5 +279,5 @@ func (b Board) getSliderMoves(sliders uint64, bishopMove bool, c chan []Move, pi
 		}
 		sliders ^= currentSquareNum
 	}
-	c <- moves
+	return moves
 }

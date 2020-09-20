@@ -8,16 +8,9 @@ import (
 )
 
 func BenchmarkBoard_GenerateLegalMoves(b *testing.B) {
-	pChan := make(chan []Move, 1)
-	nChan := make(chan []Move, 1)
-	bChan := make(chan []Move, 1)
-	rChan := make(chan []Move, 1)
-	qbChan := make(chan []Move, 1)
-	qrChan := make(chan []Move, 1)
-	kChan := make(chan []Move, 1)
-	castleChan := make(chan []Move, 1)
+
 	board := SetUpBoardNoPawns()
-	board.GenerateLegalMoves(pChan, nChan, bChan, rChan, qbChan, qrChan, kChan, castleChan)
+	board.GenerateLegalMoves()
 
 }
 
@@ -29,24 +22,17 @@ func BenchmarkBoard_MiniMax(b *testing.B) {
 }
 
 func TestBoard_GenerateLegalMoves(t *testing.T) {
-	pChan := make(chan []Move, 1)
-	nChan := make(chan []Move, 1)
-	bChan := make(chan []Move, 1)
-	rChan := make(chan []Move, 1)
-	qbChan := make(chan []Move, 1)
-	qrChan := make(chan []Move, 1)
-	kChan := make(chan []Move, 1)
-	castleChan := make(chan []Move, 1)
+
 
 	//Test that from starting position, we have 20 moves.
 	b := SetUpBoard()
-	assert.Equal(t, 20, len(b.GenerateLegalMoves(pChan, nChan, bChan, rChan, qbChan, qrChan, kChan, castleChan)))
+	assert.Equal(t, 20, len(b.GenerateLegalMoves()))
 
 	b = SetUpBoardNoPawns()
-	assert.Equal(t, 50, len(b.GenerateLegalMoves(pChan, nChan, bChan, rChan, qbChan, qrChan, kChan, castleChan))) //would be 51 if enemy queen wasn't blocking D2
+	assert.Equal(t, 50, len(b.GenerateLegalMoves())) //would be 51 if enemy queen wasn't blocking D2
 
 	b = SetUpWhiteCastlingBoard()
-	assert.Equal(t, 26, len(b.GenerateLegalMoves(pChan, nChan, bChan, rChan, qbChan, qrChan, kChan, castleChan)))
+	assert.Equal(t, 26, len(b.GenerateLegalMoves()))
 }
 
 //https://en.wikipedia.org/wiki/Shannon_number

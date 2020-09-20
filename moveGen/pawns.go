@@ -16,15 +16,15 @@ func (b Board) GetPawnDefendedSquares() (defendedSquares uint64) {
 	return defendedSquares
 }
 
-func (b Board) getPawnMoves(c chan []Move) {
+func (b Board) getPawnMoves() []Move {
 	var unfilteredMoves []Move
 
 	//If there are no pawns, take a shortcut and return no moves.
 	if b.IsWhiteMove && (b.Pawns&b.WhitePieces == 0) {
-		c <- unfilteredMoves
+		return unfilteredMoves
 	}
 	if !b.IsWhiteMove && (b.Pawns&b.BlackPieces == 0) {
-		c <- unfilteredMoves
+		return unfilteredMoves
 	}
 
 	unfilteredMoves = append(unfilteredMoves, b.pawnNormalCaptures()...)
@@ -60,7 +60,7 @@ func (b Board) getPawnMoves(c chan []Move) {
 		}
 	}
 
-	c <- filteredMoves
+	return filteredMoves
 }
 
 //Expects a pawn move, and will return all possible promotions. If no promotions are possible, returns given move.

@@ -11,14 +11,6 @@ var WhiteCount = 0 //used for debug
 
 func (b *Board) MiniMax(plyLeft int, alpha, beta float64) float64 {
 
-	pChan := make(chan []Move, 1)
-	nChan := make(chan []Move, 1)
-	bChan := make(chan []Move, 1)
-	rChan := make(chan []Move, 1)
-	qbChan := make(chan []Move, 1)
-	qrChan := make(chan []Move, 1)
-	kChan := make(chan []Move, 1)
-	castleChan := make(chan []Move, 1)
 
 	//fmt.Printf("Iteration: %v\n", Iter)
 	//Iter++
@@ -46,7 +38,7 @@ func (b *Board) MiniMax(plyLeft int, alpha, beta float64) float64 {
 		plyLeft--
 
 		maxEval := math.Inf(-1)
-		for _, move := range b.GenerateLegalMoves(pChan, nChan, bChan, rChan, qbChan, qrChan, kChan, castleChan) {
+		for _, move := range b.GenerateLegalMoves() {
 			undo := b.ApplyMove(move)
 			eval := b.MiniMax(plyLeft, alpha, beta)
 			undo()
@@ -62,7 +54,7 @@ func (b *Board) MiniMax(plyLeft int, alpha, beta float64) float64 {
 		plyLeft--
 
 		minEval := math.Inf(1)
-		for _, move := range b.GenerateLegalMoves(pChan, nChan, bChan, rChan, qbChan, qrChan, kChan, castleChan) {
+		for _, move := range b.GenerateLegalMoves() {
 			undo := b.ApplyMove(move)
 			eval := b.MiniMax(plyLeft, alpha, beta)
 			undo()
@@ -78,16 +70,9 @@ func (b *Board) MiniMax(plyLeft int, alpha, beta float64) float64 {
 
 //Counts the number of legal moves at a given ply, used for testing
 func (b *Board) CountVariationsAtPly(ply, legalMoves int, printBoard bool) int {
-	pChan := make(chan []Move, 1)
-	nChan := make(chan []Move, 1)
-	bChan := make(chan []Move, 1)
-	rChan := make(chan []Move, 1)
-	qbChan := make(chan []Move, 1)
-	qrChan := make(chan []Move, 1)
-	kChan := make(chan []Move, 1)
-	castleChan := make(chan []Move, 1)
+
 	ply--
-	for _, move := range b.GenerateLegalMoves(pChan, nChan, bChan, rChan, qbChan, qrChan, kChan, castleChan) {
+	for _, move := range b.GenerateLegalMoves() {
 		undo := b.ApplyMove(move)
 		if printBoard {
 			PrintBoard(*b)
