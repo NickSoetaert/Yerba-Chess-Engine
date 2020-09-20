@@ -394,15 +394,7 @@ func currentTurnKingIsInCheck(king uint64, attackedSquares uint64) bool {
 
 //Todo: account for pinned pieces
 //Todo: account for check/checkmate
-func (b Board) GenerateLegalMoves() (moves []Move) {
-	pChan := make(chan []Move, 1)
-	nChan := make(chan []Move, 1)
-	bChan := make(chan []Move, 1)
-	rChan := make(chan []Move, 1)
-	qbChan := make(chan []Move, 1)
-	qrChan := make(chan []Move, 1)
-	kChan := make(chan []Move, 1)
-	castleChan := make(chan []Move, 1)
+func (b Board) GenerateLegalMoves(pChan, nChan, bChan, rChan, qbChan, qrChan, kChan, castleChan chan[]Move) (moves []Move) {
 
 	attackedSquares := b.GetSquaresAttackedByOpponent()
 
