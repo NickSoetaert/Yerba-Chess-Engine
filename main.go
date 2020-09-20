@@ -16,7 +16,7 @@ import (
 func main() {
 	fmt.Println("Hello World")
 
-	b := moveGen.SetUpWhitePromotionBoard()
+	b := moveGen.SetUpBlackCastlingBoard()
 	moveGen.PrintBoard(b)
 	fmt.Println("possible moves:")
 

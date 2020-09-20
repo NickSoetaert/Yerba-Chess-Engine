@@ -220,18 +220,37 @@ func KnightOnlyTestBoard() Board {
 	}
 }
 
-//For testing
-func SetUpCastlingTestBoard() Board {
+func SetUpWhiteCastlingBoard() Board {
 	r, b := InitSlidingPieces()
 	board := Board{
 		Kings:                  E1 | E8,
 		WhitePieces:            E1 | A1 | H1,
-		BlackPieces:            E8 | B3,
-		Knights: B3,
+		BlackPieces:            E8,
 		Rooks:                  A1 | H1,
 		RookDB:                 r,
 		BishopDB:               b,
 		IsWhiteMove:            true,
+		WhiteKingHasNeverMoved: true,
+		H8RookHasNeverMoved:    true,
+		A1RookHasNeverMoved:    true,
+		BlackKingHasNeverMoved: true,
+		H1RookHasNeverMoved:    true,
+		A8RookHasNeverMoved:    true,
+		EnPassantFile:          uint8(0),
+	}
+	return board
+}
+
+func SetUpBlackCastlingBoard() Board {
+	r, b := InitSlidingPieces()
+	board := Board{
+		Kings:                  E1 | E8,
+		WhitePieces:            E1,
+		BlackPieces:            E8 | A8 | H8,
+		Rooks:                  A8 | H8,
+		RookDB:                 r,
+		BishopDB:               b,
+		IsWhiteMove:            false,
 		WhiteKingHasNeverMoved: true,
 		H8RookHasNeverMoved:    true,
 		A1RookHasNeverMoved:    true,

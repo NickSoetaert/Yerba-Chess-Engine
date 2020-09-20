@@ -50,11 +50,11 @@ func (b *Board) ApplyMove(m Move) UndoMove {
 			b.WhitePieces |= F1
 		} else {
 			b.Kings |= G8
-			b.WhitePieces |= G8
+			b.BlackPieces |= G8
 			b.Rooks = b.Rooks &^ H8
 			b.BlackPieces = b.BlackPieces &^ H8
 			b.Rooks |= F8
-			b.WhitePieces |= F8
+			b.BlackPieces |= F8
 		}
 
 	case castleQueenside:
@@ -67,7 +67,7 @@ func (b *Board) ApplyMove(m Move) UndoMove {
 			b.WhitePieces |= D1
 		} else {
 			b.Kings |= C8
-			b.WhitePieces |= C8
+			b.BlackPieces |= C8
 			b.Rooks = b.Rooks &^ A8
 			b.BlackPieces = b.BlackPieces &^ A8
 			b.Rooks |= D8
