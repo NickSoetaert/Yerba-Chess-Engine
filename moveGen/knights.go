@@ -20,12 +20,12 @@ func (b *Board) getKnightDefendedSquares() (defendedSquares uint64) {
 	for bits.OnesCount64(knights) != 0 { //While there are still knights left
 		currentSquare := utils.IsolateLsb(knights)
 		defendedSquares |= KnightMask[bits.TrailingZeros64(currentSquare)] &^ ownPieces //get all squares the current knight can attack
-		knights ^= currentSquare //clear the knight we just calculated
+		knights ^= currentSquare                                                        //clear the knight we just calculated
 	}
 	return defendedSquares
 }
 
-func (b Board) getKnightMoves(ch chan []Move) {
+func (b *Board) getKnightMoves(ch chan []Move) {
 	var moves []Move
 	var knights uint64
 	var ownPieces uint64
@@ -63,7 +63,7 @@ func (b Board) getKnightMoves(ch chan []Move) {
 			if b.IsWhiteMove { //todo: optimize
 				undo := b.ApplyMove(move)
 				//Must be attacked by self because ApplyMove flips the turn
-				if b.GetSquaresAttackedThisHalfTurn() & (b.Kings & b.WhitePieces) != 0 { //If we are in check
+				if b.GetSquaresAttackedThisHalfTurn()&(b.Kings&b.WhitePieces) != 0 { //If we are in check
 					undo()
 					continue
 				}
@@ -71,7 +71,7 @@ func (b Board) getKnightMoves(ch chan []Move) {
 			} else {
 				undo := b.ApplyMove(move)
 				//Must be attacked by self because ApplyMove flips the turn
-				if b.GetSquaresAttackedThisHalfTurn() & (b.Kings & b.BlackPieces) != 0 { //If we are in check
+				if b.GetSquaresAttackedThisHalfTurn()&(b.Kings&b.BlackPieces) != 0 { //If we are in check
 					undo()
 					continue
 				}

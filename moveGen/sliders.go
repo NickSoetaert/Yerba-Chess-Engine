@@ -210,7 +210,7 @@ func (b *Board) getSliderDefendedSquares(sliders uint64, bishopMove bool) (defen
 		sliders ^= currentSquareNum
 	}
 
-		return defendedSquares
+	return defendedSquares
 }
 
 //Calculates bishop XOR rook-like moves for a given piece type (rooks, bishops, queens)
@@ -259,7 +259,7 @@ func (b Board) getSliderMoves(sliders uint64, bishopMove bool, c chan []Move, pi
 			if b.IsWhiteMove {
 				undo := b.ApplyMove(move)
 				//Must be attacked by self because ApplyMove flips the turn
-				if b.GetSquaresAttackedThisHalfTurn() & (b.Kings & b.WhitePieces) != 0 { //If we are in check
+				if b.GetSquaresAttackedThisHalfTurn()&(b.Kings&b.WhitePieces) != 0 { //If we are in check
 					undo()
 					continue //ignore this move because it is illegal
 				}
@@ -267,7 +267,7 @@ func (b Board) getSliderMoves(sliders uint64, bishopMove bool, c chan []Move, pi
 			} else {
 				undo := b.ApplyMove(move)
 				//Must be attacked by self because ApplyMove flips the turn
-				if b.GetSquaresAttackedThisHalfTurn() & (b.Kings & b.BlackPieces) != 0 { //If we are in check
+				if b.GetSquaresAttackedThisHalfTurn()&(b.Kings&b.BlackPieces) != 0 { //If we are in check
 					undo()
 					continue
 				}

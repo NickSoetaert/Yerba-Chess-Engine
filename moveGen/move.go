@@ -23,7 +23,7 @@ func (b *Board) ApplyMove(m Move) UndoMove {
 		b.putPieceOnTargetSquare(m)
 
 	case pawnDoublePush:
-		b.EnPassantFile = uint8(bits.TrailingZeros64(m.getOriginSquare()) % 8) + 1//can capture e.p. next turn
+		b.EnPassantFile = uint8(bits.TrailingZeros64(m.getOriginSquare())%8) + 1 //can capture e.p. next turn
 		b.putPieceOnTargetSquare(m)
 
 	case enPassantCapture:

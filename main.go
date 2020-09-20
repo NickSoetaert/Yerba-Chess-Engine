@@ -16,12 +16,10 @@ import (
 func main() {
 	fmt.Println("Hello World")
 
-	b := moveGen.SetUpBlackCastlingBoard()
+	b := moveGen.SetUpBoardNoPawns()
 	moveGen.PrintBoard(b)
-	fmt.Println("possible moves:")
 
 	b.CountVariationsAtPly(1, 0, true)
-
 
 	//start := time.Now()
 	//ply := 3

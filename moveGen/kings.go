@@ -6,7 +6,7 @@ import (
 )
 
 // Gets all squares that the king is attacking, regardless of if it can move there or not.
-func(b *Board) getKingDefendedSquares() (defendedSquares uint64) {
+func (b *Board) getKingDefendedSquares() (defendedSquares uint64) {
 	var currentSquare uint64
 	if b.IsWhiteMove {
 		currentSquare = utils.IsolateLsb(b.Kings & b.WhitePieces)
@@ -64,7 +64,7 @@ func (b Board) getNormalKingMoves(attackedSquares uint64, ch chan []Move) {
 		if b.IsWhiteMove {
 			undo := b.ApplyMove(move)
 			//Must be attacked by self because ApplyMove flips the turn
-			if b.GetSquaresAttackedThisHalfTurn() & (b.Kings & b.WhitePieces) != 0 { //If we are in check
+			if b.GetSquaresAttackedThisHalfTurn()&(b.Kings&b.WhitePieces) != 0 { //If we are in check
 				undo()
 				continue //ignore this move because it is illegal
 			}
@@ -72,7 +72,7 @@ func (b Board) getNormalKingMoves(attackedSquares uint64, ch chan []Move) {
 		} else {
 			undo := b.ApplyMove(move)
 			//Must be attacked by self because ApplyMove flips the turn
-			if b.GetSquaresAttackedThisHalfTurn() & (b.Kings & b.BlackPieces) != 0 { //If we are in check
+			if b.GetSquaresAttackedThisHalfTurn()&(b.Kings&b.BlackPieces) != 0 { //If we are in check
 				undo()
 				continue
 			}

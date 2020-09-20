@@ -4,7 +4,7 @@ import (
 	"Yerba/utils"
 )
 
-func (b Board) getPawnDefendedSquares() (defendedSquares uint64) {
+func (b Board) GetPawnDefendedSquares() (defendedSquares uint64) {
 	if b.IsWhiteMove {
 		defendedSquares |= (b.Pawns & b.WhitePieces << 7) & ^HFile
 		defendedSquares |= (b.Pawns & b.WhitePieces << 9) & ^AFile
@@ -13,17 +13,17 @@ func (b Board) getPawnDefendedSquares() (defendedSquares uint64) {
 		defendedSquares |= (b.Pawns & b.BlackPieces >> 7) & ^AFile
 		defendedSquares |= (b.Pawns & b.BlackPieces >> 9) & ^HFile
 	}
-	return  defendedSquares
+	return defendedSquares
 }
 
 func (b Board) getPawnMoves(c chan []Move) {
 	var unfilteredMoves []Move
 
 	//If there are no pawns, take a shortcut and return no moves.
-	if b.IsWhiteMove && (b.Pawns & b.WhitePieces == 0) {
+	if b.IsWhiteMove && (b.Pawns&b.WhitePieces == 0) {
 		c <- unfilteredMoves
 	}
-	if ! b.IsWhiteMove &&  (b.Pawns & b.BlackPieces == 0) {
+	if !b.IsWhiteMove && (b.Pawns&b.BlackPieces == 0) {
 		c <- unfilteredMoves
 	}
 
@@ -40,7 +40,7 @@ func (b Board) getPawnMoves(c chan []Move) {
 		for _, move := range unfilteredMoves {
 			undo := b.ApplyMove(move)
 			//Must be attacked by self because ApplyMove flips the turn
-			if b.GetSquaresAttackedThisHalfTurn() & (b.Kings & b.WhitePieces) != 0 { //If we are in check
+			if b.GetSquaresAttackedThisHalfTurn()&(b.Kings&b.WhitePieces) != 0 { //If we are in check
 				undo()
 				continue
 			}
@@ -51,7 +51,7 @@ func (b Board) getPawnMoves(c chan []Move) {
 		for _, move := range unfilteredMoves {
 			undo := b.ApplyMove(move)
 			//Must be attacked by self because ApplyMove flips the turn
-			if b.GetSquaresAttackedThisHalfTurn() & (b.Kings & b.BlackPieces) != 0 { //If we are in check
+			if b.GetSquaresAttackedThisHalfTurn()&(b.Kings&b.BlackPieces) != 0 { //If we are in check
 				undo()
 				continue
 			}
