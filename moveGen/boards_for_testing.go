@@ -83,9 +83,9 @@ func WhiteKingBoard() Board {
 
 func BlackKingBoard() Board {
 	return Board{
-		Pawns:       C4 | E4 | C5 | E5 | C6 | D6 | E6,
+		//Pawns:       C4 | E4 | C5 | E5 | C6 | D6 | E6,
 		Kings:       D5 | H8,
-		WhitePieces: H8 | C4 | E4 | C5 | E5 | C6 | D6| E6,
+		WhitePieces: H8,// | C4 | E4 | C5 | E5 | C6 | D6| E6,
 		BlackPieces: D5,
 		IsWhiteMove: false,
 	}

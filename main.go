@@ -17,6 +17,7 @@ func main() {
 
 	b := moveGen.BlackKingBoard()
 	moveGen.PrintBoard(b)
+	fmt.Println("Possible moves:")
 
 	b.CountVariationsAtPly(1, 0, true)
 }
