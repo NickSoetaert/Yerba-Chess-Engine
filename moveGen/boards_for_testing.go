@@ -71,22 +71,42 @@ func SetUpBlackPromotionBoard() Board {
 	}
 }
 
-func BlackPawnBoard() Board {
+func WhiteKingBoard() Board {
 	return Board{
-		Pawns:       A5 | D5 | H6,
-		Kings:       F8 | H8,
-		WhitePieces: H8,
-		BlackPieces: A5 | D5 | H6 | F8,
+		Pawns:       C4 | D4 | E4 | C5 | E5 | C6 | E6,
+		Kings:       D5 | H8,
+		WhitePieces: D5,
+		BlackPieces: H8 | C4 | D4 | E4 | C5 | E5 | C6 | E6,
+		IsWhiteMove: true,
+	}
+}
+
+func BlackKingBoard() Board {
+	return Board{
+		Pawns:       C4 | E4 | C5 | E5 | C6 | D6 | E6,
+		Kings:       D5 | H8,
+		WhitePieces: H8 | C4 | E4 | C5 | E5 | C6 | D6| E6,
+		BlackPieces: D5,
 		IsWhiteMove: false,
 	}
 }
+
 func WhitePawnBoard() Board {
 	return Board{
-		Pawns:       A5 | D5 | H6,
+		Pawns:       C6 | D5 | E6,
 		Kings:       F8 | H8,
-		WhitePieces: A5 | D5 | H6 | F8,
-		BlackPieces: H8,
+		WhitePieces: D5 | F8,
+		BlackPieces: H8 | C6 | E6,
 		IsWhiteMove: true,
+	}
+}
+func BlackPawnBoard() Board {
+	return Board{
+		Pawns:       C4 | D5 | E4,
+		Kings:       F8 | H8,
+		WhitePieces: H8 | C4 | E4,
+		BlackPieces: D5 | F8,
+		IsWhiteMove: false,
 	}
 }
 
@@ -100,6 +120,102 @@ func WhiteQueenBoard() Board {
 		BishopDB:    b,
 		WhitePieces: D4 | H8,
 		BlackPieces: C5 | F8,
+		IsWhiteMove: true,
+	}
+}
+
+func BlackQueenBoard() Board {
+	r, b := InitSlidingPieces()
+	return Board{
+		Kings:       F8 | H8,
+		Pawns:       C5,
+		Queens:      D4,
+		RookDB:      r,
+		BishopDB:    b,
+		WhitePieces: C5 | F8,
+		BlackPieces: D4 | H8,
+		IsWhiteMove: false,
+	}
+}
+
+func WhiteRookBoard() Board {
+	r, b := InitSlidingPieces()
+	return Board{
+		Kings:       F8 | H8,
+		Pawns:       D5,
+		Rooks:       D4,
+		RookDB:      r,
+		BishopDB:    b,
+		BlackPieces: D5 | F8,
+		WhitePieces: D4 | H8,
+		IsWhiteMove: true,
+	}
+}
+func BlackRookBoard() Board {
+	r, b := InitSlidingPieces()
+	return Board{
+		Kings:       F8 | H8,
+		Pawns:       D5,
+		Rooks:       D4,
+		RookDB:      r,
+		BishopDB:    b,
+		WhitePieces: D5 | F8,
+		BlackPieces: D4 | H8,
+		IsWhiteMove: false,
+	}
+}
+
+func WhiteBishopBoard() Board {
+	r, b := InitSlidingPieces()
+	return Board{
+		Kings:       F8 | H8,
+		Pawns:       C5,
+		Bishops:     D4,
+		RookDB:      r,
+		BishopDB:    b,
+		BlackPieces: C5 | F8,
+		WhitePieces: D4 | H8,
+		IsWhiteMove: true,
+	}
+}
+func BlackBishopBoard() Board {
+	r, b := InitSlidingPieces()
+	return Board{
+		Kings:       F8 | H8,
+		Pawns:       C5,
+		Bishops:     D4,
+		RookDB:      r,
+		BishopDB:    b,
+		WhitePieces: C5 | F8,
+		BlackPieces: D4 | H8,
+		IsWhiteMove: false,
+	}
+}
+
+func WhiteKnightBoard() Board {
+	r, b := InitSlidingPieces()
+	return Board{
+		Kings:       F8 | H8,
+		Pawns:       C6,
+		Knights:     D4,
+		RookDB:      r,
+		BishopDB:    b,
+		BlackPieces: C6 | F8,
+		WhitePieces: D4 | H8,
+		IsWhiteMove: true,
+	}
+}
+
+func BlackKnightBoard() Board {
+	r, b := InitSlidingPieces()
+	return Board{
+		Kings:       F8 | H8,
+		Pawns:       C6,
+		Knights:     D4,
+		RookDB:      r,
+		BishopDB:    b,
+		WhitePieces: C6 | F8,
+		BlackPieces: D4 | H8,
 		IsWhiteMove: false,
 	}
 }

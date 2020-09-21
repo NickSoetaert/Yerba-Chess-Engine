@@ -209,10 +209,10 @@ func PrintBoard(b Board) {
 		}
 	}
 	for i := 0; i < 8; i++ {
-		fmt.Println("-------------------------------------------")
+		fmt.Println("  -----------------------------------------")
 		for j := 0; j < 8; j++ {
 			if j == 0 {
-				fmt.Printf("%c %v", rune(65+(7-i)), "| ")
+				fmt.Printf("%v %v", 8-i, "|  ")
 			} else {
 				fmt.Printf("|  ")
 			}
@@ -224,7 +224,6 @@ func PrintBoard(b Board) {
 		}
 		fmt.Println("")
 	}
-	fmt.Println("-------------------------------------------")
-
-	fmt.Println("  | A | B  | C  | D  | E  | F  | G  | H  |")
+	fmt.Println("  -----------------------------------------")
+	fmt.Println("  | A  | B  | C  | D  | E  | F  | G  | H  |")
 }
