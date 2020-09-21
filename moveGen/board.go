@@ -388,12 +388,6 @@ func (b Board) GetSquaresAttackedByOpponent() (defendedSquares uint64) {
 	return b.GetSquaresAttackedThisHalfTurn()
 }
 
-func currentTurnKingIsInCheck(king uint64, attackedSquares uint64) bool {
-	return king&attackedSquares != 0
-}
-
-//Todo: account for pinned pieces
-//Todo: account for check/checkmate
 func (b Board) GenerateLegalMoves() (moves []Move) {
 
 	attackedSquares := b.GetSquaresAttackedByOpponent()
@@ -407,59 +401,43 @@ func (b Board) GenerateLegalMoves() (moves []Move) {
 
 	if b.IsWhiteMove {
 		for _, move := range b.getSliderMoves(b.Bishops, true, whiteBishop) {
-			moves = append(moves, move)
-		}//bishops
-
+			moves = append(moves, move) //bishops
+		}
 		for _, move := range b.getSliderMoves(b.Rooks, false, whiteRook) {
-			moves = append(moves, move)
-
-		}   //rooks
+			moves = append(moves, move) //rooks
+		}
 		for _, move := range b.getSliderMoves(b.Queens, true, whiteQueen) {
-			moves = append(moves, move)
-
-		} //queens
+			moves = append(moves, move) //queen bishop moves
+		}
 		for _, move := range b.getSliderMoves(b.Queens, false, whiteQueen) {
-			moves = append(moves, move)
-
-		}//queens
-
+			moves = append(moves, move) //queen rook moves
+		}
 		for _, move := range b.getKnightMoves() {
 			moves = append(moves, move)
-
 		}
 		for _, move := range b.getNormalKingMoves(attackedSquares) {
 			moves = append(moves, move)
-
 		}
-
-	} else {
+	} else { //Black moves
 		for _, move := range b.getSliderMoves(b.Bishops, true, blackBishop) {
-			moves = append(moves, move)
-
-		}//bishops
+			moves = append(moves, move) //bishops
+		}
 		for _, move := range b.getSliderMoves(b.Rooks, false, blackRook) {
-			moves = append(moves, move)
-
-		}   //rooks
+			moves = append(moves, move) //rooks
+		}
 		for _, move := range b.getSliderMoves(b.Queens, true, blackQueen) {
-			moves = append(moves, move)
-
-		} //queens
+			moves = append(moves, move) //queen bishop moves
+		}
 		for _, move := range b.getSliderMoves(b.Queens, false, blackQueen){
-			moves = append(moves, move)
-
-		} //queens
-
+			moves = append(moves, move) //queen rook moves
+		}
 		for _, move := range b.getKnightMoves() {
 			moves = append(moves, move)
-
 		}
 		for _, move := range b.getNormalKingMoves(attackedSquares) {
 			moves = append(moves, move)
-
 		}
 	}
-
 	return moves
 }
 
