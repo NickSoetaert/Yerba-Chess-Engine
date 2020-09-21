@@ -7,16 +7,6 @@ import (
 //An instance of a Board represents a single possible game state.
 //The a1 square is bit position 0, b2 = 1,..., g8 = 62, h8 = 63
 //EnPassantFile encoding: Square that en passant is currently possible on. To get square, AND with turn.
-//00000000 == NONE
-//10000000 == A
-//01000000 == B
-//00100000 == C
-//00010000 == D
-//00001000 == E
-//00000100 == F
-//00000010 == G
-//00000001 == H
-
 type Board struct {
 	Pawns, Knights, Bishops, Rooks, Queens, Kings uint64
 	WhitePieces, BlackPieces                      uint64
@@ -61,29 +51,16 @@ func SetUpBoard() Board {
 	return board
 }
 
-//For benchmarking and testing
-func SetUpBoardNoPawns() Board {
-	r, b := InitSlidingPieces()
-	board := Board{
-		Knights:                B1 | G1 | B8 | G8,
-		Bishops:                C1 | F1 | C8 | F8,
-		Rooks:                  A1 | H1 | A8 | H8,
-		Queens:                 D1 | D8,
-		Kings:                  E1 | E8,
-		WhitePieces:            FirstRank,
-		BlackPieces:            EighthRank,
-		RookDB:                 r,
-		BishopDB:               b,
-		IsWhiteMove:            true,
-		WhiteKingHasNeverMoved: true,
-		A1RookHasNeverMoved:    true,
-		A8RookHasNeverMoved:    true,
-		BlackKingHasNeverMoved: true,
-		H1RookHasNeverMoved:    true,
-		H8RookHasNeverMoved:    true,
-		EnPassantFile:          uint8(0),
-	}
-	return board
+const (
+	castleKingsideAlgebraic = "e1g1"
+	castleQueensideAlgebraic = "e1c1"
+)
+
+func (b Board) ApplyAlgebraicMove (move string) Board {
+
+	//startSquare := strings.SplitAfter("", move)
+	return Board{}
+
 }
 
 // Todo: keep part of this cached from previous move.

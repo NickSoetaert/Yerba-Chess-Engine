@@ -396,3 +396,28 @@ func SetUpBlackCastlingBoard() Board {
 	return board
 }
 
+//For benchmarking and testing
+func SetUpBoardNoPawns() Board {
+	r, b := InitSlidingPieces()
+	board := Board{
+		Knights:                B1 | G1 | B8 | G8,
+		Bishops:                C1 | F1 | C8 | F8,
+		Rooks:                  A1 | H1 | A8 | H8,
+		Queens:                 D1 | D8,
+		Kings:                  E1 | E8,
+		WhitePieces:            FirstRank,
+		BlackPieces:            EighthRank,
+		RookDB:                 r,
+		BishopDB:               b,
+		IsWhiteMove:            true,
+		WhiteKingHasNeverMoved: true,
+		A1RookHasNeverMoved:    true,
+		A8RookHasNeverMoved:    true,
+		BlackKingHasNeverMoved: true,
+		H1RookHasNeverMoved:    true,
+		H8RookHasNeverMoved:    true,
+		EnPassantFile:          uint8(0),
+	}
+	return board
+}
+

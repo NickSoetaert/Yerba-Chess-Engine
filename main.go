@@ -16,6 +16,7 @@ func main() {
 	fmt.Println("Hello World")
 
 	b := moveGen.BlackKingBoard()
+
 	moveGen.PrintBoard(b)
 	fmt.Println("Possible moves:")
 
