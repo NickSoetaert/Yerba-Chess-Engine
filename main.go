@@ -12,7 +12,6 @@ import (
 // -Optimize undo move function
 // -Evaluate function
 // -A BUNCH general optimization
-
 func main() {
 	fmt.Println("Hello World")
 
