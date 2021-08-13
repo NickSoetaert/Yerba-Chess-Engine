@@ -12,7 +12,7 @@ type Board struct {
 	WhitePieces, BlackPieces                      uint64
 	RookDB, BishopDB                              [][]uint64 //All possible (precomputed) moves for rooks and bishops
 	IsWhiteMove                                   bool       //True if it is currently white's move
-	//CurrentKingInCheck							  bool 		 //True if the color who's turn it is starts their turn in check
+	//CurrentKingInCheck							  bool 		 //True if the color whose turn it is starts their turn in check
 
 	WhiteKingHasNeverMoved bool //True if the white king has never moved (including castling)
 	A1RookHasNeverMoved    bool //True if white rook on A1 has never moved, regardless of if captured or not.
